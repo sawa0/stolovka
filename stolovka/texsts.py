@@ -1,74 +1,4 @@
-﻿dish_list = """
-<option></option>
-<option>Борщ украинский</option>
-<option>Борщ зелёный</option>
-<option>Картофельное пюре</option>
-<option>Соус грибной</option>
-<option>Суп овощной</option>
-<option>Вареники домашние картофель/грибы</option>
-<option>Каша гречневая рассыпчастая</option>
-<option>Бульон с макаронными изделиями</option>
-<option>Суп с фрикадельками</option>
-<option>Рагу овощное</option>
-<option>Макароны с маслом</option>
-<option>Чахохбили</option>
-<option>Рыба жареная</option>
-<option>Рыба запеченная</option>
-<option>Котлеты</option>
-<option>Тефтели</option>
-<option>Пельмени домашние</option>
-<option>Компот из сухофруктов</option>
-<option>Салат из  капусты</option>
-<option>Каша арнаутка</option>
-<option>Отбивные свиные</option>
-<option>Поджарка</option>
-<option>Уха</option>
-<option>Икра из баклажанов</option>
-<option>Огурцы маринованые</option>
-<option>Рис</option>
-<option>Перец фаршированный</option>
-<option>Жаркое по-домашнему</option>
-<option>Пельмени</option>
-<option>Вареники (с картошкой)</option>
-<option>Вареники (картошка/печень)</option>
-<option>Вареники домашние с капустой</option>
-<option>Салат из свежей капусты с перцем </option>
-<option>Голубцы</option>
-<option>Салат с капустой и огурцами</option>
-<option>Салат из редьки</option>
-<option>Капуста тушеная с мясом</option>
-<option>Винегрет овощной</option>
-<option>Рассольник </option>
-<option>Свекла отваренная с майонезом</option>
-<option>Сырный суп с курицей</option>
-<option>Плов</option>
-<option>Суп харчо</option>
-<option>Суп гороховый </option>
-<option>Капуста квашеная</option>
-<option>Бризоль</option>
-<option>Бедро куриное запеченное</option>
-<option>Запеканка \ Сырники</option>
-<option>Голень куриная запеченная</option>
-<option>Овощное соте</option>
-<option>Салат свежесть</option>
-<option>Отварной картофель</option>
-<option>Салат с редисом </option>
-<option>Компот из свежих ягод</option>
-<option>Сырный суп с грибами</option>
-<option>Каша Булгур</option>
-<option>Морковка по корейски</option>
-<option>Кабачки закусочные</option>
-<option>Булка (хлеб)</option>
-<option>Солянка сборная домашняя</option>
-<option>Макароны по - флотски</option>
-<option>Сельдь под шубой</option>
-<option>Суп с клецками</option>
-<option>Рыбные тефтели </option>
-<option>Рыба под маринадом </option>
-<option>Блины с творогом</option>
-"""
-
-###################   style   ###################
+﻿###################   style   ###################
 
 control_user_page_style = """
 
@@ -104,12 +34,10 @@ control_user_page_style = """
     }
 
     .add-user-conteiner{
+        margin-top: 10px;
+        margin-left: 10px;
         height: 32px;
         display: flex;
-        position: absolute;
-        position: fixed;
-        top: 1%;
-        right: 1%;
     }
 
     .add_user {
@@ -186,19 +114,9 @@ tbody td button:hover {
     background-color: #45a049;
 }
 
-.eda{
-    padding-top: 0px;
-    padding-bottom: 0px;
-    padding-right: 0px;
-    padding-left: 0px;
-}
- 
-
 """
 
-define_menu_page_style = """
-
-       
+define_menu_page_style = """  
 .price{
     border-color: #ddd;
     padding: 0px;
@@ -728,11 +646,126 @@ main_page_style = """
 
 """
 
+define_dish_page_style = """
+.dish_status{
+    width: 65px;
+}
+
+.dish_actions{
+    width: 250px;
+}
+
+.header{
+    top: 0px;
+    width: 100%;
+    height: 50px;
+    background-color: #f2f2f2;
+    height: 50px;
+    display: flex;
+    position: absolute;
+    position: fixed;
+}
+
+/************   блок с поиском по таблице и кнопкой добавить   *************/
+
+    .input_dish_name{
+        weight: 26px;
+        padding: 4px;
+        border: 2px solid #4CAF50;
+        border-bottom-left-radius: 10px;
+        border-top-left-radius: 10px;
+        font-size: 16px;
+        outline: none;
+    }
+
+    .add-dish-conteiner{
+        margin-top: 10px;
+        margin-left: 10px;
+        height: 32px;
+        display: flex;
+    }
+
+    .add_dish {
+        padding: 7px 10px;
+        margin-right: 5px;
+        border: none;
+        border-bottom-right-radius: 10px;
+        border-top-right-radius: 10px;
+        background-color: #4CAF50;
+        color: white;
+        cursor: pointer;
+    }
+
+    .add_dish:hover {background-color: #45a049;}
+
+/*****************************************************/
+
+
+input[type="text"] {
+    padding: 4px;
+    font-size: 16px;
+    outline: none;
+}
+
+.delete_dish {
+    padding: 5px 10px;
+    margin-right: 5px;
+    border: none;
+    border-radius: 5px;
+    background-color: #af4c4c;
+    color: white;
+    cursor: pointer;
+}
+
+.delete_dish:hover {
+  background-color: #a04545;
+}
+
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+}
+
+thead th {
+    background-color: #f2f2f2;
+    border-bottom: 1px solid #ddd;
+    padding: 10px;
+    text-align: left;
+}
+
+tbody td {
+    border-bottom: 1px solid #ddd;
+    padding: 10px;
+}
+
+tbody td[contenteditable="true"] {
+    outline: none;
+    cursor: pointer;
+}
+
+tbody td button {
+    padding: 5px 10px;
+    margin-right: 5px;
+    border: none;
+    border-radius: 5px;
+    background-color: #4CAF50;
+    color: white;
+    cursor: pointer;
+}
+
+tbody td button:hover {
+    background-color: #45a049;
+}
+ 
+"""
+
 ###################   scripts   ###################
 
 scripts_for_menu = """
-function FormatTableData() {
-    
+function Update_Menu() {
+
     function GetTableData(table_id){
         var table = document.getElementById(table_id);
         var rows = table.querySelectorAll("tr");
@@ -770,11 +803,10 @@ function FormatTableData() {
     input1.type = "hidden";
     input1.name = "Week";
     input1.value = document.getElementById("week").value;
+    
     form.appendChild(input1);
-
-
-           
     form.appendChild(input);
+    
     document.body.appendChild(form);
     form.submit();
 }
@@ -819,7 +851,7 @@ function FilterUserList() {
     }
 }
 
-function ChangeStatus(id) {
+function ChangeUserStatus(id) {
     var form = document.createElement("form"); // Создаем объект формы
     form.method = "POST"; // Устанавливаем метод POST
     form.action = "/config"; // Укажите здесь путь к вашему обработчику на сервере
@@ -827,7 +859,7 @@ function ChangeStatus(id) {
     // Создаем элемент input для передачи значения
     var input = document.createElement("input");
     input.type = "hidden";
-    input.name = "ChangeStatus";
+    input.name = "ChangeUserStatus";
     input.value = id;
 
     // Добавляем элемент input к форме
@@ -1151,4 +1183,145 @@ function decrement(index) {
         total_price_resume()
     }
 }
+"""
+
+scripts_for_dish = """
+
+function FilterDishList() {
+    var filter = document.getElementById('newDishName').value;
+    
+    const dishColumns = document.getElementsByClassName('dish_column');
+
+    if (filter === '') {
+        for (let i = 0; i < dishColumns.length; i++) {dishColumns[i].style.display = 'table-row';}
+    } else {
+        for (let i = 0; i < dishColumns.length; i++) {
+            const input = dishColumns[i].querySelector('input');
+            //console.log(input.value.includes(filter));
+            if (input.value.includes(filter)){
+                dishColumns[i].style.display = 'table-row';
+            } else {
+                dishColumns[i].style.display = 'none';
+            }
+        }
+    }
+}
+
+function ChangeDishStatus(id) {
+    var form = document.createElement("form"); // Создаем объект формы
+    form.method = "POST"; // Устанавливаем метод POST
+    form.action = "/config"; // Укажите здесь путь к вашему обработчику на сервере
+            
+    // Создаем элемент input для передачи значения
+    var input = document.createElement("input");
+    input.type = "hidden";
+    input.name = "ChangeDishStatus";
+    input.value = id;
+
+    // Добавляем элемент input к форме
+    form.appendChild(input);
+  
+    document.body.appendChild(form);
+    form.submit();
+}
+
+function DeleteDish(id) {
+    var form = document.createElement("form"); // Создаем объект формы
+    form.method = "POST"; // Устанавливаем метод POST
+    form.action = "/config"; // Укажите здесь путь к вашему обработчику на сервере
+            
+    // Создаем элемент input для передачи значения
+    var input = document.createElement("input");
+    input.type = "hidden";
+    input.name = "DeleteDish";
+    input.value = id;
+
+    // Добавляем элемент input к форме
+    form.appendChild(input);
+  
+    document.body.appendChild(form);
+    form.submit();
+}
+
+function EditDishName(id){
+    // Получаем содержимое поля ввода
+    var newDishName = document.getElementById('DishName'+id).value;
+            
+    // Проверяем, не является ли поле ввода пустым
+    if (newDishName.trim() === '') {
+
+    const notification = new NotificationCustom('Ошибка','Имя пользователя не может быть пустым');
+    notification.show();
+    return;}
+  
+    var form = document.createElement("form"); // Создаем объект формы
+    form.method = "POST"; // Устанавливаем метод POST
+    form.action = "/config"; // Укажите здесь путь к вашему обработчику на сервере
+            
+    // Создаем элемент input для передачи нового имени пользователя
+    var input = document.createElement("input");
+    input.type = "hidden";
+    input.name = "EditDishName";
+    input.value = newDishName;
+    form.appendChild(input);
+            
+            
+    // Создаем элемент input1 для передачи id пользователя
+    var input1 = document.createElement("input");
+    input1.type = "hidden";
+    input1.name = "id";
+    input1.value = id;
+    form.appendChild(input1);
+            
+            
+
+    // Очищаем поле ввода после добавления пользователя
+    document.getElementById('newDishName').value = '';
+  
+    document.body.appendChild(form);
+    form.submit();
+}
+
+function NewDish() {
+    // Получаем содержимое поля ввода
+    var newDishName = document.getElementById('newDishName').value;
+            
+    // Проверяем, не является ли поле ввода пустым
+    if (newDishName.trim() === '') {
+        alert('Имя пользователя не может быть пустым');
+        return; // Прерываем выполнение функции
+    }
+  
+    var form = document.createElement("form"); // Создаем объект формы
+    form.method = "POST"; // Устанавливаем метод POST
+    form.action = "/config"; // Укажите здесь путь к вашему обработчику на сервере
+            
+    // Создаем элемент input для передачи значения
+    var input = document.createElement("input");
+    input.type = "hidden";
+    input.name = "NewDish";
+    input.value = newDishName;
+    form.appendChild(input);
+
+    // Очищаем поле ввода после добавления пользователя
+    document.getElementById('newDishName').value = '';
+  
+    document.body.appendChild(form);
+    form.submit();
+}
+
+function showEditButton(dishId) {
+    var editButton = document.getElementById("editButton" + dishId);
+    editButton.style.display = "inline-block"; // Показываем кнопку
+}
+
+function hideEditButton(dishId) {
+    var editButton = document.getElementById("editButton" + dishId);
+    editButton.style.display = "none"; // Скрываем кнопку
+}
+
+function hideEditButtonWithDelay(dishId) {
+    setTimeout(function() {hideEditButton(dishId);}, 300);
+}
+
 """

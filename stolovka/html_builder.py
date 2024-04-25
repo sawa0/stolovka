@@ -1,4 +1,5 @@
 ﻿import datetime
+import re
 
 from BD import db
 from texsts import *
@@ -160,7 +161,9 @@ def conf(page=None, notification=None, *args):
         elif page == 'reports':
             return
         elif page == 'users':
-            return scripts_for_users    #   Добавляет скрипты на страницу 
+            return scripts_for_users
+        elif page == 'dish_list':
+            return scripts_for_dish    #   Добавляет скрипты на страницу
 
     def page_style():
         if page == 'menu':
@@ -168,7 +171,9 @@ def conf(page=None, notification=None, *args):
         elif page == 'reports':
             return
         elif page == 'users':
-            return control_user_page_style  #   Добавляет стили на страницу
+            return control_user_page_style
+        elif page == 'dish_list':
+            return define_dish_page_style   #   Добавляет стили на страницу
 
     def filling_main_page():
 
@@ -199,13 +204,16 @@ def conf(page=None, notification=None, *args):
 
                         dish_name = menu[day][f"name{pos + 1}"]
                         dish_price = menu[day][f"price{pos + 1}"]
+                        def dish_list():
+                            return "".join(f"""<option>{dish[1]}</option>""" for dish in db.GetDishList())
                     
                         table += f"""
                         <tr>
                             <td class="eda">
                                 <select class="dish_name" id="name{pos + 1}" style="width: 300px;">
                                     <option>{dish_name}</option>
-                                    {dish_list}
+                                    <option></option>
+                                    {dish_list()}
                                 </select>
                             </td>
                             <td id="price{pos + 1}" class="price" ><input value="{dish_price}" class="price_input" type="number" max="999"></td>
@@ -218,10 +226,10 @@ def conf(page=None, notification=None, *args):
             return f"""
     <div class="menu_conteiner">
             
-        <form style="height: 38px;">
+        <div style="height: 38px;">
           <input class="week" type="week" id="week" name="week" onchange="WeekChange()">
-          <button class="add_user" onclick="FormatTableData()">Сохранить</button>
-        </form>
+          <button class="add_user" >Сохранить</button>
+        </div>
 
         <div class="menu-container">
         {menu_filling()}
@@ -242,16 +250,8 @@ def conf(page=None, notification=None, *args):
                 users = db.LoadUserList()
             
                 table = """
-    <table style="margin-top: 50px;">
-        <thead>
-          <tr>
-            <th>Имя пользователя</th>
-            <th>Статус</th>
-            <th>Действие</th>
-          </tr>
-        </thead>       
-        <tbody>                
-                """
+    <table style="margin-top: 50px;">       
+        <tbody>"""
             
                 for user in users:
                     table += f"""
@@ -262,7 +262,7 @@ def conf(page=None, notification=None, *args):
                 </td>
                 <td class="user_status">{'✔️' if user[2] else '❌'}</td>
                 <td class="user_actions">
-                  <button style="width: 140px;" title="Деактивированный пользователь не будет отображатся в списке пользователей на странице заказов. его всегда можно будет активировать снова" onclick="ChangeStatus({user[0]})">{'Деактивировать' if user[2] else 'Активировать'}</button>
+                  <button style="width: 140px;" title="Деактивированный пользователь не будет отображатся в списке пользователей на странице заказов. его всегда можно будет активировать снова" onclick="ChangeUserStatus({user[0]})">{'Деактивировать' if user[2] else 'Активировать'}</button>
                   <button title="Удалить пользователя (не удалит его из отчётов. если пользователь временно не будет пользоватся столовой деактивируйте его.)" class="delete_user" onclick="DeleteUser({user[0]})">Удалить</button>
                 </td>
             </tr>"""
@@ -272,13 +272,52 @@ def conf(page=None, notification=None, *args):
             header = """
     <div class="header">
         <div class="add-user-conteiner">
-            <input class="input_user_name" type="text" id="newUserName" placeholder="Поиск" oninput="FilterUserList()">
+            <input class="input_user_name" type="text" id="newUserName" placeholder="Имя пользователя" oninput="FilterUserList()">
             <button class="add_user" onclick="NewUser()">Добавить</button>
         </div>
     </div>
 """
 
             return header + user_table()
+        
+        elif page == 'purchase':
+            return
+            
+        elif page == 'dish_list':
+            
+            def dish_table():
+                dishes = db.GetDishList()
+            
+                table = """
+    <table style="margin-top: 50px;">       
+        <tbody>"""
+            
+                for dish in dishes:
+                    table += f"""
+            <tr class="dish_column">
+                <td>
+                <input style="border-width: 0px;width: 300px;" type="text" id="DishName{dish[0]}" value="{dish[1]}" onfocus="showEditButton({dish[0]})" onblur="hideEditButtonWithDelay({dish[0]})">
+                <button id="editButton{dish[0]}" style="display: none;" title="Сохранить изменённое имя" style="hiden;" onclick="EditDishName({dish[0]})">✏️</button>
+                </td>
+                <td class="dish_status">{'✔️' if dish[2] else '❌'}</td>
+                <td class="dish_actions">
+                  <button style="width: 140px;" title="Деактивированное блюдо не будет отображатся в списке блюд. Его всегда можно будет активировать снова" onclick="ChangeDishStatus({dish[0]})">{'Деактивировать' if dish[2] else 'Активировать'}</button>
+                  <button title="Удалить блюдо" class="delete_dish" onclick="DeleteDish({dish[0]})">Удалить</button>
+                </td>
+            </tr>"""
+                table += "</tbody></table>"
+                return table
+
+            header = """
+    <div class="header">
+        <div class="add-dish-conteiner">
+            <input class="input_dish_name" type="text" id="newDishName" placeholder="Название блюда" oninput="FilterDishList()">
+            <button class="add_dish" onclick="NewDish()">Добавить</button>
+        </div>
+    </div>
+"""
+
+            return header + dish_table()
 
     def sidebar_create():
         

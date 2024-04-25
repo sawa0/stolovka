@@ -32,41 +32,60 @@ def SettingsPage():
                    notification.show();"""
 
     if request.method == 'POST':
-        if 'Page' in request.form:
-            return html_builder.conf(request.form['Page'])
         
-        ######################\   ќбработчик страницы users   /#############################
+        if 'Page' in request.form:
+            return html_builder.conf(request.form['Page'])  #   Редирект на выбранную страницу
+        
+        #######################\   Обработчик страницы dish_list  /#######################
+        
+        elif 'NewDish' in request.form:
+
+            return html_builder.conf('dish_list', notification(db.NewDish(request.form['NewDish'])))
+        
+        elif 'DeleteDish' in request.form:
+            db.DeleteDish(request.form['DeleteDish'])
+
+            return html_builder.conf('dish_list', "")
+
+        elif 'ChangeDishStatus' in request.form:
+            db.ChangeDishStatus(request.form['ChangeDishStatus'])
+
+            return html_builder.conf('dish_list', "")
+        
+        elif 'EditDishName' in request.form:
+            return html_builder.conf('dish_list', notification(db.EditDishName(request.form['EditDishName'], request.form['id'])))
+        
+        #########################\  Обработчик страницы users   /##########################
 
         elif 'NewUser' in request.form:
 
             return html_builder.conf('users', notification(db.NewUser(request.form['NewUser'])))
         
-
         elif 'DeleteUser' in request.form:
             db.DeleteUser(request.form['DeleteUser'])
 
             return html_builder.conf('users', "")
         
-
-        elif 'ChangeStatus' in request.form:
-            db.ChangeStatus(request.form['ChangeStatus'])
+        elif 'ChangeUserStatus' in request.form:
+            db.ChangeStatus(request.form['ChangeUserStatus'])
 
             return html_builder.conf('users', "")
         
         elif 'EditUserName' in request.form:
             return html_builder.conf('users', notification(db.EditUserName(request.form['EditUserName'], request.form['id'])))
 
-        ######################\   ќбработчик страницы menu   /#############################
+        ######################\   Oбработчик страницы menu   /#############################
 
         elif 'GetMemu' in request.form:
             return html_builder.conf('menu', "", request.form['GetMemu'])
         
         elif 'Memu' in request.form:
             db.UpdateMenu(request.form['Memu'], request.form['Week'])
-            return html_builder.conf('menu', notification(["”спех", "ћеню на неделю сохранено!"]), request.form['Week'])
+            return html_builder.conf('menu', notification(["Успех", "Меню на неделю сохранено!"]), request.form['Week'])
         
     if request.method == 'GET':
-        return html_builder.conf("menu", "")
+        print("get")
+        return html_builder.conf("menu", "")    #  Редирект на страницу по умолчанию
 
 if __name__ == '__main__':
     # app.run(debug=True)
