@@ -764,7 +764,7 @@ tbody td button:hover {
 ###################   scripts   ###################
 
 scripts_for_menu = """
-function Update_Menu() {
+function UpdateMenu() {
 
     function GetTableData(table_id){
         var table = document.getElementById(table_id);

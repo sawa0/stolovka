@@ -228,7 +228,7 @@ def conf(page=None, notification=None, *args):
             
         <div style="height: 38px;">
           <input class="week" type="week" id="week" name="week" onchange="WeekChange()">
-          <button class="add_user" >Сохранить</button>
+          <button class="add_user" onclick="UpdateMenu()">Сохранить</button>
         </div>
 
         <div class="menu-container">
