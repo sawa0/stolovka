@@ -36,7 +36,7 @@ class DB:
                         id INTEGER PRIMARY KEY AUTOINCREMENT,
                         name TEXT NOT NULL,
                         volume_unit TEXT NOT NULL,
-                        last_price INTEGER NOT NULL
+                        last_price INTEGER
                     )''')
         conn.commit()
         conn.close()    #   Создает структуру базы данных, если таковой нет 
@@ -110,6 +110,70 @@ class DB:
         conn.close()
         return  #   Обновляет меню на выборную неделю
 
+    ################\ Для страницы purchase  /################
+    
+    def NewIngredient(self, name, volume_unit):
+        conn = sqlite3.connect('stolovka.db')
+        cursor = conn.cursor()
+
+        cursor.execute("""SELECT * FROM products WHERE name = ?""", (name,))
+        ingredient = cursor.fetchone()
+        if ingredient:
+            return ["Ошибка", "Такой ингредиент уже существует"]
+
+        cursor.execute("""INSERT INTO products (name, volume_unit) VALUES (?, ?)""", (name, volume_unit))
+        conn.commit()
+        conn.close()
+        
+        return ["успех", "Ингредиент добавлен"]  #   Добавляет ингредиент
+
+    def GetIngredientsList(self):
+        conn = sqlite3.connect('stolovka.db')
+        cursor = conn.cursor()
+        cursor.execute("""SELECT * FROM products""")
+        dishes = cursor.fetchall()
+        
+        conn.close()
+        
+        return dishes    #   Возвращает список всех ингредиентов
+
+    def EditIngredientName(self, name, id):
+        conn = sqlite3.connect('stolovka.db')
+        cursor = conn.cursor()
+        
+        cursor.execute("""SELECT * FROM products WHERE name = ?""", (name,))
+        ingredient = cursor.fetchone()
+
+        if ingredient:
+            if ingredient[0] == int(id):
+                conn.close()
+                return ["Ошибка", "Вы не изменили название"]
+            conn.close()
+            return ["Ошибка", "Такой ингредиент уже существует"]
+            
+
+        cursor.execute("""UPDATE products SET name = ? WHERE id = ?""", (name, id))
+        conn.commit()
+        conn.close()
+        return ["Успех", "Название ингредиента изменено"]   #   Меняет название ингредиента
+    
+    def LastPrice(self, LastPrice, id):
+        conn = sqlite3.connect('stolovka.db')
+        cursor = conn.cursor() 
+
+        cursor.execute("""UPDATE products SET last_price = ? WHERE id = ?""", (LastPrice, id))
+        conn.commit()
+        conn.close()
+        return ["Успех", "Цена ингредиента изменена"]   #   Меняет цену последней покупки ингредиента
+    
+    def DeleteIngredient(self, id):
+        conn = sqlite3.connect('stolovka.db')
+        cursor = conn.cursor()
+        
+        cursor.execute("""DELETE FROM products WHERE id = ?""", (id,))
+        conn.commit()
+        conn.close()    #   Удаляет ингредиент
+
     ################\ Для страницы dish_list /################
     
     def NewDish(self, dishname):
@@ -154,7 +218,6 @@ class DB:
         return dishes    #   Возвращает список всех блюд
 
     def EditDishName(self, dishname, id):
-        
         conn = sqlite3.connect('stolovka.db')
         cursor = conn.cursor()
         
@@ -178,7 +241,6 @@ class DB:
         conn = sqlite3.connect('stolovka.db')
         cursor = conn.cursor()
         
-        # Запрос на удаление пользователя по его id
         cursor.execute("""DELETE FROM dishes WHERE id = ?""", (id,))
         conn.commit()
         conn.close()    #   Удаляет блюдо
@@ -241,7 +303,6 @@ class DB:
         conn = sqlite3.connect('stolovka.db')
         cursor = conn.cursor()
         
-        # Запрос на удаление пользователя по его id
         cursor.execute("""DELETE FROM users WHERE id = ?""", (id,))
         conn.commit()
         conn.close()    #   Удаляет пользователя

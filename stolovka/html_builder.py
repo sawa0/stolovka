@@ -1,5 +1,5 @@
 ﻿import datetime
-import re
+from re import I
 
 from BD import db
 from texsts import *
@@ -162,8 +162,10 @@ def conf(page=None, notification=None, *args):
             return
         elif page == 'users':
             return scripts_for_users
+        elif page == 'purchase':
+            return scripts_for_ingredients_page
         elif page == 'dish_list':
-            return scripts_for_dish    #   Добавляет скрипты на страницу
+            return scripts_for_dish_page    #   Добавляет скрипты на страницу
 
     def page_style():
         if page == 'menu':
@@ -172,6 +174,8 @@ def conf(page=None, notification=None, *args):
             return
         elif page == 'users':
             return control_user_page_style
+        elif page == 'purchase':
+            return define_ingredients_page_style
         elif page == 'dish_list':
             return define_dish_page_style   #   Добавляет стили на страницу
 
@@ -205,7 +209,11 @@ def conf(page=None, notification=None, *args):
                         dish_name = menu[day][f"name{pos + 1}"]
                         dish_price = menu[day][f"price{pos + 1}"]
                         def dish_list():
-                            return "".join(f"""<option>{dish[1]}</option>""" for dish in db.GetDishList())
+                            answer = ""
+                            for dish in db.GetDishList():
+                                if dish[2]:
+                                    answer += f"""<option>{dish[1]}</option>"""
+                            return answer
                     
                         table += f"""
                         <tr>
@@ -248,10 +256,7 @@ def conf(page=None, notification=None, *args):
             
             def user_table():
                 users = db.LoadUserList()
-            
-                table = """
-    <table style="margin-top: 50px;">       
-        <tbody>"""
+                table = ""
             
                 for user in users:
                     table += f"""
@@ -266,8 +271,9 @@ def conf(page=None, notification=None, *args):
                   <button title="Удалить пользователя (не удалит его из отчётов. если пользователь временно не будет пользоватся столовой деактивируйте его.)" class="delete_user" onclick="DeleteUser({user[0]})">Удалить</button>
                 </td>
             </tr>"""
-                table += "</tbody></table>"
-                return table    #   создание таблицы пользователей
+                
+                return f"""<table style="margin-top: 50px;">       
+        <tbody>{table}</tbody></table>"""    #   создание таблицы пользователей
             
             header = """
     <div class="header">
@@ -275,49 +281,83 @@ def conf(page=None, notification=None, *args):
             <input class="input_user_name" type="text" id="newUserName" placeholder="Имя пользователя" oninput="FilterUserList()">
             <button class="add_user" onclick="NewUser()">Добавить</button>
         </div>
-    </div>
-"""
+    </div>"""
 
             return header + user_table()
         
         elif page == 'purchase':
-            return
+            
+            def dish_table():
+                ingredients = db.GetIngredientsList()
+                table = ""
+            
+                for ingredient in ingredients:
+                    table += f"""
+            <tr class="ingredients_column">
+                <td>
+                <input style="border-width: 0px;width: 300px;" type="text" id="IngredientName{ingredient[0]}" value="{ingredient[1]}" onfocus="showEditButton({ingredient[0]})" onblur="hideEditButtonWithDelay({ingredient[0]})">
+                <button id="editButton{ingredient[0]}" style="display: none;" title="Сохранить изменённое название" onclick="EditIngredientName({ingredient[0]})">✏️</button>
+                </td>
+                <td class="ingredient_volume" style="font-size: 18px;width: 200px;">
+                    <input id="newLastPrice{ingredient[0]}" value="{ingredient[3]}" class="price_input" type="number" max="999" onfocus="showEditLastPriceButton({ingredient[0]})" onblur="hideEditLastPriceButtonWithDelay({ingredient[0]})">
+                    грн/{ingredient[2]}
+                    <button id="editLastPrice{ingredient[0]}" style="margin-left: 20px; display: none;" onclick="editLastPrice({ingredient[0]})">✏️</button>
+                </td>
+                <td class="ingredients_actions">
+                    <button class="delete_ingredient" onclick="DeleteIngredient({ingredient[0]})">Удалить</button>
+                </td>
+            </tr>"""
+                    
+                return f"""<table style="margin-top: 50px;">       
+        <tbody>{table}</tbody></table>"""
+
+            return """
+    <div class="header">
+        <div class="add-ingredients-conteiner">
+            <input class="input_ingredient_name" type="text" id="newIngredientName" placeholder="Название ингридеента" oninput="FilterIngredientList()">
+            <select id="newIngredientVolume" class="volume_input">
+                <option></option>
+                <option>кг.</option>
+                <option>л.</option>
+                <option>шт.</option>
+            </select>
+            <button class="add_ingredient" onclick="NewIngredient()">Добавить</button>
+        </div>
+    </div>
+    """ + dish_table()
             
         elif page == 'dish_list':
             
             def dish_table():
                 dishes = db.GetDishList()
-            
-                table = """
-    <table style="margin-top: 50px;">       
-        <tbody>"""
+                table = ""
             
                 for dish in dishes:
                     table += f"""
             <tr class="dish_column">
                 <td>
                 <input style="border-width: 0px;width: 300px;" type="text" id="DishName{dish[0]}" value="{dish[1]}" onfocus="showEditButton({dish[0]})" onblur="hideEditButtonWithDelay({dish[0]})">
-                <button id="editButton{dish[0]}" style="display: none;" title="Сохранить изменённое имя" style="hiden;" onclick="EditDishName({dish[0]})">✏️</button>
+                <button id="editButton{dish[0]}" style="display: none;" title="Сохранить изменённое название" style="hiden;" onclick="EditDishName({dish[0]})">✏️</button>
                 </td>
                 <td class="dish_status">{'✔️' if dish[2] else '❌'}</td>
                 <td class="dish_actions">
                   <button style="width: 140px;" title="Деактивированное блюдо не будет отображатся в списке блюд. Его всегда можно будет активировать снова" onclick="ChangeDishStatus({dish[0]})">{'Деактивировать' if dish[2] else 'Активировать'}</button>
+                  <button onclick="Recipe({dish[0]})">Рецептура</button>
                   <button title="Удалить блюдо" class="delete_dish" onclick="DeleteDish({dish[0]})">Удалить</button>
                 </td>
             </tr>"""
-                table += "</tbody></table>"
-                return table
+                    
+                return f"""<table style="margin-top: 50px;">       
+        <tbody>{table}</tbody></table>"""
 
-            header = """
+            return """
     <div class="header">
         <div class="add-dish-conteiner">
             <input class="input_dish_name" type="text" id="newDishName" placeholder="Название блюда" oninput="FilterDishList()">
             <button class="add_dish" onclick="NewDish()">Добавить</button>
         </div>
     </div>
-"""
-
-            return header + dish_table()
+    """ + dish_table()
 
     def sidebar_create():
         
@@ -345,20 +385,10 @@ def conf(page=None, notification=None, *args):
         {config_page_style}
         {page_style()}
     </style>
-
 </head>
 <body style="margin: 0px;">
-
-    <div class="sidebar">
-    
-        {sidebar_create()}
-        
-    </div>
-
-    <div class="content">
-        {filling_main_page()}
-    </div>
-    
+    <div class="sidebar">{sidebar_create()}</div>
+    <div class="content">{filling_main_page()}</div>
     <div class="notifications"></div>
     
     <script>
@@ -367,7 +397,6 @@ def conf(page=None, notification=None, *args):
     {notification if notification != None else ""}
     </script>
     
-
 </body>
 </html>"""
     

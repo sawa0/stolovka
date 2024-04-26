@@ -652,7 +652,7 @@ define_dish_page_style = """
 }
 
 .dish_actions{
-    width: 250px;
+    width: 350px;
 }
 
 .header{
@@ -759,6 +759,131 @@ tbody td button:hover {
     background-color: #45a049;
 }
  
+"""
+
+define_ingredients_page_style = """
+.ingredients_actions{
+    width: 350px;
+}
+
+.volume_input{
+    border: 2px solid #4CAF50;
+    border-left-width: 0px;
+    border-right-width: 0px;
+}
+
+.price_input{
+    text-align: center;
+    border-radius: 10px;
+    border: 2px solid #4CAF50;
+    font-size: 16px;
+    height: 25px;
+    width: 60px;
+}
+
+.header{
+    top: 0px;
+    width: 100%;
+    height: 50px;
+    background-color: #f2f2f2;
+    height: 50px;
+    display: flex;
+    position: absolute;
+    position: fixed;
+}
+
+/************   блок с поиском по таблице и кнопкой добавить   *************/
+
+    .input_ingredient_name{
+        weight: 26px;
+        padding: 4px;
+        border: 2px solid #4CAF50;
+        border-bottom-left-radius: 10px;
+        border-top-left-radius: 10px;
+        font-size: 16px;
+        outline: none;
+    }
+
+    .add-ingredients-conteiner{
+        margin-top: 10px;
+        margin-left: 10px;
+        height: 32px;
+        display: flex;
+    }
+
+    .add_ingredient {
+        padding: 7px 10px;
+        margin-right: 5px;
+        border: none;
+        border-bottom-right-radius: 10px;
+        border-top-right-radius: 10px;
+        background-color: #4CAF50;
+        color: white;
+        cursor: pointer;
+    }
+
+    .add_ingredient:hover {background-color: #45a049;}
+
+/*****************************************************/
+
+
+input[type="text"] {
+    padding: 4px;
+    font-size: 16px;
+    outline: none;
+}
+
+.delete_ingredient {
+    padding: 5px 10px;
+    margin-right: 5px;
+    border: none;
+    border-radius: 5px;
+    background-color: #af4c4c;
+    color: white;
+    cursor: pointer;
+}
+
+.delete_ingredient:hover {
+  background-color: #a04545;
+}
+
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+}
+
+thead th {
+    background-color: #f2f2f2;
+    border-bottom: 1px solid #ddd;
+    padding: 10px;
+    text-align: left;
+}
+
+tbody td {
+    border-bottom: 1px solid #ddd;
+    padding: 10px;
+}
+
+tbody td[contenteditable="true"] {
+    outline: none;
+    cursor: pointer;
+}
+
+tbody td button {
+    padding: 5px 10px;
+    margin-right: 5px;
+    border: none;
+    border-radius: 5px;
+    background-color: #4CAF50;
+    color: white;
+    cursor: pointer;
+}
+
+tbody td button:hover {
+    background-color: #45a049;
+}
 """
 
 ###################   scripts   ###################
@@ -1185,11 +1310,10 @@ function decrement(index) {
 }
 """
 
-scripts_for_dish = """
+scripts_for_dish_page = """
 
 function FilterDishList() {
     var filter = document.getElementById('newDishName').value;
-    
     const dishColumns = document.getElementsByClassName('dish_column');
 
     if (filter === '') {
@@ -1324,4 +1448,185 @@ function hideEditButtonWithDelay(dishId) {
     setTimeout(function() {hideEditButton(dishId);}, 300);
 }
 
+"""
+
+scripts_for_ingredients_page = """
+function FilterIngredientList() {
+    var filter = document.getElementById('newIngredientName').value;
+    
+    const ingredientColumns = document.getElementsByClassName('ingredients_column');
+
+    if (filter === '') {
+        for (let i = 0; i < ingredientColumns.length; i++) {ingredientColumns[i].style.display = 'table-row';}
+    } else {
+        for (let i = 0; i < ingredientColumns.length; i++) {
+            const input = ingredientColumns[i].querySelector('input');
+            //console.log(input.value.includes(filter));
+            if (input.value.includes(filter)){
+                ingredientColumns[i].style.display = 'table-row';
+            } else {
+                ingredientColumns[i].style.display = 'none';
+            }
+        }
+    }
+}
+
+function DeleteIngredient(id) {
+    var form = document.createElement("form"); // Создаем объект формы
+    form.method = "POST"; // Устанавливаем метод POST
+    form.action = "/config"; // Укажите здесь путь к вашему обработчику на сервере
+            
+    // Создаем элемент input для передачи значения
+    var input = document.createElement("input");
+    input.type = "hidden";
+    input.name = "DeleteIngredient";
+    input.value = id;
+
+    // Добавляем элемент input к форме
+    form.appendChild(input);
+  
+    document.body.appendChild(form);
+    form.submit();
+}
+
+function EditIngredientName(id){
+    // Получаем содержимое поля ввода
+    var newIngredientName = document.getElementById('IngredientName'+id).value;
+    
+    // Проверяем, не является ли поле ввода пустым
+    if (newIngredientName.trim() === '') {
+
+    const notification = new NotificationCustom('Ошибка','Название ингридиента не может быть пустым');
+    notification.show();
+    return;}
+    
+    var form = document.createElement("form"); // Создаем объект формы
+    form.method = "POST"; // Устанавливаем метод POST
+    form.action = "/config"; // Укажите здесь путь к вашему обработчику на сервере
+    
+    // Создаем элемент input для передачи нового имени пользователя
+    var input = document.createElement("input");
+    input.type = "hidden";
+    input.name = "EditIngredientName";
+    input.value = newIngredientName;
+    form.appendChild(input);
+    
+    // Создаем элемент input1 для передачи id пользователя
+    var input1 = document.createElement("input");
+    input1.type = "hidden";
+    input1.name = "id";
+    input1.value = id;
+    form.appendChild(input1);
+    
+    // Очищаем поле ввода после добавления пользователя
+    document.getElementById('newIngredientName').value = '';
+  
+    document.body.appendChild(form);
+    form.submit();
+}
+
+function NewIngredient() {
+    // Получаем содержимое поля ввода
+    var newIngredientName = document.getElementById('newIngredientName').value;
+            
+    // Проверяем, не является ли поле ввода пустым
+    if (newIngredientName.trim() === '') {
+        alert('Название ингридиента не может быть пустым');
+        return; // Прерываем выполнение функции
+    }
+    
+    var newIngredientVolume = document.getElementById('newIngredientVolume').value;
+    
+    if (newIngredientVolume === '') {
+        alert('Выберете единицу учёта для продукта');
+        return; // Прерываем выполнение функции
+    }
+  
+    var form = document.createElement("form"); // Создаем объект формы
+    form.method = "POST"; // Устанавливаем метод POST
+    form.action = "/config"; // Укажите здесь путь к вашему обработчику на сервере
+    
+    // Создаем элемент input1 для передачи значения
+    var input1 = document.createElement("input");
+    input1.type = "hidden";
+    input1.name = "NewIngredientVolume";
+    input1.value = newIngredientVolume;
+    form.appendChild(input1);
+    
+    // Создаем элемент input для передачи значения
+    var input = document.createElement("input");
+    input.type = "hidden";
+    input.name = "NewIngredientName";
+    input.value = newIngredientName;
+    form.appendChild(input);
+  
+    document.body.appendChild(form);
+    form.submit();
+}
+
+function editLastPrice(id){
+    // Получаем содержимое поля ввода
+    var LastPrice = document.getElementById('newLastPrice'+id).value;
+    
+    console.log(LastPrice)
+    
+    // Проверяем, не является ли поле ввода пустым
+    if (LastPrice.trim() === '') {
+
+    const notification = new NotificationCustom('Ошибка','Введите цену ингредиента');
+    notification.show();
+    return;}
+    
+    var form = document.createElement("form"); // Создаем объект формы
+    form.method = "POST"; // Устанавливаем метод POST
+    form.action = "/config"; // Укажите здесь путь к вашему обработчику на сервере
+    
+    // Создаем элемент input для передачи новой цены ингредиента
+    var input = document.createElement("input");
+    input.type = "hidden";
+    input.name = "LastPrice";
+    input.value = LastPrice;
+    form.appendChild(input);
+    
+    // Создаем элемент input1 для передачи id пользователя
+    var input1 = document.createElement("input");
+    input1.type = "hidden";
+    input1.name = "id";
+    input1.value = id;
+    form.appendChild(input1);
+    
+    // Очищаем поле ввода после добавления пользователя
+    document.getElementById('newIngredientName').value = '';
+  
+    document.body.appendChild(form);
+    form.submit();
+}
+
+function showEditButton(ingredientId) {
+    var editButton = document.getElementById("editButton" + ingredientId);
+    editButton.style.display = "inline-block"; // Показываем кнопку
+}
+
+function hideEditButton(ingredientId) {
+    var editButton = document.getElementById("editButton" + ingredientId);
+    editButton.style.display = "none"; // Скрываем кнопку
+}
+
+function showEditLastPriceButton(ingredientId) {
+    var editButton = document.getElementById("editLastPrice" + ingredientId);
+    editButton.style.display = "inline-block"; // Показываем кнопку
+}
+
+function hideEditLastPriceButton(ingredientId) {
+    var editButton = document.getElementById("editLastPrice" + ingredientId);
+    editButton.style.display = "none"; // Скрываем кнопку
+}
+
+function hideEditButtonWithDelay(ingredientId) {
+    setTimeout(function() {hideEditButton(ingredientId);}, 300);
+}
+
+function hideEditLastPriceButtonWithDelay(ingredientId) {
+    setTimeout(function() {hideEditLastPriceButton(ingredientId);}, 300);
+}
 """

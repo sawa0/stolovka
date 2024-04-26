@@ -1,3 +1,4 @@
+from re import A
 from flask import *
 
 import html_builder
@@ -36,10 +37,25 @@ def SettingsPage():
         if 'Page' in request.form:
             return html_builder.conf(request.form['Page'])  #   Редирект на выбранную страницу
         
+        #######################\   Обработчик страницы purchase   /#######################
+        
+        elif 'NewIngredientName' in request.form:
+            return html_builder.conf('purchase', notification(db.NewIngredient(request.form['NewIngredientName'], request.form['NewIngredientVolume'])))
+            
+        elif 'DeleteIngredient' in request.form:
+            db.DeleteIngredient(request.form['DeleteIngredient'])
+            
+            return html_builder.conf('purchase', "")
+            
+        elif 'EditIngredientName' in request.form:
+            return html_builder.conf('purchase', notification(db.EditIngredientName(request.form['EditIngredientName'], request.form['id'])))
+        
+        elif 'LastPrice' in request.form:
+            return html_builder.conf('purchase', notification(db.LastPrice(request.form['LastPrice'], request.form['id'])))
+
         #######################\   Обработчик страницы dish_list  /#######################
         
         elif 'NewDish' in request.form:
-
             return html_builder.conf('dish_list', notification(db.NewDish(request.form['NewDish'])))
         
         elif 'DeleteDish' in request.form:
