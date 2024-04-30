@@ -1,195 +1,66 @@
 ﻿###################   style   ###################
 
-control_user_page_style = """
-
-.user_status{
-    width: 65px;
+main_page_style = """
+.key{
+    width: 100px;
+    height: 100px;
+    margin: 15px;
+    font-size: 50px;
+    font-weight: bold;
 }
 
-.user_actions{
-    width: 250px;
-}
-
-.header{
-    top: 0px;
-    width: 100%;
-    height: 50px;
-    background-color: #f2f2f2;
-    height: 50px;
+.keyboard{
     display: flex;
-    position: absolute;
-    position: fixed;
-}
-
-/************   блок с поиском по таблице и кнопкой добавить   *************/
-
-    .input_user_name{
-        weight: 26px;
-        padding: 4px;
-        border: 2px solid #4CAF50;
-        border-bottom-left-radius: 10px;
-        border-top-left-radius: 10px;
-        font-size: 16px;
-        outline: none;
-    }
-
-    .add-user-conteiner{
-        margin-top: 10px;
-        margin-left: 10px;
-        height: 32px;
-        display: flex;
-    }
-
-    .add_user {
-        padding: 7px 10px;
-        margin-right: 5px;
-        border: none;
-        border-bottom-right-radius: 10px;
-        border-top-right-radius: 10px;
-        background-color: #4CAF50;
-        color: white;
-        cursor: pointer;
-    }
-
-    .add_user:hover {background-color: #45a049;}
-
-/*****************************************************/
-
-
-input[type="text"] {
-    padding: 4px;
-    font-size: 16px;
-    outline: none;
-}
-
-.delete_user {
-    padding: 5px 10px;
-    margin-right: 5px;
-    border: none;
-    border-radius: 5px;
-    background-color: #af4c4c;
-    color: white;
-    cursor: pointer;
-}
-
-.delete_user:hover {
-  background-color: #a04545;
-}
-
-
-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-bottom: 20px;
-}
-
-thead th {
-    background-color: #f2f2f2;
-    border-bottom: 1px solid #ddd;
-    padding: 10px;
-    text-align: left;
-}
-
-tbody td {
-    border-bottom: 1px solid #ddd;
-    padding: 10px;
-}
-
-tbody td[contenteditable="true"] {
-    outline: none;
-    cursor: pointer;
-}
-
-tbody td button {
-    padding: 5px 10px;
-    margin-right: 5px;
-    border: none;
-    border-radius: 5px;
-    background-color: #4CAF50;
-    color: white;
-    cursor: pointer;
-}
-
-tbody td button:hover {
-    background-color: #45a049;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    margin: 5%;
+    justify-content: center;
+    align-items: center;
 }
 
 """
 
-define_menu_page_style = """  
-.price{
-    border-color: #ddd;
-    padding: 0px;
-    height: 25px;
-    width: 60px;
+choise_user_page_style = """
+body:has(.choise_user){
+margin:0px
 }
+.choise_user{
+    max-width:1200px;
+    padding:0 15px;
+    margin:0px auto;
     
-.price_input{
-    width: 60px;
-    border-width: 0px;
-    padding-left: 4px;
-    height: 30px;
 }
-
-.menu-container{
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: flex-start;
+.key{
+    font-size: 50px;
+    display: block; /* Расположить кнопки в виде блоков */
+    width: 100%; /* Ширина кнопок равна ширине контейнера */
+    padding: 10px 10px 10px 20px; /* Отступы вокруг кнопок */
+    margin-bottom: 30px; /* Отступ снизу между кнопками */
+    border: 1px solid #ccc; /* Граница кнопок */
+    background-color: #f9f9f9; /* Цвет фона кнопок */
+    border-radius:50px;
+    text-align: left;
+    transition:all 0.1s;
 }
-
-/* Стилизация элемента <input type="week"> */
-.week {
-    padding: 8px 12px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    font-size: 16px;
-    background-color: #f2f2f2;
-    color: #333;
-}
-
-/* Стили для фокуса */
-.week:focus {
-    outline: none;
-    border-color: #66afe9;
-    box-shadow: 0 0 5px rgba(102, 175, 233, 0.6);
-}
-
-.add_user{
-    height: 37px;
-    margin-left: 10px;
-    width: 130px;
-    color: white;
-    background-color: #4CAF50;
-    font-size: 18px;
-    font-weight: bold;
-    border: none;
-    border-radius: 5px;
-}
-
-.menu_conteiner{
-    padding: 16px;
-}
-
-.dish_name{
-    border-width: 0px;
-    height: 30px;
-    width: 310px;
-}
-            
-table {
-    flex: none;
-    border-collapse: collapse;
-    width: 300px;
-    margin-top: 20px;
-    margin-right: 20px;
-}
-th, td {
-    height: 25px;
-    border: 1px solid #ddd;
-    padding: 0px;
-}
-th {
-    background-color: #f2f2f2;}
+.key:not(:first-child):active{
+    background-color: #8783ab;
+     color:white;
+     scale:1.1;
+     transition:all 0.1s;
+    }
+    .key:not(:first-child){
+     box-shadow: 0 0 10px rgba(0,0,0,0.2);
+    }
+.key:first-child{
+    position: sticky;
+    top:0px;
+    width: 100%;
+    border-radius:0px;}
+.key:first-child:active{
+    background-color: blue !important;
+    color:white;
+    transition:all 0.1s;
+    }
 """
 
 menu_page_style_advanced = """
@@ -200,16 +71,23 @@ menu_page_style_advanced = """
 
       .menu_table {
         margin-bottom: 40px;
-        width: 94%;
-        margin-left: 3%;
+        width: 100%;
+        margin:0 auto;
+        padding: 10px;
         background-color: #c1c1c1;
         border-radius: 25px;
+            tbody {
+            flex-direction: column;
+            gap: 10px;}
       }
-      
+      .dish_column{
+        justify-content: space-between;
+        align-items: center;
+      }
+      .dish_column td:first-child{
+        min-width: 100px;
+        width: 100%;}
       .quantity-control {
-         padding-left: 20px;
-         float: right;
-         padding: .5rem .5rem;
          align-items: center !important;
          display: flex !important;
       }
@@ -225,7 +103,7 @@ menu_page_style_advanced = """
          justify-content: center;
          align-items: center;
       }
-
+      
       .left-qua {
          border-top-left-radius: 50%;
          border-bottom-left-radius: 50%;
@@ -246,23 +124,33 @@ menu_page_style_advanced = """
          border-top-right-radius: 50%;
          border-bottom-right-radius: 50%;
       }
+      .left-qua,
+      .counter,
+      .right-qua{
+      cursor:pointer;}
 
       .dish_name {
-        margin-left: 10px;
-        font-size: 40px;
+        font-size: 28px;
+        cursor:pointer;
+        padding:9px 5px 9px 15px;
+        background-color: #f1f1f1;
+        border-radius: 15px;
+        transition: all 0.5s;
       }
-      
       .price {
-      
+        width:90px;;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align:center;
         padding-top: 5px;
         padding-bottom: 5px;
         padding-right: 5px;
         padding-left: 5px;
-      
         background-color: #fff;
         border-radius: 5px;
         font-size: 20px;
-        margin-right: 50px;
+        margin: 0px 15px 0px 50px;
       }
 
 
@@ -289,22 +177,27 @@ menu_page_style_advanced = """
             align-items: center;
             height: 100vh;
             background-color: #f1f1f1;
-
             padding: 20px;
             margin: 0 auto;
             max-width: 1200px;
+            width:100%;
         }
 
         .form {
-            padding: 20px;
+            width: 100%;
+            padding: 10px;
             border-radius: 5px;
             background-color: #fff;
             box-shadow: 0 0 10px rgba(0,0,0,0.2);
         }
 
         .name {
+            margin-top: 0px;
+            margin-bottom: 6px;
             text-align: center;
             font-size: 40px;
+            font-style:italic;
+            text-transform:uppercase;
         }
 
         .item_food {
@@ -393,6 +286,7 @@ menu_page_style_advanced = """
             align-content: center;
             justify-content: center;
             align-items: center;
+            margin-top: 6px;
         }
 
         .cancel {
@@ -417,10 +311,15 @@ menu_page_style_advanced = """
             font-weight: bold;
             border: none;
             border-radius: 5px;
+            transition: all 0.1s;
+            cursor:pointer;
+        }
+        .previous_dey:active{
+            background-color: #3d0cf7;
+            transition: all 0.1s;
         }
         
         .buy {
-            margin-right: 20px;
             width: 85px;
             color: white;
             background-color: #4CAF50;
@@ -430,23 +329,19 @@ menu_page_style_advanced = """
             cursor: pointer;
             border-radius: 5px;
             padding: 10px;
-            margin-left: 15px;
+            margin-right: 15px;
         }
 
         .total_price {
-            margin-bottom: 10px;
             font-size: 30px;
             font-weight: bold;
-            margin-right: 10px;
+            margin-right: 20px;
             text-align: right;
-            width: 95%;
+            width: 100%;
+            margin-top:10px;
+            margin-bottom:10px;
         }
         
-        .form {
-            width: 100%;
-            padding: 5px;
-        }
-
         .item_food {
             flex-direction: column;
             align-items: flex-start;
@@ -457,18 +352,7 @@ menu_page_style_advanced = """
  
 """
 
-choise_user_page_style = """
-.key{
-    font-size: 50px;
-    display: block; /* Расположить кнопки в виде блоков */
-    width: 95%; /* Ширина кнопок равна ширине контейнера */
-    padding: 10px; /* Отступы вокруг кнопок */
-    margin-bottom: 5px; /* Отступ снизу между кнопками */
-    border: 1px solid #ccc; /* Граница кнопок */
-    background-color: #f9f9f9; /* Цвет фона кнопок */
-    text-align: left;
-}
-"""
+#====# config page #====#
 
 config_page_style = """
 
@@ -477,6 +361,7 @@ config_page_style = """
 }
 
 .content {
+    min-width: 850px;
     margin-left: 200px; /* Учитывает ширину боковой панели */
     padding: 0px;
 }
@@ -624,24 +509,210 @@ button.add-button:hover {
     padding: 0px;
 }
 
-}"""
+"""
 
-main_page_style = """
-.key{
-    width: 100px;
-    height: 100px;
-    margin: 15px;
-    font-size: 50px;
-    font-weight: bold;
+define_menu_page_style = """  
+.price{
+    border-color: #ddd;
+    padding: 0px;
+    height: 25px;
+    width: 60px;
+}
+    
+.price_input{
+    width: 60px;
+    border-width: 0px;
+    padding-left: 4px;
+    height: 30px;
 }
 
-.keyboard{
+.menu-container{
     display: flex;
     flex-wrap: wrap;
     justify-content: flex-start;
-    margin: 5%;
-    justify-content: center;
-    align-items: center;
+}
+
+/* Стилизация элемента <input type="week"> */
+.week {
+    padding: 8px 12px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+    background-color: #f2f2f2;
+    color: #333;
+}
+
+/* Стили для фокуса */
+.week:focus {
+    outline: none;
+    border-color: #66afe9;
+    box-shadow: 0 0 5px rgba(102, 175, 233, 0.6);
+}
+
+.add_user{
+    height: 37px;
+    margin-left: 10px;
+    width: 130px;
+    color: white;
+    background-color: #4CAF50;
+    font-size: 18px;
+    font-weight: bold;
+    border: none;
+    border-radius: 5px;
+}
+
+.menu_conteiner{
+    padding: 16px;
+}
+
+.dish_name{
+    border-width: 0px;
+    height: 30px;
+    width: 310px;
+}
+            
+table {
+    flex: none;
+    border-collapse: collapse;
+    width: 300px;
+    margin-top: 20px;
+    margin-right: 20px;
+}
+th, td {
+    height: 25px;
+    border: 1px solid #ddd;
+    padding: 0px;
+}
+th {
+    background-color: #f2f2f2;}
+"""
+
+define_ingredients_page_style = """
+
+.edit_last_price{
+    margin-left: 10px;
+    padding-top: 3px;
+    padding-left: 6px;
+    padding-right: 6px;
+}
+
+.price_input{
+    text-align: center;
+    border-radius: 10px;
+    border: 2px solid #4CAF50;
+    font-size: 16px;
+    height: 25px;
+    width: 80px;
+}
+
+.header{
+    top: 0px;
+    width: 100%;
+    height: 50px;
+    background-color: #f2f2f2;
+    height: 50px;
+    display: flex;
+    position: absolute;
+    position: fixed;
+}
+
+/************   блок с поиском по таблице и кнопкой добавить   *************/
+
+    .input_ingredient_name{
+        weight: 26px;
+        padding: 4px;
+        border: 2px solid #4CAF50;
+        border-bottom-left-radius: 10px;
+        border-top-left-radius: 10px;
+        font-size: 16px;
+        outline: none;
+    }
+
+    .add-ingredients-conteiner{
+        margin-top: 10px;
+        margin-left: 10px;
+        height: 32px;
+        display: flex;
+    }
+
+    .add_ingredient {
+        padding: 7px 10px;
+        margin-right: 5px;
+        border: none;
+        border-bottom-right-radius: 10px;
+        border-top-right-radius: 10px;
+        background-color: #4CAF50;
+        color: white;
+        cursor: pointer;
+    }
+
+    .add_ingredient:hover {background-color: #45a049;}
+
+/*****************************************************/
+
+
+input[type="text"] {
+    padding: 4px;
+    font-size: 16px;
+    outline: none;
+}
+
+.delete_ingredient {
+    padding: 5px 10px;
+    margin-right: 5px;
+    border: none;
+    border-radius: 5px;
+    background-color: #af4c4c;
+    color: white;
+    cursor: pointer;
+}
+
+.delete_ingredient:hover {
+  background-color: #a04545;
+}
+
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+}
+
+thead th {
+    background-color: #f2f2f2;
+    border-bottom: 1px solid #ddd;
+    padding: 10px;
+    text-align: left;
+}
+
+tbody td {
+    border-bottom: 1px solid #ddd;
+    padding: 10px;
+}
+
+tbody td[contenteditable="true"] {
+    outline: none;
+    cursor: pointer;
+}
+
+tbody td button {
+    padding: 5px 10px;
+    margin-right: 5px;
+    border: none;
+    border-radius: 5px;
+    background-color: #4CAF50;
+    color: white;
+    cursor: pointer;
+}
+
+tbody td button:hover {
+    background-color: #45a049;
+}
+
+.volume_input{
+    border: 2px solid #4CAF50;
+    border-left-width: 0px;
+    border-right-width: 0px;
 }
 
 """
@@ -758,27 +829,124 @@ tbody td button {
 tbody td button:hover {
     background-color: #45a049;
 }
+
+/************   блок с рецептами блюд   *************/
  
-"""
-
-define_ingredients_page_style = """
-.ingredients_actions{
-    width: 350px;
-}
-
-.volume_input{
-    border: 2px solid #4CAF50;
-    border-left-width: 0px;
-    border-right-width: 0px;
-}
-
-.price_input{
-    text-align: center;
+.recipe_conteiner{
+    min-width: 700px;
+    position: fixed;
+    height: 500px;
     border-radius: 10px;
     border: 2px solid #4CAF50;
-    font-size: 16px;
-    height: 25px;
-    width: 60px;
+    
+    top: 15%;
+    left: 325px;
+    right: 75px;
+    
+    box-shadow: 0px 0px 105px 75px;
+    
+    background-color: #f2f2f2;
+}
+
+.recipe_conteiner_header{
+    border: 2px solid #4CAF50;
+    border-top-left-radius: 7px;
+    border-top-right-radius: 7px;
+    background: #878787;
+    display: flex;
+}
+
+.close_recipe{
+    width: 200px;
+    margin-top: 4px;
+    margin-bottom: 4px;
+    margin-right: 12px;
+    border: 2px solid #af4c4c;
+    color: white;
+    border-radius: 10px;
+    background-color: #af4c4c;
+}
+
+.add-ingredients-conteiner{
+    display: flex;
+
+    margin-left: 3px;
+    margin-top: 4px;
+    margin-bottom: 4px;
+}
+
+.add_ingredient{
+    border: 2px solid #4CAF50;
+    color: white;
+    border-top-right-radius: 10px;
+    border-bottom-right-radius: 10px;
+    background-color: #4CAF50;
+}
+
+.add_ingredient_select{
+    border: 2px solid #4CAF50;
+    border-top-left-radius: 10px;
+    border-bottom-left-radius: 10px;
+    background-color: #f2f2f2;
+    width: 200px;
+}
+
+.input{
+    border: 2px solid #4CAF50;
+    border-radius: 10px;
+    background-color: #f2f2f2;
+    height: 20px;
+    width: 50px;
+}
+
+.padding_4{
+    padding: 4px;
+}
+
+.delete_ingredient{
+    border: 2px solid #af4c4c;
+    color: white;
+    border-radius: 10px;
+    background-color: #af4c4c;
+}
+
+.delete_ingredient:hover{
+    background-color: #a04545;
+}
+
+.close_recipe:hover{
+    background-color: #a04545;
+}
+
+.ingredients_actions{
+    width: 100px;
+    padding: 4px;
+}
+
+.set_volume{
+    font-size: 14px;
+    margin-left: 10px;
+    padding-left: 6px;
+    padding-right: 6px;
+    padding-bottom: 3px;
+    padding-top: 1px;
+}
+
+.input_volume{
+    width: 150px;
+    padding: 4px;
+}
+
+"""
+
+control_user_page_style = """
+
+.user_status{
+    width: 65px;
+}
+
+.user_actions{
+    width: 250px;
 }
 
 .header{
@@ -794,7 +962,7 @@ define_ingredients_page_style = """
 
 /************   блок с поиском по таблице и кнопкой добавить   *************/
 
-    .input_ingredient_name{
+    .input_user_name{
         weight: 26px;
         padding: 4px;
         border: 2px solid #4CAF50;
@@ -804,14 +972,14 @@ define_ingredients_page_style = """
         outline: none;
     }
 
-    .add-ingredients-conteiner{
+    .add-user-conteiner{
         margin-top: 10px;
         margin-left: 10px;
         height: 32px;
         display: flex;
     }
 
-    .add_ingredient {
+    .add_user {
         padding: 7px 10px;
         margin-right: 5px;
         border: none;
@@ -822,7 +990,7 @@ define_ingredients_page_style = """
         cursor: pointer;
     }
 
-    .add_ingredient:hover {background-color: #45a049;}
+    .add_user:hover {background-color: #45a049;}
 
 /*****************************************************/
 
@@ -833,7 +1001,7 @@ input[type="text"] {
     outline: none;
 }
 
-.delete_ingredient {
+.delete_user {
     padding: 5px 10px;
     margin-right: 5px;
     border: none;
@@ -843,7 +1011,7 @@ input[type="text"] {
     cursor: pointer;
 }
 
-.delete_ingredient:hover {
+.delete_user:hover {
   background-color: #a04545;
 }
 
@@ -884,6 +1052,7 @@ tbody td button {
 tbody td button:hover {
     background-color: #45a049;
 }
+
 """
 
 ###################   scripts   ###################
@@ -1041,11 +1210,6 @@ function EditUserName(id){
     input1.name = "id";
     input1.value = id;
     form.appendChild(input1);
-            
-            
-
-    // Очищаем поле ввода после добавления пользователя
-    document.getElementById('newUserName').value = '';
   
     document.body.appendChild(form);
     form.submit();
@@ -1190,7 +1354,7 @@ function chose_menu(id){
     form.submit();
 }
 
-function MainPage(){
+function PreviousDay(){
     window.history.back();
 }
 """
@@ -1308,6 +1472,10 @@ function decrement(index) {
         total_price_resume()
     }
 }
+
+function PreviousDay(){
+    window.history.back();
+}
 """
 
 scripts_for_dish_page = """
@@ -1396,11 +1564,6 @@ function EditDishName(id){
     input1.name = "id";
     input1.value = id;
     form.appendChild(input1);
-            
-            
-
-    // Очищаем поле ввода после добавления пользователя
-    document.getElementById('newDishName').value = '';
   
     document.body.appendChild(form);
     form.submit();
@@ -1433,6 +1596,128 @@ function NewDish() {
     document.body.appendChild(form);
     form.submit();
 }
+
+/////////////////// Функционал редактирования рецептов
+
+function Recipe(id){
+    var form = document.createElement("form"); // Создаем объект формы
+    form.method = "POST"; // Устанавливаем метод POST
+    form.action = "/config"; // Укажите здесь путь к вашему обработчику на сервере
+            
+    // Создаем элемент input для передачи значения
+    var input = document.createElement("input");
+    input.type = "hidden";
+    input.name = "Recipe";
+    input.value = id;
+    form.appendChild(input);
+
+    document.body.appendChild(form);
+    form.submit();
+}
+
+function СloseRecipeWindow() {
+    document.getElementById('recipeWindow').style.display = 'none';
+}
+
+function UpdateRecipe(id) {
+    var IngredientId = document.getElementById('newIngredient').value;
+
+    if (IngredientId === '') {
+    const notification = new NotificationCustom('Ошибка','Выберите ингредиент, который хотите добавить в рецепт');
+    notification.show();
+    return;}
+
+    var form = document.createElement("form"); // Создаем объект формы
+    form.method = "POST"; // Устанавливаем метод POST
+    form.action = "/config"; // Укажите здесь путь к вашему обработчику на сервере
+            
+    // Создаем элемент input для передачи значения ингридиента
+    var input = document.createElement("input");
+    input.type = "hidden";
+    input.name = "AddIngredientToRecipe";
+    input.value = IngredientId;
+    form.appendChild(input);
+    
+    // Создаем элемент input1 для передачи id блюда
+    var input1 = document.createElement("input");
+    input1.type = "hidden";
+    input1.name = "DishId";
+    input1.value = id;
+    form.appendChild(input1);
+  
+    document.body.appendChild(form);
+    form.submit();
+    
+}
+
+function DeleteIngredientFromRecipe (DishId, IngredientId) {
+    var form = document.createElement("form"); // Создаем объект формы
+    form.method = "POST"; // Устанавливаем метод POST
+    form.action = "/config"; // Укажите здесь путь к вашему обработчику на сервере
+            
+    // Создаем элемент input для передачи значения ингридиента
+    var input = document.createElement("input");
+    input.type = "hidden";
+    input.name = "DeleteIngredientFromRecipe";
+    input.value = IngredientId;
+    form.appendChild(input);
+    
+    // Создаем элемент input1 для передачи id блюда
+    var input1 = document.createElement("input");
+    input1.type = "hidden";
+    input1.name = "DishId";
+    input1.value = DishId;
+    form.appendChild(input1);
+  
+    document.body.appendChild(form);
+    form.submit();
+}
+
+function SaveVolume(DishId, IngredientId) {
+    var Volume = document.getElementById('set_ingridient_volume' + IngredientId).value;
+
+    if (Volume === '') {
+    const notification = new NotificationCustom('Ошибка','Введите объем ингредиента');
+    notification.show();
+    return;}
+    
+    var form = document.createElement("form"); // Создаем объект формы
+    form.method = "POST"; // Устанавливаем метод POST
+    form.action = "/config"; // Укажите здесь путь к вашему обработчику на сервере
+            
+    // Создаем элемент input для передачи id блюда
+    var input = document.createElement("input");
+    input.type = "hidden";
+    input.name = "IngredientVolumeData";
+    input.value = JSON.stringify({'IngredientId':IngredientId, 'Volume':Volume});
+    form.appendChild(input);
+    
+    // Создаем элемент input1 для передачи значения
+    var input1 = document.createElement("input");
+    input1.type = "hidden";
+    input1.name = "DishId";
+    input1.value = DishId;
+    form.appendChild(input1);
+  
+    document.body.appendChild(form);
+    form.submit();
+}
+
+function showIngredientVolumeEditButton(dishId) {
+    var editButton = document.getElementById("set_volume" + dishId);
+    editButton.style.display = "inline-block"; // Показываем кнопку
+}
+
+function hideIngredientVolumeEditButton(dishId) {
+    var editButton = document.getElementById("set_volume" + dishId);
+    editButton.style.display = "none"; // Скрываем кнопку
+}
+
+function hideIngredientVolumeEditButtonWithDelay(dishId) {
+    setTimeout(function() {hideIngredientVolumeEditButton(dishId);}, 300);
+}
+
+///////////////////
 
 function showEditButton(dishId) {
     var editButton = document.getElementById("editButton" + dishId);
@@ -1594,9 +1879,6 @@ function editLastPrice(id){
     input1.name = "id";
     input1.value = id;
     form.appendChild(input1);
-    
-    // Очищаем поле ввода после добавления пользователя
-    document.getElementById('newIngredientName').value = '';
   
     document.body.appendChild(form);
     form.submit();

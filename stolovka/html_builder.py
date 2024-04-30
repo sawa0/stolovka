@@ -1,5 +1,8 @@
 ﻿import datetime
-from re import I
+from msilib import Table
+from re import A, I
+import re
+from unittest import result
 
 from BD import db
 from texsts import *
@@ -23,7 +26,7 @@ def menu(id=None):
         for i in range(1, 9):
             table_html += f'''
                 <tr class="dish_column" id="dish_column_{i}" style="display: none;">
-                    <td><p class="dish_name" id="dish_name{i}" style="margin-left: 6px; padding-left: 6px; {"background-color: #f1f1f1; border-radius: 15px;" if (i % 2) == 0 else ""}"></p></td>
+                    <td><p class="dish_name" id="dish_name{i}"></p></td>
                     <td class="quantity-control">
                         <span class="price" id="dish_price{i}"></span>
                         <button class="left-qua" onclick="decrement({i})">➖</button>
@@ -56,12 +59,10 @@ def menu(id=None):
             <h1 id="user_name" class="name">{db.GetUser(id)[1]}</h1>
             <div class="foods">{generate_food_list()}</div>
             <div class="result">
-                <p class="total_price" id="total_price">Всего: 0грн</p>
-            </div>
-            <div class="result">
                 {btn_previous_dey()}
-                <button class="cancel">Отмена</button>
+                <p class="total_price" id="total_price">Всего: 0грн</p>
                 <button class="buy" onclick="buy()">Купить</button>
+                <button class="cancel" onclick="PreviousDay()">Отмена</button>
             </div>
         </div>
     </div>
@@ -83,7 +84,7 @@ def letter(letter):
             if user[1][0] == letter:
                 users.append(user)
            
-        answer = """<button onclick="MainPage()" style="text-align: center; background-color: #c9c9c9;" class="key">Назад</button>"""
+        answer = """<button onclick="PreviousDay()" style="text-align: center; background-color: #c9c9c9;" class="key">Назад</button>"""
 
         for user in users:
             if user[2]:
@@ -298,12 +299,12 @@ def conf(page=None, notification=None, *args):
                 <input style="border-width: 0px;width: 300px;" type="text" id="IngredientName{ingredient[0]}" value="{ingredient[1]}" onfocus="showEditButton({ingredient[0]})" onblur="hideEditButtonWithDelay({ingredient[0]})">
                 <button id="editButton{ingredient[0]}" style="display: none;" title="Сохранить изменённое название" onclick="EditIngredientName({ingredient[0]})">✏️</button>
                 </td>
-                <td class="ingredient_volume" style="font-size: 18px;width: 200px;">
+                <td class="ingredient_volume" style="font-size: 18px;width: 180px;">
                     <input id="newLastPrice{ingredient[0]}" value="{ingredient[3]}" class="price_input" type="number" max="999" onfocus="showEditLastPriceButton({ingredient[0]})" onblur="hideEditLastPriceButtonWithDelay({ingredient[0]})">
                     грн/{ingredient[2]}
-                    <button id="editLastPrice{ingredient[0]}" style="margin-left: 20px; display: none;" onclick="editLastPrice({ingredient[0]})">✏️</button>
+                    <button class="edit_last_price" id="editLastPrice{ingredient[0]}" style="display: none;" onclick="editLastPrice({ingredient[0]})">✏️</button>
                 </td>
-                <td class="ingredients_actions">
+                <td class="ingredients_actions" style="width: 100px;">
                     <button class="delete_ingredient" onclick="DeleteIngredient({ingredient[0]})">Удалить</button>
                 </td>
             </tr>"""
@@ -347,32 +348,107 @@ def conf(page=None, notification=None, *args):
                 </td>
             </tr>"""
                     
-                return f"""<table style="margin-top: 50px;">       
-        <tbody>{table}</tbody></table>"""
+                return table
 
-            return """
+            def recipe_window():
+                if not args:
+                    return ""
+
+                def ingredients():
+                    ingredients = db.GetIngredientsList()
+                    result = "<option></option>"
+                    for i in ingredients:
+                        result += f'<option value="{i[0]}">{i[1]}</option>'
+                    return result
+
+                def recipe_table():
+                    if args[0] == []:
+                        return "Нет рецептуры, добавьте её"
+                    
+                    ingredients = db.GetIngredientsList()
+                    
+                    def get_ingedient_nane_by_id(id):
+                        for i in ingredients:
+
+                            if int(id) == i[0]:
+                                return i
+
+                    table_data = []
+
+                    for i in args[0][1]:
+                        table_data.append([get_ingedient_nane_by_id(i[0]), i[1]])
+                    
+                    answer = "<table>"
+
+                    for i in table_data:
+                        answer += f"""
+            <tr class="">
+                <td class="padding_4">{i[0][1]}</td>
+                <td class="input_volume">
+                    <input id="set_ingridient_volume{i[0][0]}" class="input" type="number" value="{i[1]}" onfocus="showIngredientVolumeEditButton({i[0][0]})" onblur="hideIngredientVolumeEditButtonWithDelay({i[0][0]})"> {i[0][2]}
+                    <button class="set_volume" id="set_volume{i[0][0]}" style="display: none;" onclick="SaveVolume({args[0][0]}, {i[0][0]})">✏️</button>
+                </td>
+                <td class="ingredients_actions"><button class="delete_ingredient" onclick="DeleteIngredientFromRecipe({args[0][0]}, {i[0][0]})">Удалить</button></td>
+            </tr>"""
+                        
+                    answer += "</table>"
+                    return answer
+                        
+
+
+                return f"""
+    <div id="recipeWindow" class="recipe_conteiner">
+        <div class="recipe_conteiner_header">
+            <div class="add-ingredients-conteiner">
+                <select id="newIngredient" class="add_ingredient_select">
+                    {ingredients()}
+                </select>
+                <button class="add_ingredient" onclick="UpdateRecipe({args[0][0]})">Добавить</button>
+            </div>
+            
+            <div style="width: -webkit-fill-available;"></div>
+            
+            <button class="close_recipe" onclick="СloseRecipeWindow()">Отменить</button>
+        </div>
+        <div class="recipe_conteiner_body">
+            {recipe_table()}
+        </div>
+    </div>
+"""
+
+            return f"""
     <div class="header">
         <div class="add-dish-conteiner">
             <input class="input_dish_name" type="text" id="newDishName" placeholder="Название блюда" oninput="FilterDishList()">
             <button class="add_dish" onclick="NewDish()">Добавить</button>
         </div>
     </div>
-    """ + dish_table()
+    
+    <table style="margin-top: 50px;">       
+        <tbody>
+            {dish_table()}
+        </tbody>
+    </table>
+    
+    {recipe_window()}
+    
+    """
 
     def sidebar_create():
-        
+
+        # <div class="sub_menu" style="{'display: flex;' if page == 'menu' or page == 'purchase' or page == 'dish_list' else 'display: none;'}">
+        #         <button class="sub_menu_btn" {'style="background-color: #c1c1c1;float: right;margin-right: 0px;color: white;"' if page == 'purchase' else ""} onclick="openpage('purchase')">Закупка</button>
+        #         <button class="sub_menu_btn" {'style="background-color: #c1c1c1;float: right;margin-right: 0px;color: white;"' if page == 'dish_list' else ""} onclick="openpage('dish_list')">Список блюд</button>
+        # </div>
+
         return f"""
     <h2>Конфигурация Столовой</h2>
 
-    <button class="key" style="{'background-color: #4CAF50;color: white;' if page == 'menu' or page == 'purchase' or page == 'dish_list' else ''}"
-            onclick="openpage('menu')">Меню</button>
-    <div class="sub_menu" style="{'display: flex;' if page == 'menu' or page == 'purchase' or page == 'dish_list' else 'display: none;'}">
-            <button class="sub_menu_btn" {'style="background-color: #c1c1c1;float: right;margin-right: 0px;color: white;"' if page == 'purchase' else ""} onclick="openpage('purchase')">Закупка</button>
-            <button class="sub_menu_btn" {'style="background-color: #c1c1c1;float: right;margin-right: 0px;color: white;"' if page == 'dish_list' else ""} onclick="openpage('dish_list')">Список блюд</button>
-    </div>
-
-    <button class="key" {'style="background-color: #4CAF50;float: right;margin-right: 0px;color: white;"' if page == 'reports' else ""} onclick="openpage('reports')">Отчет</button>
-    <button class="key" {'style="background-color: #4CAF50;float: right;margin-right: 0px;color: white;"' if page == 'users' else ""} onclick="openpage('users')">Пользователи</button>
+    <button class="key" {'style="background-color: #4CAF50;color: white;"' if page == 'menu' else ''} onclick="openpage('menu')">Меню</button>
+    <button class="key" {'style="background-color: #4CAF50;color: white;"' if page == 'purchase' else ""} onclick="openpage('purchase')">Закупка</button>
+    <button class="key" {'style="background-color: #4CAF50;color: white;"' if page == 'dish_list' else ""} onclick="openpage('dish_list')">Список блюд</button>
+    <button class="key" {'style="background-color: #4CAF50;color: white;"' if page == 'reports' else ""} onclick="openpage('reports')">Отчет</button>
+    <button class="key" {'style="background-color: #4CAF50;color: white;"' if page == 'users' else ""} onclick="openpage('users')">Пользователи</button>
     """
 
     return f"""<!DOCTYPE html>

@@ -1,4 +1,9 @@
-﻿import sqlite3, json
+﻿from calendar import c
+from operator import ne
+import sqlite3, json
+from telnetlib import EL
+
+from flask.ctx import F
 
 class DB:
     def __init__(self):
@@ -30,7 +35,7 @@ class DB:
                         id INTEGER PRIMARY KEY AUTOINCREMENT,
                         name TEXT NOT NULL,
                         isactive BOOLEAN NOT NULL,
-                        recipe TEXT
+                        recipe TEXT NOT NULL
                     )''')
         cursor.execute('''CREATE TABLE IF NOT EXISTS products (
                         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -185,7 +190,7 @@ class DB:
         if dish:
             return ["Ошибка", "Такое блюдо уже существует"]
 
-        cursor.execute("""INSERT INTO dishes (name, isactive) VALUES (?, ?)""", (dishname, True))
+        cursor.execute("""INSERT INTO dishes (name, isactive, recipe) VALUES (?, ?, ?)""", (dishname, True, "[]"))
         conn.commit()
         conn.close()
         
@@ -244,6 +249,89 @@ class DB:
         cursor.execute("""DELETE FROM dishes WHERE id = ?""", (id,))
         conn.commit()
         conn.close()    #   Удаляет блюдо
+        
+    def GetRecipe(self, id):
+        conn = sqlite3.connect('stolovka.db')
+        cursor = conn.cursor()
+        
+        cursor.execute("""SELECT recipe FROM dishes WHERE id = ?""", (id,))
+        
+        recipe = cursor.fetchone()
+        conn.close()
+        return json.loads(recipe[0])
+    
+    def GetIngredientsList(self):
+        conn = sqlite3.connect('stolovka.db')
+        cursor = conn.cursor()
+
+        cursor.execute("""SELECT * FROM products""")
+        ingredients = cursor.fetchall()
+
+        conn.close()
+        return ingredients
+    
+    def AddIngredientToRecipe(self, id, ingredient):
+        conn = sqlite3.connect('stolovka.db')
+        cursor = conn.cursor()
+        
+        cursor.execute("""SELECT recipe FROM dishes WHERE id = ?""", (id,))
+        recipe = json.loads(cursor.fetchone()[0])
+        
+        print(ingredient)
+
+        for i in recipe:
+            if i[0] == ingredient:
+                return ["Ошибка", "Ингредиент уже в рецепте"]
+            
+        recipe.append([ingredient, 0])
+                
+        cursor.execute("""UPDATE dishes SET recipe = ? WHERE id = ?""", (json.dumps(recipe), id))
+        conn.commit()
+        conn.close()
+        
+    def DeleteIngredientFromRecipe(self, id, ingredient):
+        conn = sqlite3.connect('stolovka.db')
+        cursor = conn.cursor()
+
+        cursor.execute("""SELECT recipe FROM dishes WHERE id = ?""", (id,))
+        recipe = json.loads(cursor.fetchone()[0])
+        
+        new_recipe = []
+
+        for i in recipe:
+            if i[0] != ingredient:
+                new_recipe.append(i)
+        
+        cursor.execute("""UPDATE dishes SET recipe = ? WHERE id = ?""", (json.dumps(new_recipe), id))
+        
+        conn.commit()
+        conn.close()
+        
+    def IngredientVolumeEdit(self, data, id):
+        conn = sqlite3.connect('stolovka.db')
+        cursor = conn.cursor()
+        
+        cursor.execute("""SELECT recipe FROM dishes WHERE id = ?""", (id,))
+        recipe = json.loads(cursor.fetchone()[0])
+        
+        change = json.loads(data)
+
+        answer = []
+
+        for i in recipe:
+            
+            
+
+            if int(i[0]) == int(change['IngredientId']):
+                answer.append([change['IngredientId'], change['Volume']])
+            else:
+                answer.append(i)
+                
+        print(answer)
+
+        cursor.execute("""UPDATE dishes SET recipe = ? WHERE id = ?""", (json.dumps(answer), id))
+        conn.commit()
+        conn.close()
 
     ##################\ Для страницы users /##################
     
