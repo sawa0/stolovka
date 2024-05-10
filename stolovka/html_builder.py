@@ -1,8 +1,4 @@
 ﻿import datetime
-from msilib import Table
-from re import A, I
-import re
-from unittest import result
 
 from BD import db
 from texsts import *
@@ -219,7 +215,7 @@ def conf(page=None, notification=None, *args):
                         table += f"""
                         <tr>
                             <td class="eda">
-                                <select class="dish_name" id="name{pos + 1}" style="width: 300px;">
+                                <select class="dish_name" id="name{pos + 1}" onchange="UpdateMenu()" style="width: 300px;">
                                     <option>{dish_name}</option>
                                     <option></option>
                                     {dish_list()}
@@ -237,7 +233,8 @@ def conf(page=None, notification=None, *args):
             
         <div style="height: 38px;">
           <input class="week" type="week" id="week" name="week" onchange="WeekChange()">
-          <button class="add_user" onclick="UpdateMenu()">Сохранить</button>
+          <button class="heder_button" onclick="UpdateMenu()">Сохранить</button>
+          <button class="heder_button" onclick="PriceRecalculate()">Пересчёт цен</button>
         </div>
 
         <div class="menu-container">
@@ -263,7 +260,7 @@ def conf(page=None, notification=None, *args):
                     table += f"""
             <tr class="user_column">
                 <td>
-                <input style="border-width: 0px;width: 300px;" type="text" id="UserName{user[0]}" value="{user[1]}" onfocus="showEditButton({user[0]})" onblur="hideEditButtonWithDelay({user[0]})">
+                <input class="table_input_user_name" type="text" id="UserName{user[0]}" value="{user[1]}" onfocus="showEditButton({user[0]})" onblur="hideEditButtonWithDelay({user[0]})">
                 <button id="editButton{user[0]}" style="display: none;" title="Сохранить изменённое имя" style="hiden;" onclick="EditUserName({user[0]})">✏️</button>
                 </td>
                 <td class="user_status">{'✔️' if user[2] else '❌'}</td>
@@ -271,20 +268,27 @@ def conf(page=None, notification=None, *args):
                   <button style="width: 140px;" title="Деактивированный пользователь не будет отображатся в списке пользователей на странице заказов. его всегда можно будет активировать снова" onclick="ChangeUserStatus({user[0]})">{'Деактивировать' if user[2] else 'Активировать'}</button>
                   <button title="Удалить пользователя (не удалит его из отчётов. если пользователь временно не будет пользоватся столовой деактивируйте его.)" class="delete_user" onclick="DeleteUser({user[0]})">Удалить</button>
                 </td>
-            </tr>"""
+            </tr>
+            """
                 
-                return f"""<table style="margin-top: 50px;">       
-        <tbody>{table}</tbody></table>"""    #   создание таблицы пользователей
+                return table    #   создание таблицы пользователей
             
-            header = """
+            return f"""
     <div class="header">
         <div class="add-user-conteiner">
             <input class="input_user_name" type="text" id="newUserName" placeholder="Имя пользователя" oninput="FilterUserList()">
             <button class="add_user" onclick="NewUser()">Добавить</button>
         </div>
-    </div>"""
-
-            return header + user_table()
+    </div>
+    
+    <div class="users-table-conteiner">
+        <table>       
+            <tbody>
+                {user_table()}
+            </tbody>
+        </table>
+    </div>
+    """
         
         elif page == 'purchase':
             
@@ -296,23 +300,22 @@ def conf(page=None, notification=None, *args):
                     table += f"""
             <tr class="ingredients_column">
                 <td>
-                <input style="border-width: 0px;width: 300px;" type="text" id="IngredientName{ingredient[0]}" value="{ingredient[1]}" onfocus="showEditButton({ingredient[0]})" onblur="hideEditButtonWithDelay({ingredient[0]})">
+                <input class="table_input_ingredient_name" type="text" id="IngredientName{ingredient[0]}" value="{ingredient[1]}" onfocus="showEditButton({ingredient[0]})" onblur="hideEditButtonWithDelay({ingredient[0]})">
                 <button id="editButton{ingredient[0]}" style="display: none;" title="Сохранить изменённое название" onclick="EditIngredientName({ingredient[0]})">✏️</button>
                 </td>
-                <td class="ingredient_volume" style="font-size: 18px;width: 180px;">
+                <td class="ingredient_volume" style="font-size: 18px;width: 210px;">
                     <input id="newLastPrice{ingredient[0]}" value="{ingredient[3]}" class="price_input" type="number" max="999" onfocus="showEditLastPriceButton({ingredient[0]})" onblur="hideEditLastPriceButtonWithDelay({ingredient[0]})">
                     грн/{ingredient[2]}
                     <button class="edit_last_price" id="editLastPrice{ingredient[0]}" style="display: none;" onclick="editLastPrice({ingredient[0]})">✏️</button>
                 </td>
                 <td class="ingredients_actions" style="width: 100px;">
-                    <button class="delete_ingredient" onclick="DeleteIngredient({ingredient[0]})">Удалить</button>
+                    <button class="delete_ingredient" onclick="DeleteIngredientDiolog({ingredient[0]})">Удалить</button>
                 </td>
             </tr>"""
                     
-                return f"""<table style="margin-top: 50px;">       
-        <tbody>{table}</tbody></table>"""
+                return table
 
-            return """
+            return f"""
     <div class="header">
         <div class="add-ingredients-conteiner">
             <input class="input_ingredient_name" type="text" id="newIngredientName" placeholder="Название ингридеента" oninput="FilterIngredientList()">
@@ -325,10 +328,29 @@ def conf(page=None, notification=None, *args):
             <button class="add_ingredient" onclick="NewIngredient()">Добавить</button>
         </div>
     </div>
-    """ + dish_table()
+    
+    
+    <div class="ingredients-table-conteiner">
+        <table>       
+            <tbody>
+                {dish_table()}
+            </tbody>
+        </table>
+    </div>
+    
+    <div id="accept_delete_conteiner" class="accept_delete_conteiner" style="display: none;">
+        <h1 style="margin: 0px;">Вы действительно хотите удалить ингредиент?</h1>
+        <p>Также, удалённый ингредиент будет удалён из всех рецептов</p>
+        <div class="delete_action_buttons">
+            <button class="cancel_delete_button" onclick="cancelDelete()">Отмена</button>
+            <button class="accept_delete_button" onclick="DeleteIngredient()">Удалить</button>
+        </div>
+    </div>
+    
+    """
             
         elif page == 'dish_list':
-            
+
             def dish_table():
                 dishes = db.GetDishList()
                 table = ""
@@ -337,7 +359,7 @@ def conf(page=None, notification=None, *args):
                     table += f"""
             <tr class="dish_column">
                 <td>
-                <input style="border-width: 0px;width: 300px;" type="text" id="DishName{dish[0]}" value="{dish[1]}" onfocus="showEditButton({dish[0]})" onblur="hideEditButtonWithDelay({dish[0]})">
+                <input class="table_input_dish_name" type="text" id="DishName{dish[0]}" value="{dish[1]}" onfocus="showEditButton({dish[0]})" onblur="hideEditButtonWithDelay({dish[0]})">
                 <button id="editButton{dish[0]}" style="display: none;" title="Сохранить изменённое название" style="hiden;" onclick="EditDishName({dish[0]})">✏️</button>
                 </td>
                 <td class="dish_status">{'✔️' if dish[2] else '❌'}</td>
@@ -348,73 +370,63 @@ def conf(page=None, notification=None, *args):
                 </td>
             </tr>"""
                     
-                return table
+                return table    #   возвращает таблицу с блюдами
 
             def recipe_window():
-                if not args:
-                    return ""
+                ingredients = db.GetIngredientsList()
+                ingredients_dict = {item[0]: item[1:] for item in ingredients}
 
-                def ingredients():
-                    ingredients = db.GetIngredientsList()
+                def ingredients_choose_list():
+                    
                     result = "<option></option>"
+                    
+                    heven_id = []
+                    
+                    for i in db.GetRecipe(args[0]):
+                        heven_id.append(i[0])
+
                     for i in ingredients:
-                        result += f'<option value="{i[0]}">{i[1]}</option>'
+                        if i[0] not in heven_id:
+                            result += f'<option value="{i[0]}">{i[1]}</option>'
                     return result
 
                 def recipe_table():
-                    if args[0] == []:
-                        return "Нет рецептуры, добавьте её"
-                    
-                    ingredients = db.GetIngredientsList()
-                    
-                    def get_ingedient_nane_by_id(id):
-                        for i in ingredients:
 
-                            if int(id) == i[0]:
-                                return i
-
-                    table_data = []
-
-                    for i in args[0][1]:
-                        table_data.append([get_ingedient_nane_by_id(i[0]), i[1]])
-                    
                     answer = "<table>"
 
-                    for i in table_data:
+                    for i in db.GetRecipe(args[0]):
                         answer += f"""
             <tr class="">
-                <td class="padding_4">{i[0][1]}</td>
+                <td class="padding_4">{ingredients_dict[i[0]][0]}</td>
                 <td class="input_volume">
-                    <input id="set_ingridient_volume{i[0][0]}" class="input" type="number" value="{i[1]}" onfocus="showIngredientVolumeEditButton({i[0][0]})" onblur="hideIngredientVolumeEditButtonWithDelay({i[0][0]})"> {i[0][2]}
-                    <button class="set_volume" id="set_volume{i[0][0]}" style="display: none;" onclick="SaveVolume({args[0][0]}, {i[0][0]})">✏️</button>
+                    <input id="set_ingridient_volume{i[0]}" class="input" type="number" value="{i[1]}" onfocus="showIngredientVolumeEditButton({i[0]})" onblur="hideIngredientVolumeEditButtonWithDelay({i[0]})">  {ingredients_dict[i[0]][1]}
+                    <button class="set_volume" id="set_volume{i[0]}" style="display: none;" onclick="SaveVolume({args[0]}, {i[0]})">✏️</button>
                 </td>
-                <td class="ingredients_actions"><button class="delete_ingredient" onclick="DeleteIngredientFromRecipe({args[0][0]}, {i[0][0]})">Удалить</button></td>
+                <td class="ingredients_actions"><button class="delete_ingredient" onclick="DeleteIngredientFromRecipe({args[0]}, {i[0]})">Удалить</button></td>
             </tr>"""
                         
                     answer += "</table>"
                     return answer
                         
-
-
                 return f"""
     <div id="recipeWindow" class="recipe_conteiner">
         <div class="recipe_conteiner_header">
             <div class="add-ingredients-conteiner">
                 <select id="newIngredient" class="add_ingredient_select">
-                    {ingredients()}
+                    {ingredients_choose_list()}
                 </select>
-                <button class="add_ingredient" onclick="UpdateRecipe({args[0][0]})">Добавить</button>
+                <button class="add_ingredient" onclick="UpdateRecipe({args[0]})">Добавить</button>
             </div>
             
-            <div style="width: -webkit-fill-available;"></div>
+            <div style="width: -webkit-fill-available;"><h1 class="dish_name">{db.GetDishName(args[0])[0]}</h1></div>
             
-            <button class="close_recipe" onclick="СloseRecipeWindow()">Отменить</button>
+            <button class="close_recipe" onclick="СloseRecipeWindow()">Закрыть</button>
         </div>
         <div class="recipe_conteiner_body">
             {recipe_table()}
         </div>
     </div>
-"""
+""" #   генерирует окно рецета
 
             return f"""
     <div class="header">
@@ -424,13 +436,15 @@ def conf(page=None, notification=None, *args):
         </div>
     </div>
     
-    <table style="margin-top: 50px;">       
-        <tbody>
-            {dish_table()}
-        </tbody>
-    </table>
+    <div class="dish_table_conteiner">
+        <table>       
+            <tbody>
+                {dish_table()}
+            </tbody>
+        </table>
+    </div>
     
-    {recipe_window()}
+    {recipe_window() if args != () else ""}
     
     """
 

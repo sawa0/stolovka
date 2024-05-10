@@ -1,9 +1,4 @@
-﻿from calendar import c
-from operator import ne
-import sqlite3, json
-from telnetlib import EL
-
-from flask.ctx import F
+﻿import sqlite3, json
 
 class DB:
     def __init__(self):
@@ -114,7 +109,75 @@ class DB:
         conn.commit()
         conn.close()
         return  #   Обновляет меню на выборную неделю
+    
+    def PriceRecalculate(self, week):
+        conn = sqlite3.connect('stolovka.db')
+        cursor = conn.cursor()
 
+        cursor.execute("""SELECT * FROM menu WHERE week_number = ?""", (week,))
+        menu_to_recalculate = cursor.fetchone()
+        
+        if menu_to_recalculate == None:
+            conn.close()
+            return ["Ошибка", "Меню на неделю не найдено. Убедитесь, что вы сохранили меню, перед пересчетом цен."] #   Если мнею на неделю нет, останавливает функцию, и возвращает ошибку в веб интерфейс
+        else:
+            menu_to_recalculate = json.loads(menu_to_recalculate[1])    #   Если мнею на неделю есть, загружает JSON строку
+
+        dishes_to_recalculate = []
+
+        message = []
+
+        for dey in menu_to_recalculate:
+            for dish_id in range(8):
+                name = dey[f"name{dish_id+1}"]
+                if name != "" and name not in dishes_to_recalculate:
+                    dishes_to_recalculate.append(name)
+        
+        products_price = {item[0]: item[3] for item in self.GetIngredientsList()}
+        def price_calculate(recipe):
+            nonlocal message
+            price = 0
+            for ingredient in recipe:
+                if products_price[ingredient[0]] == None:
+                    print("!")
+                    message = ["Внимание!", "У некоторых продуктов нет цены, их стоимость не будет учтена в конечной цене блюда !"]
+                    continue
+                price += float(ingredient[1]) * float(products_price[ingredient[0]])
+            return round(price * 1.11, 2)
+        
+        cursor.execute(f"""SELECT name, recipe FROM dishes WHERE name IN ("{'","'.join([dish_name for dish_name in dishes_to_recalculate])}")""")
+        dishes_to_recalculate = []
+        for i in cursor.fetchall():
+            dishes_to_recalculate.append([i[0], price_calculate(json.loads(i[1]))])
+        dishes_to_recalculate = {item[0]: item[1] for item in dishes_to_recalculate}
+        result = []
+
+        cursor.execute("""SELECT * FROM menu WHERE week_number = ?""", (week,))
+        for dey in json.loads(cursor.fetchone()[1]):
+            dey_menu = []
+            for dish_id in range(8):
+                dish = dey[f"name{dish_id+1}"]
+                if dish == "":
+                    dey_menu.append([f"name{dish_id+1}", ""])
+                    dey_menu.append([f"price{dish_id+1}", ""])
+                    continue
+                dey_menu.append([f"name{dish_id+1}", dish])
+                if dish in dishes_to_recalculate: 
+                    dey_menu.append([f"price{dish_id+1}", dishes_to_recalculate[dish]]) #   Устанавливает цену блюду
+                elif dey[f"name{dish_id+1}"] == "":
+                    dey_menu.append([f"price{dish_id+1}", ""])  # Если название блюда пустое, то цена очистится
+                else:
+                    dey_menu.append([f"price{dish_id+1}", dey[f"price{dish_id+1}"]])    #   Если такого блюда нет в бд, то цена останется прежней
+            result.append({item[0]: item[1] for item in dey_menu})
+        
+        self.UpdateMenu(json.dumps(result), week)
+        
+        conn.close()
+
+        if message == "":
+            message = ["успех", "Цены были обновлены"]
+        return message
+    
     ################\ Для страницы purchase  /################
     
     def NewIngredient(self, name, volume_unit):
@@ -175,9 +238,28 @@ class DB:
         conn = sqlite3.connect('stolovka.db')
         cursor = conn.cursor()
         
+        cursor.execute("""SELECT * FROM dishes""")
+        dishes = cursor.fetchall()
+
+        dishes_to_update = []
+
+        for i in dishes:
+            if i[3] == None:
+                continue    #   Если в блюде нет рецепта, то пропускаем
+            for j in json.loads(i[3]):
+                if j[0] == id:
+                    dishes_to_update.append(i[0])
+                    break
+
         cursor.execute("""DELETE FROM products WHERE id = ?""", (id,))
+        
         conn.commit()
-        conn.close()    #   Удаляет ингредиент
+        conn.close()
+
+        for dish_id in dishes_to_update:
+            self.DeleteIngredientFromRecipe(int(dish_id), id)
+
+        #   Удаляет ингредиент из списка ингредиентов, и из рецептов блюд
 
     ################\ Для страницы dish_list /################
     
@@ -249,11 +331,19 @@ class DB:
         cursor.execute("""DELETE FROM dishes WHERE id = ?""", (id,))
         conn.commit()
         conn.close()    #   Удаляет блюдо
-        
+    
+    def GetIngredientName(self, id):
+        conn = sqlite3.connect('stolovka.db')
+        cursor = conn.cursor()
+        cursor.execute("""SELECT name FROM products WHERE id = ?""", (id,))
+        name = cursor.fetchone()
+        conn.close()
+        return name #   Возвращает название ингредиента
+
     def GetRecipe(self, id):
         conn = sqlite3.connect('stolovka.db')
         cursor = conn.cursor()
-        
+
         cursor.execute("""SELECT recipe FROM dishes WHERE id = ?""", (id,))
         
         recipe = cursor.fetchone()
@@ -276,33 +366,31 @@ class DB:
         
         cursor.execute("""SELECT recipe FROM dishes WHERE id = ?""", (id,))
         recipe = json.loads(cursor.fetchone()[0])
-        
-        print(ingredient)
 
         for i in recipe:
             if i[0] == ingredient:
                 return ["Ошибка", "Ингредиент уже в рецепте"]
             
-        recipe.append([ingredient, 0])
+        recipe.append([int(ingredient), 0])
                 
         cursor.execute("""UPDATE dishes SET recipe = ? WHERE id = ?""", (json.dumps(recipe), id))
         conn.commit()
         conn.close()
         
-    def DeleteIngredientFromRecipe(self, id, ingredient):
+    def DeleteIngredientFromRecipe(self, dish_id, ingredient):
         conn = sqlite3.connect('stolovka.db')
         cursor = conn.cursor()
 
-        cursor.execute("""SELECT recipe FROM dishes WHERE id = ?""", (id,))
+        cursor.execute("""SELECT recipe FROM dishes WHERE id = ?""", (dish_id,))
         recipe = json.loads(cursor.fetchone()[0])
         
         new_recipe = []
 
         for i in recipe:
-            if i[0] != ingredient:
+            if str(i[0]) != str(ingredient):
                 new_recipe.append(i)
         
-        cursor.execute("""UPDATE dishes SET recipe = ? WHERE id = ?""", (json.dumps(new_recipe), id))
+        cursor.execute("""UPDATE dishes SET recipe = ? WHERE id = ?""", (json.dumps(new_recipe), dish_id))
         
         conn.commit()
         conn.close()
@@ -320,18 +408,25 @@ class DB:
 
         for i in recipe:
             
-            
-
             if int(i[0]) == int(change['IngredientId']):
                 answer.append([change['IngredientId'], change['Volume']])
             else:
                 answer.append(i)
                 
-        print(answer)
-
         cursor.execute("""UPDATE dishes SET recipe = ? WHERE id = ?""", (json.dumps(answer), id))
         conn.commit()
         conn.close()
+
+    def GetDishName(self, id):
+        conn = sqlite3.connect('stolovka.db')
+        cursor = conn.cursor()
+
+        cursor.execute("""SELECT name FROM dishes WHERE id = ?""", (id,))
+
+        name = cursor.fetchone()
+        conn.close()
+        
+        return name
 
     ##################\ Для страницы users /##################
     

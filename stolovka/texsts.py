@@ -356,6 +356,13 @@ menu_page_style_advanced = """
 
 config_page_style = """
 
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+
 .body {
     margin: 0;
 }
@@ -367,9 +374,36 @@ config_page_style = """
 }
 
 /*#####################################*/
+/*       Стили полосы прокрутки        */
+
+/* Ширина и цвет полосы прокрутки */
+::-webkit-scrollbar {
+    width: 10px; /* Ширина полосы прокрутки */
+}
+
+/* Стилизация самой полосы */
+::-webkit-scrollbar-track {
+    background: transparent; /* Цвет фона */
+    padding-top: 5px;
+    padding-: 5px;
+}
+
+/* Стилизация ползунка */
+::-webkit-scrollbar-thumb {
+    background: #888; /* Цвет ползунка */
+    border-radius: 5px;
+}
+
+/* Если нужен выпуклый эффект на ползунке */
+::-webkit-scrollbar-thumb:hover {
+    background: #555; /* Цвет ползунка при наведении */
+}
+
+/*#####################################*/
 /* Стилизация всплывающего уведомления */
 
 .notification {
+    max-width: 600px;
     background-color: rgba(0,40,40, 0.8);
     margin-bottom: 10px;
     font-size: 25px;
@@ -549,10 +583,10 @@ define_menu_page_style = """
     box-shadow: 0 0 5px rgba(102, 175, 233, 0.6);
 }
 
-.add_user{
+.heder_button{
     height: 37px;
     margin-left: 10px;
-    width: 130px;
+    width: 150px;
     color: white;
     background-color: #4CAF50;
     font-size: 18px;
@@ -612,8 +646,6 @@ define_ingredients_page_style = """
     background-color: #f2f2f2;
     height: 50px;
     display: flex;
-    position: absolute;
-    position: fixed;
 }
 
 /************   блок с поиском по таблице и кнопкой добавить   *************/
@@ -650,6 +682,22 @@ define_ingredients_page_style = """
 
 /*****************************************************/
 
+.ingredients-table-conteiner{
+    overflow-x: auto;
+    height: calc(100vh - 50px);
+}
+
+
+.table_input_ingredient_name{
+    border-width: 0px;
+    width: 300px;
+    border-radius: 10px;
+}
+
+tr:hover {
+    background-color: #b5b5b5;
+    transition: all 0.5s;
+}
 
 input[type="text"] {
     padding: 4px;
@@ -715,6 +763,47 @@ tbody td button:hover {
     border-right-width: 0px;
 }
 
+.accept_delete_conteiner{
+    position: fixed;
+    width: 400px;
+    border-radius: 10px;
+    border: 2px solid #4CAF50;
+    padding: 12px;
+    
+    top: 15%;
+    right: 75px;
+    
+    box-shadow: 0px 0px 105px 75px;
+    
+    background-color: #f2f2f2;
+}
+
+.delete_action_buttons{
+    display: flex;
+    width: 100%;
+    hight: 40px;
+}
+
+.cancel_delete_button{
+    color: gray;
+    width: 50%;
+    height: 30px;
+    border-top-left-radius: 10px;
+    border-bottom-left-radius: 10px;
+    border: 2px solid #a2a2a2;
+    background-color: #fafafa;
+}
+
+.accept_delete_button{
+    color: white;
+    width: 50%;
+    height: 30px;
+    border-top-right-radius: 10px;
+    border-bottom-right-radius: 10px;
+    border: 2px solid #af4c4c;
+    background-color: #af4c4c;
+}
+
 """
 
 define_dish_page_style = """
@@ -733,8 +822,6 @@ define_dish_page_style = """
     background-color: #f2f2f2;
     height: 50px;
     display: flex;
-    position: absolute;
-    position: fixed;
 }
 
 /************   блок с поиском по таблице и кнопкой добавить   *************/
@@ -771,6 +858,16 @@ define_dish_page_style = """
 
 /*****************************************************/
 
+.dish_table_conteiner{
+    overflow-x: auto;
+    height: calc(100vh - 50px);
+}
+
+.table_input_dish_name{
+    border-width: 0px;
+    width: 300px;
+    border-radius: 10px;
+}
 
 input[type="text"] {
     padding: 4px;
@@ -792,6 +889,10 @@ input[type="text"] {
   background-color: #a04545;
 }
 
+tr:hover {
+    background-color: #b5b5b5;
+    transition: all 0.5s;
+}
 
 table {
     width: 100%;
@@ -856,6 +957,11 @@ tbody td button:hover {
     display: flex;
 }
 
+.recipe_conteiner_body{
+    height: 456.6px;
+    overflow-x: auto;
+}
+
 .close_recipe{
     width: 200px;
     margin-top: 4px;
@@ -896,7 +1002,7 @@ tbody td button:hover {
     border-radius: 10px;
     background-color: #f2f2f2;
     height: 20px;
-    width: 50px;
+    width: 60px;
 }
 
 .padding_4{
@@ -937,6 +1043,12 @@ tbody td button:hover {
     padding: 4px;
 }
 
+.dish_name{
+    color: #f1f1f1;
+    margin: 0px;
+    margin-left: 10px;
+}
+
 """
 
 control_user_page_style = """
@@ -956,8 +1068,6 @@ control_user_page_style = """
     background-color: #f2f2f2;
     height: 50px;
     display: flex;
-    position: absolute;
-    position: fixed;
 }
 
 /************   блок с поиском по таблице и кнопкой добавить   *************/
@@ -994,6 +1104,16 @@ control_user_page_style = """
 
 /*****************************************************/
 
+.users-table-conteiner{
+    overflow-x: auto;
+    height: calc(100vh - 50px);
+}
+
+.table_input_user_name{
+    border-width: 0px;
+    width: 300px;
+    border-radius: 10px;
+}
 
 input[type="text"] {
     padding: 4px;
@@ -1015,6 +1135,10 @@ input[type="text"] {
   background-color: #a04545;
 }
 
+tr:hover {
+    background-color: #b5b5b5;
+    transition: all 0.5s;
+}
 
 table {
     width: 100%;
@@ -1121,12 +1245,27 @@ function WeekChange() {
     form.submit();
 }
 
+function PriceRecalculate(){
+    var form = document.createElement("form"); // Создаем объект формы
+    form.method = "POST"; // Устанавливаем метод POST
+    form.action = "/config"; // Укажите здесь путь к вашему обработчику на сервере
+
+    var input = document.createElement("input");
+    input.type = "hidden";
+    input.name = "PriceRecalculate";
+    input.value = document.getElementById("week").value;
+   
+    form.appendChild(input);
+    document.body.appendChild(form);
+    form.submit();
+}
+
 """
 
 scripts_for_users = """
 
 function FilterUserList() {
-    var filter = document.getElementById('newUserName').value;
+    var filter = document.getElementById('newUserName').value.toLowerCase();
     
     const userColumns = document.getElementsByClassName('user_column');
 
@@ -1135,8 +1274,8 @@ function FilterUserList() {
     } else {
         for (let i = 0; i < userColumns.length; i++) {
             const input = userColumns[i].querySelector('input');
-            //console.log(input.value.includes(filter));
-            if (input.value.includes(filter)){
+            const text = input.value.toLowerCase();
+            if (text.includes(filter)){
                 userColumns[i].style.display = 'table-row';
             } else {
                 userColumns[i].style.display = 'none';
@@ -1481,7 +1620,7 @@ function PreviousDay(){
 scripts_for_dish_page = """
 
 function FilterDishList() {
-    var filter = document.getElementById('newDishName').value;
+    var filter = document.getElementById('newDishName').value.toLowerCase();
     const dishColumns = document.getElementsByClassName('dish_column');
 
     if (filter === '') {
@@ -1489,8 +1628,8 @@ function FilterDishList() {
     } else {
         for (let i = 0; i < dishColumns.length; i++) {
             const input = dishColumns[i].querySelector('input');
-            //console.log(input.value.includes(filter));
-            if (input.value.includes(filter)){
+            const inputValue = input.value.toLowerCase();
+            if (inputValue.includes(filter)){
                 dishColumns[i].style.display = 'table-row';
             } else {
                 dishColumns[i].style.display = 'none';
@@ -1635,6 +1774,7 @@ function UpdateRecipe(id) {
     var input = document.createElement("input");
     input.type = "hidden";
     input.name = "AddIngredientToRecipe";
+    input.name = "AddIngredientToRecipe";
     input.value = IngredientId;
     form.appendChild(input);
     
@@ -1737,7 +1877,7 @@ function hideEditButtonWithDelay(dishId) {
 
 scripts_for_ingredients_page = """
 function FilterIngredientList() {
-    var filter = document.getElementById('newIngredientName').value;
+    var filter = document.getElementById('newIngredientName').value.toLowerCase();
     
     const ingredientColumns = document.getElementsByClassName('ingredients_column');
 
@@ -1746,8 +1886,8 @@ function FilterIngredientList() {
     } else {
         for (let i = 0; i < ingredientColumns.length; i++) {
             const input = ingredientColumns[i].querySelector('input');
-            //console.log(input.value.includes(filter));
-            if (input.value.includes(filter)){
+            const text = input.value.toLowerCase();
+            if (text.includes(filter)){
                 ingredientColumns[i].style.display = 'table-row';
             } else {
                 ingredientColumns[i].style.display = 'none';
@@ -1756,7 +1896,7 @@ function FilterIngredientList() {
     }
 }
 
-function DeleteIngredient(id) {
+function DeleteIngredient() {
     var form = document.createElement("form"); // Создаем объект формы
     form.method = "POST"; // Устанавливаем метод POST
     form.action = "/config"; // Укажите здесь путь к вашему обработчику на сервере
@@ -1765,7 +1905,7 @@ function DeleteIngredient(id) {
     var input = document.createElement("input");
     input.type = "hidden";
     input.name = "DeleteIngredient";
-    input.value = id;
+    input.value = IngredientToDelete;
 
     // Добавляем элемент input к форме
     form.appendChild(input);
@@ -1883,6 +2023,20 @@ function editLastPrice(id){
     document.body.appendChild(form);
     form.submit();
 }
+
+var IngredientToDelete = 0;
+
+function DeleteIngredientDiolog(IngredientID){
+    IngredientToDelete = IngredientID;
+    
+    document.getElementById("accept_delete_conteiner").style.display = 'block';
+}
+
+function cancelDelete(){
+    document.getElementById("accept_delete_conteiner").style.display = 'none';
+}
+
+//////////////////////
 
 function showEditButton(ingredientId) {
     var editButton = document.getElementById("editButton" + ingredientId);
