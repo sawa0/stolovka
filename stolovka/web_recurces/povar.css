@@ -1,0 +1,178 @@
+body {
+    font-size: 60px;
+    font-family: 'Arial', sans-serif;
+    background-color: #f4f4f4;
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.container {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+header {
+    text-align: center;
+    padding: 10px;
+    background: #333;
+    color: white;
+}
+
+main {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+section {
+    flex: 1;
+    padding: 10px;
+    overflow-y: auto;
+}
+
+.current-order {
+    border-bottom: 2px solid #ddd;
+}
+
+h1 {
+    margin: 5px;
+}
+
+table {
+    font-size: 50px;
+    width: 100%;
+    border-collapse: collapse;
+}
+
+table th, table td {
+    padding: 10px;
+    border: 1px solid #ddd;
+    text-align: left;
+}
+
+.order-actions {
+    display: flex;
+    margin-top: 10px;
+    text-align: center;
+}
+
+.btn {
+    padding: 10px 20px;
+    margin: 0 10px;
+    border: none;
+    border-radius: 4px;
+    font-size: 1em;
+    cursor: pointer;
+}
+
+.btn.confirm {
+    background-color: #4CAF50;
+    color: white;
+}
+
+.btn.cancel {
+    background-color: #f44336;
+    color: white;
+}
+
+.username {
+    margin: 20px;
+}
+
+.btn {
+    display: none;
+    padding: 10px 20px;
+    border: 2px solid #4CAF50;
+    border-radius: 4px;
+    font-size: 1em;
+    cursor: pointer;
+    background: white;
+    color: #4CAF50;
+    position: relative;
+    overflow: hidden;
+    transition: background-color 0.5s;
+}
+
+    .btn.confirm::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        height: 100%;
+        width: 0;
+        background: linear-gradient(to right, rgba(76, 175, 80, 1), rgba(76, 175, 80, 0.7), rgba(76, 175, 80, 0));
+        z-index: -1;
+        transition: width 15s linear;
+    }
+
+    .btn.confirm.confirming::before {
+        width: 100%;
+    }
+
+    .btn.confirm.confirming {
+        background-color: #4CAF50;
+        color: white;
+    }
+
+@keyframes shrink-text {
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(0.9);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+@keyframes hide-buttons {
+    from {
+        opacity: 1;
+    }
+
+    to {
+        opacity: 0;
+    }
+}
+
+.hidden {
+    opacity: 0;
+    display: none;
+}
+
+
+/*    order history table    */
+.order-history_table_head {
+    background-color: darkgray;
+}
+/**/
+.history_table_head_id {
+    width: 150px;
+    text-align: center;
+}.history_table_id {
+    width: 150px;
+    text-align: center;
+}
+/**/
+.history_table_head_time {
+    width: 160px;
+}.history_table_time {
+    width: 160px;
+}
+/**/
+.order_history_body {
+    max-height: 400px;
+    overflow-x: auto;
+}
+.order_history_body::-webkit-scrollbar {
+    display: none;
+}

@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="/libs/socket.io.js"></script>
+    <link rel="stylesheet" href="/main.css">
+    <script src="/main.js"></script>
+</head>
+<body>
+    <div class="keyboard">
+    </div>
+    <div style="display: none;" class="choise_user">
+        <button class="key back">Назад</button>
+        <div class="choise_user_div">
+
+        </div>
+    </div>
+    <div class="wrapper" style="display: none;">
+        <div class="form">
+            <h1 id="user_name" class="name"></h1>
+            <div class="foods">
+                <table class="menu_table"></table>
+            </div>
+            <div class="result">
+                <button class="previous_dey" id="previous_dey">Предыдущий день</button>
+                <p class="total_price" id="total_price">Всего: 0грн</p>
+                <button class="buy">Купить</button>
+                <button class="cancel">Отмена</button>
+            </div>
+        </div>
+        <div class="accept_order">
+            <div class="final_order"></div>
+            <div style="display: flex;">
+                <div class="final_price"></div>
+                <button class="edit_order_btn chek_btn">Отмена</button>
+                <button class="accept_order_btn chek_btn">Подтвердить</button>
+            </div>
+        </div>
+        <div class="waiting_confirmation">
+            <p class="waiting_confirmation_text">Ожидание подтверждения от повора ...</p>
+            <p class="waiting_confirmation_accept">&#9989;</p>
+        </div>
+    </div>
+</body>
+</html>

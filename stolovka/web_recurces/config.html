@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Конфигурация</title>
+    <script src="/libs/socket.io.js"></script>
+    <script src="/config.js"></script>
+    <link rel="stylesheet" href="/config.css">
+</head>
+<body style="margin: 0px;">
+    <div class="sidebar">
+        <h2>Конфигурация Столовой</h2>
+        <button id="sidebar_btn_menu" class="key" onclick="openpage('menu')">Меню</button>
+        <button id="sidebar_btn_purchase" class="key" onclick="openpage('purchase')">Закупки</button>
+        <button id="sidebar_btn_dish_list" class="key" onclick="openpage('dish_list')">Рецепты</button>
+        <button id="sidebar_btn_reports" class="key" onclick="openpage('reports')">Отчёты</button>
+        <button id="sidebar_btn_users" class="key" onclick="openpage('users')">Пользователи</button>
+        <button id="sidebar_btn_settings" class="key" onclick="openpage('settings')">Настройки</button>
+    </div>
+    <div class="content">
+        <div class="header">
+            <div id="users_header_container" class="users_header_container">
+                <input class="input_user_name" type="text" id="newUserName" placeholder="Имя пользователя" oninput="FilterUserList()">
+                <button class="add_user" onclick="NewUser()">Добавить</button>
+            </div>
+            <div id="purchase_header_container" class="purchase_header_container">
+                <input class="input_ingredient_name" type="text" id="newIngredientName" placeholder="Название ингридеента" oninput="FilterIngredientList()">
+                <select id="newIngredientVolume" class="volume_input">
+                    <option>Объем</option>
+                    <option>кг.</option>
+                    <option>л.</option>
+                    <option>шт.</option>
+                </select>
+                <input id="newIngredientPrice" class="newIngredientPrice" type="number" placeholder="Цена" />
+                <button class="add_ingredient" onclick="NewIngredient()">Добавить</button>
+            </div>
+            <div id="menu_header_container" class="menu_header_container">
+                <input class="week" type="week" id="week" name="week" onchange="WeekChange()">
+            </div>
+            <div id="dish_list_header_container" class="dish_list_header_container">
+                <input class="input_dish_name" type="text" id="newDishName" placeholder="Название блюда" oninput="FilterDishList()">
+                <button class="add_dish" onclick="NewDish()">Добавить</button>
+            </div>
+            <div id="settings_header_container" class="settings_header_container">
+
+            </div>
+            <div id="reports_header_container" class="reports_header_container">
+
+            </div>
+        </div>
+
+        <div class="page_container">
+
+            <div style="display: none;" id="menu_page">
+                <div id="menu_conteiner" class="menu_conteiner">
+
+                </div>
+            </div>
+
+            <div style="display: none;" id="purchase_page">
+                <table>
+                    <tbody id="purchase_table">
+                    </tbody>
+                </table>
+                <div id="accept_ingredient_delete_conteiner" class="accept_delete_conteiner" style="display: none;">
+                    <h1 style="margin: 0px;">Вы действительно хотите удалить ингредиент?</h1>
+                    <p>Также, удалённый ингредиент будет удалён из всех рецептов</p>
+                    <div class="delete_action_buttons">
+                        <button class="cancel_delete_button" onclick="cancelIngredientDelete()">Отмена</button>
+                        <button class="accept_delete_button" onclick="DeleteIngredient()">Удалить</button>
+                    </div>
+                </div>
+            </div>
+
+            <div style="display: none;" id="dish_list_page">
+                <div class="dish_table_conteiner">
+                    <table>
+                        <tbody id="dish_table"></tbody>
+                    </table>
+                </div>
+
+                <div id="accept_dish_delete_conteiner" class="accept_delete_conteiner" style="display: none;">
+                    <h1 style="margin: 0px;">Вы действительно хотите удалить блюдо?</h1>
+                    <p>Также блюдо будет удалено из уже заполненных меню.</p>
+                    <div class="delete_action_buttons">
+                        <button class="cancel_delete_button" onclick="cancelDishDelete()">Отмена</button>
+                        <button class="accept_delete_button" onclick="DeleteDish()">Удалить</button>
+                    </div>
+                </div>
+
+                <div id="recipeWindow" class="recipe_conteiner" style="display: none;">
+                    <div class="recipe_conteiner_header">
+                        <div id="add_ingredients_conteiner" class="add_ingredients_conteiner">
+                        </div>
+                        <div style="width: -webkit-fill-available;"><h1 id="recipeName" class="recipe_dish_name"></h1></div>
+                        <button class="close_recipe" onclick="СloseRecipeWindow()">Закрыть</button>
+                    </div>
+                    <div class="recipe_conteiner_body">
+                        <table id="recipe_table">
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+
+            <div style="display: none;" id="reports_page"></div>
+
+            <div style="display: none;" id="users_page">
+                <table>
+                    <tbody id="users_table">
+                    </tbody>
+                </table>
+            </div>
+
+            <div style="display: none;" id="settings_page"></div>
+
+        </div>
+    </div>
+
+    <div class="notifications"></div>
+</body>
+</html>

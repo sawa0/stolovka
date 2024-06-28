@@ -1,0 +1,46 @@
+<html>
+<head>
+    <title>Povar</title>
+    <script src="/libs/socket.io.js"></script>
+    <script src="/povar.js"></script>
+    <link rel="stylesheet" href="/povar.css">
+
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Касса</h1>
+        </header>
+        <main>
+            <section class="current-order">
+                <p class="username"></p>
+                <table class="order-table">
+                    <tbody class="current_order_body">
+                    </tbody>
+                </table>
+                <div class="order-actions">
+                    <button class="btn confirm" onclick="orderDecision('accept')">Подтвердить (<span id="countdown">15</span>s)</button>
+                    <button class="btn cancel" onclick="orderDecision('cancel')">Отменить</button>
+                </div>
+            </section>
+            <div class="order-history">
+                <table class="order-history-table">
+                    <thead class="order-history_table_head">
+                        <tr>
+                            <th class="history_table_head_id">ID</th>
+                            <th>ФИО</th>
+                            <th class="history_table_head_time">Время</th>
+                        </tr>
+                    </thead>
+                </table>
+                <div class="order_history_body">
+                    <table>
+                        <tbody id="order_history">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

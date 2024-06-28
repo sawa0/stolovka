@@ -1,147 +1,226 @@
-from flask import *
+﻿import datetime
 
-import html_builder
+from flask import *
+from flask_socketio import SocketIO, send, emit
+
 from BD import db
 
-
 app = Flask(__name__)
+flask_web_interface = SocketIO(app) #   Flask app
 
-@app.route('/favicon.ico')
+@app.route('/favicon.ico')  #   Иконка на вкладке браузера
 def favicon():
-    return send_from_directory(app.root_path, 'favicon.ico', mimetype='image/vnd.microsoft.icon')
+    return send_from_directory(app.root_path, 'favicon.ico', mimetype='favicon.ico')
 
-@app.route('/', methods=['GET', 'POST'])
-def main_page():
-    if request.method == 'POST':
-        if 'letter' in request.form:
-            return html_builder.letter(request.form['letter'])
-        if 'user' in request.form:
-            return html_builder.menu(request.form['user'])
-        if 'order' in request.form:
-            print(request.form['order'])
-            return request.form['order']
-        
-    if request.method == 'GET':
-        return html_builder.main()
+##############################################
+#                 page loading               #
+##############################################
 
-# @app.route('/povar')
-# def povar_page():
-#     return render_template('povar.html')
-    
-
-@app.route('/config', methods=['GET', 'POST'])
+@app.route('/config')
 def SettingsPage():
+    with open('./web_recurces/config.html') as f:
+        return f.read()
+
+@app.route('/povar')
+def povar_page():
+    with open('./web_recurces/povar.html') as f:
+        return f.read()
     
-    def notification(data):
-        return f"""const notification = new NotificationCustom('{data[0]}','{data[1]}');
-                   notification.show();"""
+@app.route('/')
+def main_page():
+    with open('./web_recurces/main.html') as f:
+        return f.read()
 
-    if request.method == 'POST':
-        
-        if 'Page' in request.form:
-            return html_builder.conf(request.form['Page'])  #   Редирект на выбранную страницу
-        
-        #######################\   Обработчик страницы purchase   /#######################
-        
-        elif 'NewIngredientName' in request.form:
-            return html_builder.conf('purchase', notification(db.NewIngredient(request.form['NewIngredientName'], request.form['NewIngredientVolume'])))
-            
-        elif 'DeleteIngredient' in request.form:
-            db.DeleteIngredient(int(request.form['DeleteIngredient']))
-            
-            return html_builder.conf('purchase', "")
-            
-        elif 'EditIngredientName' in request.form:
-            return html_builder.conf('purchase', notification(db.EditIngredientName(request.form['EditIngredientName'], request.form['id'])))
-        
-        elif 'LastPrice' in request.form:
-            return html_builder.conf('purchase', notification(db.LastPrice(request.form['LastPrice'], request.form['id'])))
+##############################################
+#                files loading               #
+##############################################
 
-        #######################\   Обработчик страницы dish_list  /#######################
+web_recurces_directory = app.root_path + "/web_recurces"
+
+@app.route('/<filename>.css')
+def css_files(filename):
+    try:
+        return send_from_directory(web_recurces_directory, f"{filename}.css")
+    except FileNotFoundError:
+        abort(404)
+
+@app.route('/<filename>.js')
+def JS_files(filename):
+    try:
+        return send_from_directory(web_recurces_directory, f"{filename}.js")
+    except FileNotFoundError:
+        abort(404)
+
+##############################################
+#       Обработка отправки JS библиотек      #
+##############################################
+
+@app.route('/libs/<filename>')
+def serve_libs(filename):
+    try:
+        with open('./web_recurces/JS_WEB_Libs/' + filename) as f:
+            return f.read()
+    except FileNotFoundError:
+        abort(404)
+
+#####################################################
+#         обработка событий отправки/приема         #
+#   данных о новом закакзе, и о решении по заказу   #
+#####################################################
         
-        elif 'IngredientVolumeData' in request.form:
-            db.IngredientVolumeEdit(request.form['IngredientVolumeData'], request.form['DishId'])
-            
-            return html_builder.conf('dish_list', "", request.form['DishId'])
+@flask_web_interface.on('decision')     #   Отправка решения о принятии/отказе заказа на страницу Заказа
+def order_decision(data):
+    if data['decision'] == 'accept':
+        db.NewTransaction(data['order'])
+        emit('today_transactions', db.GetTodayTtransactions())
+    emit('decision', data['decision'], broadcast=True)
 
-        elif 'DeleteIngredientFromRecipe' in request.form:
-            db.DeleteIngredientFromRecipe(request.form['DishId'], request.form['DeleteIngredientFromRecipe'])
-            
-            return html_builder.conf('dish_list', "", request.form['DishId'])
+@flask_web_interface.on('new_order')    #   Отправка нового заказа на страницу Повара
+def new_order(data):
+    emit('new_order', data, broadcast=True)
+    
+##################################################
+#            Обработчик GET запросов             #
+##################################################
+@flask_web_interface.on('get')
+def get_request_handler(data):
+#####  запросы страницы настроек  #####
+    if data == '':
+        ...
+    
+#####   запросы страницы повара   #####
+    elif data == 'transactions':    #   Загрузка списка заказов за сегодня для истории заказов на странице повара
+        emit('today_transactions', db.GetTodayTtransactions())
 
-        elif 'Recipe' in request.form:
-            return html_builder.conf('dish_list', "" , request.form['Recipe'])
+#####   запросы страницы заказа   #####
+
+    elif data == 'users':   #   Загрузка списка пользователей на странице заказа  
+        answer = []
+        for user in db.LoadUserList():  #   Очистка списка от не активных пользователей
+            if user[2]:
+                answer.append([user[0], user[1]])
+        emit('users', answer)   #   Отправка списка пользователей в браузер
         
-        elif 'AddIngredientToRecipe' in request.form:
-            db.AddIngredientToRecipe(request.form['DishId'], request.form['AddIngredientToRecipe'])
-            
-            return html_builder.conf('dish_list', "", request.form['DishId'])
+    elif data == 'menu':    #   Загрузка меню за сегодя, и вчера, на страницу заказа  
+        current_date = datetime.datetime.now().weekday()
+        current_week = f"{datetime.date.today().year}-W{datetime.date.today().isocalendar()[1]:02d}"
+        data = {}
+        if current_date < 5:    #   если сегодня будний день
+            if current_date:    #   если сегодня не понедельник (истина - всё что отличается от нуля)
+                data['previous_dey_data'] = db.GetMemu(current_week)[current_date - 1]  #   загрузить меню на предыдущий день 
+            data['today_data'] = db.GetMemu(current_week)[current_date] #   загрузить меню на сегодня
+        data['dishes'] = db.GetDishDict()
+        emit('menu', data)  #   отправить данные в браузер
         
-        elif 'NewDish' in request.form:
-            return html_builder.conf('dish_list', notification(db.NewDish(request.form['NewDish'])))    #   Добавляет блюдо
-        
-        elif 'DeleteDish' in request.form:
-            db.DeleteDish(request.form['DeleteDish'])
+@flask_web_interface.on('get_week_menu')
+def get_week_menu(data):    #   передаёт в браузер [номер недели, меню на неделю, список названий активных блюд]
+    emit('week_menu', [data, db.GetMemu(data), db.GetDishDict()])
+    
+@flask_web_interface.on('menu_update')
+def menu_update(data):
+    db.UpdateMenu(data[0], data[1])
+    emit('week_menu', [data[0], db.GetMemu(data[0]), db.GetDishDict()])    #   Отправляем событие с обновленным недельным меню в браузер
 
-            return html_builder.conf('dish_list', "")   #   Удаляет блюдо
+@flask_web_interface.on('getUsers')
+def getUsers():
+    emit('users', db.LoadUserList())
+    
+@flask_web_interface.on('newUserName')
+def newUserName(data):
+    db.NewUser(data)
+    emit('users', db.LoadUserList())
+    
+@flask_web_interface.on('EditUserName')
+def EditUserName(data):
+    db.EditUserName(data[0], data[1])
+    emit('users', db.LoadUserList())
+    
+@flask_web_interface.on('DeleteUser')
+def DeleteUser(data):
+    db.DeleteUser(data)
+    emit('users', db.LoadUserList())
+    
+@flask_web_interface.on('ChangeUserStatus')
+def ChangeUserStatus(data):
+    db.ChangeUserStatus(data)
+    emit('users', db.LoadUserList())
 
-        elif 'ChangeDishStatus' in request.form:
-            db.ChangeDishStatus(request.form['ChangeDishStatus'])
+@flask_web_interface.on('getPurchase')
+def getPurchase():
+    emit('Purchase', db.GetIngredientsList())
+    
+@flask_web_interface.on('newPrice')
+def newPrice(data):
+    db.NewPrice(data[0], data[1])
+    emit('Purchase', db.GetIngredientsList())
+    
+@flask_web_interface.on('NewIngredient')
+def NewIngredient(data):
+    db.NewIngredient(data[0], data[1], data[2])
+    emit('Purchase', db.GetIngredientsList())
+    
+@flask_web_interface.on('UpdateIngredientName')
+def UpdateIngredientName(data):
+    db.EditIngredientName(data[0], data[1])
+    emit('Purchase', db.GetIngredientsList())
 
-            return html_builder.conf('dish_list', "")   #   Включает/выключает отображение блюда
-        
-        elif 'EditDishName' in request.form:
-            return html_builder.conf('dish_list', notification(db.EditDishName(request.form['EditDishName'], request.form['id'])))  #   Меняет имя блюда
-        
-        #########################\  Обработчик страницы users   /##########################
+@flask_web_interface.on('DeleteIngredient')
+def DeleteIngredient(data):
+    db.DeleteIngredient(data)
+    emit('Purchase', db.GetIngredientsList())
+    
+@flask_web_interface.on('getDishList')
+def getDishList():
+    emit("Dishes", db.GetDishList())
+    
+@flask_web_interface.on('ChangeDishStatus')
+def ChangeDishStatus(data):
+    db.ChangeDishStatus(data)
+    emit("Dishes", db.GetDishList())
+    
+@flask_web_interface.on('NewDish')
+def ChangeDishStatus(data):
+    db.NewDish(data)
+    emit("Dishes", db.GetDishList())
+    
+@flask_web_interface.on('EditDishName')
+def EditDishName(data):
+    db.EditDishName(data[0], data[1])
+    emit("Dishes", db.GetDishList())
+    
+@flask_web_interface.on('DeleteDish')
+def DeleteDish(data):
+    db.DeleteDish(data)
+    emit("Dishes", db.GetDishList())
+    
+@flask_web_interface.on('GetRecipe')
+def GetRecipe(data):
 
-        elif 'NewUser' in request.form:
+    dish_info = db.GetDishInfo(data)
+    dish_info['ingridients'] = db.GetIngredientsDict()
 
-            return html_builder.conf('users', notification(db.NewUser(request.form['NewUser'])))    #   Добавляет пользователя
-        
-        elif 'DeleteUser' in request.form:
-            db.DeleteUser(request.form['DeleteUser'])
+    emit("Recipe", dish_info)
+    
+@flask_web_interface.on('DeleteIngredientFromRecipe')
+def DeleteIngredientFromRecipe(data):
+    db.DeleteIngredientFromRecipe(data['DishID'], data['IngredientID'])
+    GetRecipe(data['DishID'])
+    
+@flask_web_interface.on('AddIngredientToRecipe')
+def AddIngredientToRecipe(data):
+    db.AddIngredientToRecipe(data['DishID'], data['IngredientID'], data['IngredientName'], data['volume'])
+    GetRecipe(data['DishID'])
 
-            return html_builder.conf('users', "")   #   Удаляет пользователя
-        
-        elif 'ChangeUserStatus' in request.form:
-            db.ChangeUserStatus(request.form['ChangeUserStatus'])
+@flask_web_interface.on('EditVolume')
+def EditVolume(data):
+    db.IngredientVolumeEdit(data['DishID'], data['IngredientID'], data['Volume'])
+    GetRecipe(data['DishID'])
 
-            return html_builder.conf('users', "")   #   Включает/выключает отображение пользователя
-        
-        elif 'EditUserName' in request.form:
-            return html_builder.conf('users', notification(db.EditUserName(request.form['EditUserName'], request.form['id'])))  #   Меняет имя пользователя, если всё хорошо
 
-        ######################\   Oбработчик страницы menu   /#############################
-
-        elif 'GetMemu' in request.form:
-            return html_builder.conf('menu', "", request.form['GetMemu'])
-        
-        elif 'Memu' in request.form:
-            db.UpdateMenu(request.form['Memu'], request.form['Week'])
-            return html_builder.conf('menu', notification(["Успех", "Меню на неделю сохранено!"]), request.form['Week'])
-        
-        elif 'PriceRecalculate' in request.form:
-            return html_builder.conf('menu', notification(db.PriceRecalculate(request.form['PriceRecalculate'])), request.form['PriceRecalculate'])
-
-    if request.method == 'GET':
-        return html_builder.conf("menu", "")    #  Редирект на страницу по умолчанию
-
+##################################################
+#                 запуск сервера                 #        
+##################################################        
 if __name__ == '__main__':
-    # app.run(debug=True)
-    app.run(host="0.0.0.0", port="8080")
+    flask_web_interface.run(app, debug=False, port="8080", host="0.0.0.0")
+##################################################
 
-"""
-доделать:
-
-    добавить возможность указывать цену при добавлении ингредиента (не обязательную)
-    добавить возможность указать объём при добавлении ингредиента в рецепт (не обязательную)
-    
-    название удаляемого ингредиента в accept_delete_conteiner
-    стили подтверждения удаления ингредиентов
-    
-    коментарии ко всему
-    
-    автопрокрутку до измененного элемента
-    
-"""

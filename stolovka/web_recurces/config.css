@@ -1,0 +1,854 @@
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+
+.body {
+    margin: 0;
+}
+
+.content {
+    min-width: 850px;
+    margin-left: 200px; /* Учитывает ширину боковой панели */
+    padding: 0px;
+}
+
+/*#####################################*/
+/*       Стили полосы прокрутки        */
+
+/* Ширина и цвет полосы прокрутки */
+::-webkit-scrollbar {
+    width: 10px; /* Ширина полосы прокрутки */
+}
+
+/* Стилизация самой полосы */
+::-webkit-scrollbar-track {
+    background: transparent; /* Цвет фона */
+    padding-top: 5px;
+    padding-: 5px;
+}
+
+/* Стилизация ползунка */
+::-webkit-scrollbar-thumb {
+    background: #888; /* Цвет ползунка */
+    border-radius: 5px;
+}
+
+    /* Если нужен выпуклый эффект на ползунке */
+    ::-webkit-scrollbar-thumb:hover {
+        background: #555; /* Цвет ползунка при наведении */
+    }
+
+/*#####################################*/
+/* Стилизация всплывающего уведомления */
+
+.notification {
+    max-width: 600px;
+    background-color: rgba(0,40,40, 0.8);
+    margin-bottom: 10px;
+    font-size: 25px;
+    font-weight: bold;
+    margin-right: 10px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.2);
+    border-radius: 12px;
+    padding: 10px;
+    bottom: 20px;
+    right: 20px;
+    min-width: 400px;
+    border-left: 12px solid #000;
+    border-right: 12px solid #000;
+    animation-name: notification;
+    animation-duration: 0.5s;
+    animation-timing-function: ease-in-out;
+}
+
+.notifications {
+    color: white;
+    font-size: 25px;
+    font-weight: bold;
+    margin-right: 10px;
+    border-radius: 10px;
+    padding: 10px;
+    position: fixed;
+    top: 50%;
+    left: 30%;
+}
+
+@keyframes notification {
+    0% {
+        opacity: 0;
+    }
+
+    100% {
+        opacity: 1;
+    }
+}
+
+.notification-animate-to-hide {
+    animation-name: notificationToHide;
+    animation-duration: 0.5s;
+    animation-timing-function: ease-in-out;
+}
+
+@keyframes notificationToHide {
+    0% {
+        opacity: 1;
+    }
+
+    100% {
+        opacity: 0;
+    }
+}
+
+
+/*#####################################*/
+/* Стили бокового меню выбора страницы */
+.sub_menu {
+    background-color: #c1c1c1;
+    width: 90%;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    color: white;
+    margin-top: -3px;
+}
+
+button {
+    padding: 5px 12px;
+    border: 1px solid #ccc;
+    font-size: 16px;
+    background-color: #f8f8f8;
+    color: #333;
+    cursor: pointer;
+    transition: all 0.3s;
+    /* Изменяем курсор при наведении */
+}
+
+    /* Стили для кнопок при наведении */
+    button:hover {
+        transition: all 0.3s;
+        background-color: #e0e0e0;
+    }
+
+
+    button.add-button {
+        margin-bottom: 10px;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        background-color: #008CBA;
+        color: white;
+        cursor: pointer;
+    }
+
+        button.add-button:hover {
+            background-color: #005f79;
+        }
+
+.key {
+    background-color: #f0f0f0;
+    border: none;
+    color: black;
+    padding: 10px 20px;
+    text-align: center;
+    text-decoration: none;
+    display: block;
+    width: 90%;
+    font-size: 22px;
+    margin-top: 10px;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: all 0.3s;
+}
+
+    /* Изменяем стиль кнопки при наведении */
+    .key:hover {
+        color: white;
+        background-color: #45a049;
+        transition: all 0.3s;
+    }
+
+.sidebar {
+    height: 100%;
+    width: 250px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    background-color: #212629;
+    padding-top: 20px;
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+}
+
+    .sidebar h2 {
+        margin: 0px;
+        color: white;
+        text-align: center;
+    }
+
+.content {
+    margin-left: 250px;
+    /* Учитывает ширину боковой панели */
+    padding: 0px;
+}
+
+.price {
+    border-color: #ddd;
+    padding: 0px;
+    height: 25px;
+    width: 60px;
+}
+
+.price_input {
+    width: 60px;
+    border-width: 0px;
+    padding-left: 4px;
+    height: 30px;
+}
+
+.menu-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+}
+
+/* Стилизация элемента <input type="week"> */
+.week {
+    padding: 8px 12px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+    background-color: #fff;
+    color: #333;
+}
+
+    /* Стили для фокуса */
+    .week:focus {
+        outline: none;
+        border-color: #66afe9;
+        box-shadow: 0 0 5px rgba(102, 175, 233, 0.6);
+    }
+
+.page_container {
+    height: calc(100vh - 50px);
+    overflow-x: auto;
+}
+
+.heder_button {
+    margin-left: 10px;
+    width: 150px;
+    color: white;
+    background-color: #4CAF50;
+    font-size: 18px;
+    font-weight: bold;
+    border: none;
+    border-radius: 5px;
+}
+
+.menu_conteiner {
+    overflow-x: auto;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    padding: 16px;
+    padding-top: 0px;
+}
+
+.eda {
+    height: 25px;    width: 60px;
+    border-width: 0px;
+    padding-left: 4px;
+    height: 30px;
+    border: 1px solid #ddd;
+    padding: 0px;
+}
+
+.menu_filling_table_dish_name {
+    margin: 0px;
+    border-width: 0px;
+    height: 30px;
+}
+
+.menu_filling_table_price_input {
+    width: 60px;
+    border-width: 0px;
+    padding-left: 4px;
+    height: 30px;
+}
+
+.dish_name {
+    border-width: 0px;
+    height: 30px;
+    width: 310px;
+}
+
+.menu_filling_table {
+    flex: none;
+    border-collapse: collapse;
+    width: 300px;
+    margin-top: 20px;
+    margin-right: 20px;
+}
+
+.table_borders_1_px {
+    height: 25px;
+    border: 1px solid #ddd;
+    padding: 0px;
+}
+
+th {
+    background-color: #f2f2f2;
+}
+
+
+.edit_last_price {
+    margin-left: 10px;
+    padding-top: 3px;
+    padding-left: 6px;
+    padding-right: 6px;
+}
+
+.price_input {
+    text-align: center;
+    border-radius: 10px;
+    border: 2px solid #4CAF50;
+    font-size: 16px;
+    height: 25px;
+    width: 80px;
+}
+
+.header {
+    top: 0px;
+    width: 100%;
+    height: 50px;
+    background-color: #f2f2f2;
+    height: 50px;
+    display: flex;
+}
+
+.add_ingredients_conteiner {
+    margin: 6px;
+    display: flex;
+}
+
+/************   блок с поиском по таблице и кнопкой добавить   *************/
+
+.input_ingredient_name {
+    border: 2px solid #4CAF50;
+    border-bottom-left-radius: 10px;
+    border-top-left-radius: 10px;
+    width: 250px;
+}
+
+.purchase_header_container {
+    margin-top: 10px;
+    margin-left: 10px;
+    height: 32px;
+    display: none;
+}
+
+.menu_header_container {
+    margin-top: 10px;
+    margin-left: 10px;
+    height: 32px;
+    display: none;
+}
+
+.newIngredientPrice {
+    border: 2px solid #4CAF50;
+    width: 40px;
+}
+
+.add_ingredient {
+    padding: 7px 10px;
+    margin-right: 5px;
+    border: none;
+    border-bottom-right-radius: 10px;
+    border-top-right-radius: 10px;
+    background-color: #4CAF50;
+    color: white;
+    cursor: pointer;
+}
+
+    .add_ingredient:hover {
+        background-color: #45a049;
+    }
+
+/*****************************************************/
+
+.ingredients-table-conteiner {
+    overflow-x: auto;
+    height: calc(100vh - 50px);
+}
+
+
+.table_input_ingredient_name {
+    border-width: 0px;
+    width: 300px;
+    border-radius: 10px;
+}
+
+tr:hover {
+    background-color: #b5b5b5;
+    transition: all 0.5s;
+}
+
+input[type="text"] {
+    padding: 4px;
+    font-size: 16px;
+    outline: none;
+}
+
+.delete_ingredient {
+    padding: 5px 10px;
+    margin-right: 5px;
+    border: none;
+    border-radius: 5px;
+    background-color: #af4c4c;
+    color: white;
+    cursor: pointer;
+}
+
+    .delete_ingredient:hover {
+        background-color: #a04545;
+    }
+
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+thead th {
+    background-color: #f2f2f2;
+    border-bottom: 1px solid #ddd;
+    padding: 10px;
+    text-align: left;
+}
+
+tbody td {
+    border-bottom: 1px solid #ddd;
+    padding: 10px;
+}
+
+    tbody td[contenteditable="true"] {
+        outline: none;
+        cursor: pointer;
+    }
+
+    tbody td button {
+        padding: 5px 10px;
+        margin-right: 5px;
+        border: none;
+        border-radius: 5px;
+        background-color: #4CAF50;
+        color: white;
+        cursor: pointer;
+    }
+
+        tbody td button:hover {
+            background-color: #45a049;
+        }
+
+.volume_input {
+    border: 2px solid #4CAF50;
+    border-left-width: 0px;
+    border-right-width: 0px;
+}
+
+.accept_delete_conteiner {
+    position: fixed;
+    width: 400px;
+    border-radius: 10px;
+    border: 2px solid #4CAF50;
+    padding: 12px;
+    top: 15%;
+    right: 75px;
+    box-shadow: 0px 0px 105px 75px;
+    background-color: #f2f2f2;
+}
+
+.delete_action_buttons {
+    display: flex;
+    width: 100%;
+    hight: 40px;
+}
+
+.cancel_delete_button {
+    color: gray;
+    width: 50%;
+    height: 30px;
+    border-top-left-radius: 10px;
+    border-bottom-left-radius: 10px;
+    border: 2px solid #a2a2a2;
+    background-color: #fafafa;
+}
+
+.accept_delete_button {
+    color: white;
+    width: 50%;
+    height: 30px;
+    border-top-right-radius: 10px;
+    border-bottom-right-radius: 10px;
+    border: 2px solid #af4c4c;
+    background-color: #af4c4c;
+}
+
+.dish_status {
+    width: 65px;
+}
+
+.dish_actions {
+    width: 350px;
+}
+
+.header {
+    top: 0px;
+    width: 100%;
+    height: 50px;
+    background-color: #f2f2f2;
+    height: 50px;
+    display: flex;
+}
+
+.add_ingredient_volume {
+    border-bottom: 2px solid #4CAF50;
+    border-top: 2px solid #4CAF50;
+    border-left: 0px;
+    border-right: 0px;
+    width: 50px;
+    text-align: center;
+}
+/************   блок с поиском по таблице и кнопкой добавить   *************/
+.input_dish_name {
+    width: 250px;
+    border: 2px solid #4CAF50;
+    border-bottom-left-radius: 10px;
+    border-top-left-radius: 10px;
+}
+
+.dish_list_header_container {
+    margin-top: 10px;
+    margin-left: 10px;
+    height: 32px;
+    display: none;
+}
+
+.add_dish {
+    padding: 7px 10px;
+    margin-right: 5px;
+    border: none;
+    border-bottom-right-radius: 10px;
+    border-top-right-radius: 10px;
+    background-color: #4CAF50;
+    color: white;
+    cursor: pointer;
+}
+
+    .add_dish:hover {
+        background-color: #45a049;
+    }
+
+/*****************************************************/
+
+.dish_table_conteiner {
+    overflow-x: auto;
+    height: calc(100vh - 50px);
+}
+
+.table_input_dish_name {
+    border-width: 0px;
+    width: 300px;
+    border-radius: 10px;
+}
+
+input[type="text"] {
+    padding: 4px;
+    font-size: 16px;
+    outline: none;
+}
+
+.delete_dish {
+    padding: 5px 10px;
+    margin-right: 5px;
+    border: none;
+    border-radius: 5px;
+    background-color: #af4c4c;
+    color: white;
+    cursor: pointer;
+}
+
+    .delete_dish:hover {
+        background-color: #a04545;
+    }
+
+tr:hover {
+    background-color: #b5b5b5;
+    transition: all 0.5s;
+}
+
+thead th {
+    background-color: #f2f2f2;
+    border-bottom: 1px solid #ddd;
+    padding: 10px;
+    text-align: left;
+}
+
+tbody td {
+    border-bottom: 1px solid #ddd;
+    padding: 10px;
+}
+
+    tbody td[contenteditable="true"] {
+        outline: none;
+        cursor: pointer;
+    }
+
+    tbody td button {
+        padding: 5px 10px;
+        margin-right: 5px;
+        border: none;
+        border-radius: 5px;
+        background-color: #4CAF50;
+        color: white;
+        cursor: pointer;
+    }
+
+        tbody td button:hover {
+            background-color: #45a049;
+        }
+
+/************   блок с рецептами блюд   *************/
+
+.recipe_conteiner {
+    min-width: 700px;
+    position: fixed;
+    height: 500px;
+    border-radius: 10px;
+    border: 2px solid #4CAF50;
+    top: 15%;
+    left: 325px;
+    right: 75px;
+    box-shadow: 0px 0px 105px 75px;
+    background-color: #f2f2f2;
+}
+
+.recipe_conteiner_header {
+    border: 2px solid #4CAF50;
+    border-top-left-radius: 7px;
+    border-top-right-radius: 7px;
+    background: #878787;
+    display: flex;
+}
+
+.recipe_conteiner_body {
+    height: 448px;
+    overflow-x: auto;
+}
+
+.close_recipe {
+    width: 200px;
+    margin-top: 4px;
+    margin-bottom: 4px;
+    margin-right: 12px;
+    border: 2px solid #af4c4c;
+    color: white;
+    border-radius: 10px;
+    background-color: #af4c4c;
+}
+
+.add_ingredient {
+    border: 2px solid #4CAF50;
+    color: white;
+    border-top-right-radius: 10px;
+    border-bottom-right-radius: 10px;
+    background-color: #4CAF50;
+}
+
+.add_ingredient_select {
+    border: 2px solid #4CAF50;
+    border-top-left-radius: 10px;
+    border-bottom-left-radius: 10px;
+    background-color: #f2f2f2;
+    width: 200px;
+}
+
+.input {
+    border: 2px solid #4CAF50;
+    border-radius: 10px;
+    background-color: #f2f2f2;
+    height: 20px;
+    width: 60px;
+}
+
+.padding_4 {
+    padding: 4px;
+}
+
+.delete_ingredient {
+    border: 2px solid #af4c4c;
+    color: white;
+    border-radius: 10px;
+    background-color: #af4c4c;
+}
+
+    .delete_ingredient:hover {
+        background-color: #a04545;
+    }
+
+.close_recipe:hover {
+    background-color: #a04545;
+}
+
+.ingredients_actions {
+    width: 100px;
+    padding: 4px;
+}
+
+.set_volume {
+    font-size: 14px;
+    margin-left: 10px;
+    padding-left: 6px;
+    padding-right: 6px;
+    padding-bottom: 3px;
+    padding-top: 1px;
+}
+
+.input_volume {
+    width: 150px;
+    padding: 4px;
+}
+
+.recipe_dish_name {
+    color: #f1f1f1;
+    margin: 6px;
+    text-align: center;
+}
+
+
+.user_status {
+    width: 65px;
+}
+
+.user_actions {
+    width: 250px;
+}
+
+.header {
+    top: 0px;
+    width: 100%;
+    height: 50px;
+    background-color: #f2f2f2;
+    height: 50px;
+    display: flex;
+}
+
+/************   блок с поиском по таблице и кнопкой добавить   *************/
+
+.input_user_name {
+    border: 2px solid #4CAF50;
+    border-bottom-left-radius: 10px;
+    border-top-left-radius: 10px;
+    width: 250px;
+}
+
+.users_header_container {
+    margin-top: 10px;
+    margin-left: 10px;
+    height: 32px;
+    display: none;
+}
+
+.add_user {
+    padding: 7px 10px;
+    margin-right: 5px;
+    border: none;
+    border-bottom-right-radius: 10px;
+    border-top-right-radius: 10px;
+    background-color: #4CAF50;
+    color: white;
+    cursor: pointer;
+}
+
+    .add_user:hover {
+        background-color: #45a049;
+    }
+
+/*****************************************************/
+
+.users_table_conteiner {
+    overflow-x: auto;
+    height: calc(100vh - 50px);
+}
+
+.table_input_user_name {
+    border-width: 0px;
+    width: 300px;
+    border-radius: 10px;
+}
+
+input[type="text"] {
+    padding: 4px;
+    font-size: 16px;
+    outline: none;
+}
+
+.delete_user {
+    padding: 5px 10px;
+    margin-right: 5px;
+    border: none;
+    border-radius: 5px;
+    background-color: #af4c4c;
+    color: white;
+    cursor: pointer;
+}
+
+    .delete_user:hover {
+        background-color: #a04545;
+    }
+
+tr:hover {
+    background-color: #b5b5b5;
+    transition: all 0.5s;
+}
+
+
+thead th {
+    background-color: #f2f2f2;
+    border-bottom: 1px solid #ddd;
+    padding: 10px;
+    text-align: left;
+}
+
+tbody td {
+    border-bottom: 1px solid #ddd;
+    padding: 10px;
+}
+
+    tbody td[contenteditable="true"] {
+        outline: none;
+        cursor: pointer;
+    }
+
+    tbody td button {
+        padding: 5px 10px;
+        margin-right: 5px;
+        border: none;
+        border-radius: 5px;
+        background-color: #4CAF50;
+        color: white;
+        cursor: pointer;
+    }
+
+        tbody td button:hover {
+            background-color: #45a049;
+        }
+
+.sidebar_btn_active {
+    background-color: #4CAF50;
+    color: white;
+}
