@@ -363,3 +363,4 @@ MigrationBackup/
 FodyWeavers.xsd
 /stolovka/stolovka.db
 *.txt
+/stolovka/нормальное заполнение.db
