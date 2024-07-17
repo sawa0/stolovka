@@ -40,6 +40,12 @@ function openpage(key) {
     if (active_page == "dish_list") {
         socket.emit('getDishList');
     }
+    if (active_page == "reports") {
+        const date = new Date();
+        const formattedDate = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+        ActiveReportMonth = formattedDate;
+        socket.emit('getReports', formattedDate);
+    }
 
 }
 /*=*=*=*=*=*=*   JS для меню   *=*=*=*=*=*=*/
@@ -121,6 +127,7 @@ socket.on('users', function (data) {
         `;
         users_table.insertAdjacentHTML('beforeend', users_rows);
     });
+    FilterUserList();
 });
 
 function FilterUserList() {
@@ -170,7 +177,7 @@ socket.on('Purchase', function (data) {
                 <input class="table_input_ingredient_name" type="text" id="IngredientName${ingredient[0]}" value="${ingredient[1]}" onfocus="showIngredientNameEditButton(${ingredient[0]})" onblur="hideIngredientNameEditButtonWithDelay(${ingredient[0]})">
                 <button id="editIngredientNameButton${ingredient[0]}" style="display: none;" title="Сохранить изменённое название" onclick="EditIngredientName(${ingredient[0]})">✏️</button>
             </td>
-            <td class="ingredient_volume" style="font-size: 18px;width: 210px;">
+            <td class="ingredient_volume" style="font-size: 18px;width: 160px;">
                 <input id="newPrice${ingredient[0]}" value="${ingredient[3]}" class="price_input" type="number" max="999" onblur="editPrice(${ingredient[0]})">грн/${ingredient[2]}
             </td>
             <td class="ingredients_actions" style="width: 100px;">
@@ -181,6 +188,7 @@ socket.on('Purchase', function (data) {
 
         purchase_table.insertAdjacentHTML('beforeend', purchase_rows);
     });
+    FilterIngredientList();
 });
 
 function editPrice(id) {
@@ -193,10 +201,10 @@ function NewIngredient() {
     var newIngredient = [document.getElementById('newIngredientName').value,
                         document.getElementById('newIngredientVolume').value,
                         document.getElementById('newIngredientPrice').value];
-    if (newIngredient[0] == '' || newIngredient[1] == 'Объем') { alert('Необходимо указать название, и еденицу объема нового ингредиента'); return; }
+    if (newIngredient[0] == '') { alert('Необходимо указать название нового ингредиента'); return; }
 
     document.getElementById('newIngredientName').value = '';
-    document.getElementById('newIngredientVolume').value = 'Объем';
+    document.getElementById('newIngredientVolume').value = 'кг.';
     document.getElementById('newIngredientPrice').value = '';
 
     if (newIngredient[2] == '') { newIngredient[2] = 0 }
@@ -260,6 +268,8 @@ socket.on('Dishes', function (data) {
     const dish_table = document.getElementById('dish_table');
     dish_table.innerHTML = '';
 
+    console.log(data);
+
     data.forEach((dish) => {
         var dish_rows = `
         <tr class="dish_column">
@@ -267,17 +277,15 @@ socket.on('Dishes', function (data) {
                 <input class="table_input_dish_name" type="text" id="DishName${dish[0]}" value="${dish[1]}" onfocus="showDishNameEditButton(${dish[0]})" onblur="hideDishNameEditButtonWithDelay(${dish[0]})">
                 <button id="editDishNameButton${dish[0]}" style="display: none;" title="Сохранить изменённое название" style="hiden;" onclick="EditDishName(${dish[0]})">✏️</button>
             </td>
-            <td class="dish_status">${dish[2] ? '✔️' : '❌'}</td>
-            <td class="dish_actions">
-                <button style="width: 140px;" title="Деактивированное блюдо не будет отображатся в списке блюд. Его всегда можно будет активировать снова" onclick="ChangeDishStatus(${dish[0]})">${dish[2] ? 'Деактивировать' : 'Активировать'}</button>
-                <button onclick="Recipe(${dish[0]})">Рецептура</button>
-                <button title="Удалить блюдо" class="delete_dish" onclick="DeleteDishConfirmationDialog(${dish[0]})">Удалить</button>
-            </td>
+            <td class="dish_status"><div style="display: flex;"><div class="dish_status_div">${dish[2] ? '✔️' : '❌'}</div><div><button class="change_dish_status_btn" title="Деактивированное блюдо не будет отображатся в списке блюд. Его всегда можно будет активировать снова" onclick="ChangeDishStatus(${dish[0]})">${dish[2] ? 'Деактивировать' : 'Активировать'}</button></div></div></td>
+            <td class="dish_status"><div style="display: flex;"><div class="dish_price">${dish[4]} грн</div><div><button style="border-top-left-radius: 0px; border-bottom-left-radius: 0px;" onclick="Recipe(${dish[0]})">Рецептура</button></div></div></td>
+            <td class="delete_dish_btn"><button title="Удалить блюдо" class="delete_dish" onclick="DeleteDishConfirmationDialog(${dish[0]})">Удалить</button></td>
         </tr>
         `;
 
         dish_table.insertAdjacentHTML('beforeend', dish_rows);
     });
+    FilterDishList();
 });
 
 function showDishNameEditButton(dishId) { var editButton = document.getElementById("editDishNameButton" + dishId);editButton.style.display = "inline-block";} // Показываем кнопку
@@ -362,24 +370,33 @@ socket.on('Recipe', function (data) {
 
     recipeTable.innerHTML = '';
 
+    var ItogPrice = 0;
+    
     recipeKeys.forEach((key) => {
         var ingredient = data['Recipe'][key];
         var recipeRow = `
             <tr class="">
                 <td class="padding_4">${data['ingridients'][key]['name']}</td>
+                <td style="width: 80px;">${data['ingridients'][key]['price']}грн/${data['ingridients'][key]['volume']}</td>
                 <td class="input_volume">
                     <input id="set_ingridient_volume${key}" class="input" type="number" value="${ingredient}" onblur="EditVolume(${data['id']}, ${key})"> ${data['ingridients'][key]['volume']}
                 </td>
+                <td style="width: 100px;">${(data['ingridients'][key]['price'] * ingredient).toFixed(2) } грн</td>
                 <td class="ingredients_actions"><button class="delete_ingredient" onclick="DeleteIngredientFromRecipe(${data['id']}, ${key})">Удалить</button></td>
             </tr>
         `;
+
+        ItogPrice += data['ingridients'][key]['price'] * ingredient;
+
         recipeTable.insertAdjacentHTML('beforeend', recipeRow);
     });
+
+    document.getElementById("recipe_result").innerText = 'Цена всех ингридиентов: ' + ItogPrice.toFixed(2) + ' грн | Итоговая цена: ' + (ItogPrice * 1.11).toFixed(2) + ' грн';
 
     document.getElementById("recipeWindow").style.display = 'block';
 });
 
-function СloseRecipeWindow() {document.getElementById('recipeWindow').style.display = 'none';}
+function СloseRecipeWindow() { socket.emit('getDishList'); document.getElementById('recipeWindow').style.display = 'none'; }
 
 function addIngredient(id) {
 
@@ -398,4 +415,23 @@ function DeleteIngredientFromRecipe(DishID, IngredientID) { socket.emit("DeleteI
 
 function EditVolume(DishID, IngredientID) {
     socket.emit("EditVolume", { 'DishID': DishID, 'IngredientID': IngredientID, 'Volume': document.getElementById('set_ingridient_volume' + IngredientID).value })
+}
+
+/*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*/
+/*=*=*=*=*=*=*  JS для reports *=*=*=*=*=*=*/
+
+var ActiveReportMonth;
+
+socket.on('Reports', function (data) {
+    document.getElementById('ReportMonth').value = data[0];
+    console.log(data[1])
+});
+
+function ReportsMonthUpdate() {
+    socket.emit('getReports', document.getElementById('ReportMonth').value);
+}
+
+function ReportsFilterUpdate() {
+
+
 }

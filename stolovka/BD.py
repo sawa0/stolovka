@@ -13,7 +13,7 @@ class DB:
                             order_id INTEGER PRIMARY KEY AUTOINCREMENT,
                             data TEXT NOT NULL,
                             time TEXT NOT NULL,
-                            person_id INTEGER NOT NULL,
+                            person TEXT NOT NULL,
                             "order" TEXT NOT NULL)''')   #   таблица заказов
             cursor.execute('''CREATE TABLE IF NOT EXISTS "menu" (
                             week_number VARCHAR(10) PRIMARY KEY,
@@ -307,5 +307,13 @@ class DB:
             cursor = conn.cursor()
             cursor.execute("""SELECT * FROM users WHERE id = ?""", (id,))
             return cursor.fetchone()    #   Возвращает информацию о пользователе
-
+        
+    ##################\ Для страницы reports /##################
+    
+    def GetReports(self, month):
+        with sqlite3.connect('stolovka.db') as conn:
+            cursor = conn.cursor()
+            cursor.execute("""SELECT * FROM transactions WHERE data LIKE ?""", (str(month)+"%",))
+            return cursor.fetchall()
+            
 db = DB()

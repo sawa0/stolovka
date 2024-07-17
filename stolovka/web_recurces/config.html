@@ -10,7 +10,7 @@
     <div class="sidebar">
         <h2>Конфигурация Столовой</h2>
         <button id="sidebar_btn_menu" class="key" onclick="openpage('menu')">Меню</button>
-        <button id="sidebar_btn_purchase" class="key" onclick="openpage('purchase')">Закупки</button>
+        <button id="sidebar_btn_purchase" class="key" onclick="openpage('purchase')">Продукты</button>
         <button id="sidebar_btn_dish_list" class="key" onclick="openpage('dish_list')">Рецепты</button>
         <button id="sidebar_btn_reports" class="key" onclick="openpage('reports')">Отчёты</button>
         <button id="sidebar_btn_users" class="key" onclick="openpage('users')">Пользователи</button>
@@ -25,7 +25,6 @@
             <div id="purchase_header_container" class="purchase_header_container">
                 <input class="input_ingredient_name" type="text" id="newIngredientName" placeholder="Название ингридеента" oninput="FilterIngredientList()">
                 <select id="newIngredientVolume" class="volume_input">
-                    <option>Объем</option>
                     <option>кг.</option>
                     <option>л.</option>
                     <option>шт.</option>
@@ -35,6 +34,7 @@
             </div>
             <div id="menu_header_container" class="menu_header_container">
                 <input class="week" type="week" id="week" name="week" onchange="WeekChange()">
+                <button class="print_menu" onclick="print()">Печать</button>
             </div>
             <div id="dish_list_header_container" class="dish_list_header_container">
                 <input class="input_dish_name" type="text" id="newDishName" placeholder="Название блюда" oninput="FilterDishList()">
@@ -44,7 +44,8 @@
 
             </div>
             <div id="reports_header_container" class="reports_header_container">
-
+                <input class="UserNameToReport" type="text" id="UserNameToReport" placeholder="Имя пользователя" oninput="ReportsFilterUpdate()">
+                <input class="ReportMonth" type="month" id="ReportMonth" name="month" onchange="ReportsMonthUpdate()">
             </div>
         </div>
 
@@ -98,6 +99,7 @@
                         <table id="recipe_table">
                         </table>
                     </div>
+                    <div id="recipe_result" class="recipe_result"></div>
                 </div>
 
             </div>

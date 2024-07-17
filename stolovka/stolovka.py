@@ -1,4 +1,5 @@
 ﻿import datetime
+from itertools import product
 
 from flask import *
 from flask_socketio import SocketIO, send, emit
@@ -216,6 +217,9 @@ def EditVolume(data):
     db.IngredientVolumeEdit(data['DishID'], data['IngredientID'], data['Volume'])
     GetRecipe(data['DishID'])
 
+@flask_web_interface.on('getReports')
+def getReports(data):
+    emit("Reports", [data, db.GetReports(data)])
 
 ##################################################
 #                 запуск сервера                 #        
@@ -224,3 +228,11 @@ if __name__ == '__main__':
     flask_web_interface.run(app, debug=False, port="8080", host="0.0.0.0")
 ##################################################
 
+
+"""
+Доделать:
+
+Кнопка для печати меню на неделю
+
+страница отчётов
+"""

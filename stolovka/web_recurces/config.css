@@ -233,6 +233,13 @@ button {
         box-shadow: 0 0 5px rgba(102, 175, 233, 0.6);
     }
 
+.print_menu {
+    margin-left: 10px;
+    border-radius: 5px;
+    background-color: #4caf50;
+    color: #fff;
+}
+
 .page_container {
     height: calc(100vh - 50px);
     overflow-x: auto;
@@ -259,7 +266,8 @@ button {
 }
 
 .eda {
-    height: 25px;    width: 60px;
+    height: 25px;
+    width: 60px;
     border-width: 0px;
     padding-left: 4px;
     height: 30px;
@@ -502,8 +510,30 @@ tbody td {
     width: 65px;
 }
 
-.dish_actions {
-    width: 350px;
+.delete_dish_btn {
+    width: 50px;
+}
+
+.dish_price {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 90px;
+    border: 2px solid #4caf50;
+    border-top-left-radius: 5px;
+    border-bottom-left-radius: 5px;
+}
+
+.change_dish_status_btn {
+    border-top-left-radius: 0px;
+    border-bottom-left-radius: 0px;
+    width: 140px;
+}
+
+.dish_status_div {
+    border: 2px solid #4caf50;
+    border-top-left-radius: 5px;
+    border-bottom-left-radius: 5px;
 }
 
 .header {
@@ -591,6 +621,9 @@ tr:hover {
     transition: all 0.5s;
 }
 
+tr:hover {
+}
+
 thead th {
     background-color: #f2f2f2;
     border-bottom: 1px solid #ddd;
@@ -638,6 +671,7 @@ tbody td {
 }
 
 .recipe_conteiner_header {
+    height: 50px;
     border: 2px solid #4CAF50;
     border-top-left-radius: 7px;
     border-top-right-radius: 7px;
@@ -646,7 +680,7 @@ tbody td {
 }
 
 .recipe_conteiner_body {
-    height: 448px;
+    height: 408px;
     overflow-x: auto;
 }
 
@@ -719,7 +753,7 @@ tbody td {
 }
 
 .input_volume {
-    width: 150px;
+    width: 100px;
     padding: 4px;
 }
 
@@ -729,6 +763,17 @@ tbody td {
     text-align: center;
 }
 
+.recipe_result {
+    padding-top: 7px;
+    height: 25px;
+    padding-bottom: 7px;
+    background-color: #878787;
+    color: #f1f1f1;
+    text-align: center;
+    border-bottom-left-radius: 9px;
+    border-bottom-right-radius: 9px;
+    font-size: 20px;
+}
 
 .user_status {
     width: 65px;
@@ -852,3 +897,58 @@ tbody td {
     background-color: #4CAF50;
     color: white;
 }
+
+.reports_header_container {
+    margin-top: 10px;
+    margin-left: 10px;
+    height: 32px;
+    display: none;
+}
+
+.ReportMonth {
+    border: 2px solid #4CAF50;
+    border-bottom-right-radius: 10px;
+    border-top-right-radius: 10px;
+    width: 185px;
+    color: #fff;
+    background-color: #4caf50;
+    font-size: 16px;
+    text-align: center;
+}
+
+.UserNameToReport {
+    border: 2px solid #4CAF50;
+    border-bottom-left-radius: 10px;
+    border-top-left-radius: 10px;
+    width: 250px;
+}
+
+
+@media print {
+    body * {
+        visibility: hidden;
+        appearance: none;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+    }
+
+    #menu_conteiner, #menu_conteiner * {
+        visibility: visible;
+    }
+
+    #menu_conteiner {
+        position: absolute;
+        left: 0;
+        top: 0;
+    }
+
+    .menu_filling_table_dish_name{
+        border: 1px solid #ddd;
+    }
+
+    table, th, td, select {
+        border: 1px solid #ddd;
+        border-collapse: collapse;
+    }
+}
+
