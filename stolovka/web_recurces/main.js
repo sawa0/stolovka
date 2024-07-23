@@ -10,6 +10,7 @@ socket.on('connect', function () {  // подключение к серверу
 ////////////////////////////////////////////
 var users;
 socket.on('users', function (data) {
+    console.log(data);
     users = data;
     let letters = [];
     for (var i = 0; i < users.length; i++) {
@@ -54,14 +55,17 @@ function letter(l) {
 ////////////////////////////////////////////
 //
 ////////////////////////////////////////////
+var user;
+
 function select_user(id) {
-    var user
+    
     for (var i = 0; i < users.length; i++) {
         if (users[i][0] == id) {
             user = users[i];
             break;
         }
     }
+
     document.querySelector('.choise_user').style.display = "none";
     
     document.getElementById('user_name').innerText = user[1];
@@ -108,15 +112,17 @@ document.addEventListener('DOMContentLoaded', function () {
         for (let i = 1; i <= 8; i++) {
 
             if (document.getElementById("dish_price" + i) == null) { break; }
+            if (document.getElementById("quantity" + i).value == 0) { continue; }
 
             var dish_name = document.getElementById("dish_name" + i).textContent;
             var dish_price = document.getElementById("dish_price" + i).textContent.slice(0, -4);
             var quantity = document.getElementById("quantity" + i).value;
             basket.push([dish_name, [dish_price, quantity]]);
         }
-        const userName = document.getElementById('user_name').textContent;
 
-        order = { 'userName': userName, 'order': basket };
+        if (basket.length == 0) { return; }
+
+        order = { 'userName': user[1], 'userID': user[0], 'order': basket };
 
         document.querySelector('.form').style.display = "none";
         document.querySelector('.accept_order').style.display = "block";
@@ -136,7 +142,7 @@ document.addEventListener('DOMContentLoaded', function () {
             if (basket[i][1][1] == 0) { continue; }
 
             const cheak_item = document.createElement('p');
-            cheak_item.innerText = padString(basket[i][0], ".", 35) + " X" + basket[i][1][1] + " = " + (basket[i][1][0] * basket[i][1][1]) + "грн";
+            cheak_item.innerText = padString(basket[i][0], ".", 35) + " X" + basket[i][1][1] + " = " + (basket[i][1][0] * basket[i][1][1]).toFixed(2) + "грн";
             cheak_item.className = 'cheak_item';
             final_order_container.appendChild(cheak_item);
         }

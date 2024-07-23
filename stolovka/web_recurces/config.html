@@ -44,7 +44,10 @@
 
             </div>
             <div id="reports_header_container" class="reports_header_container">
-                <input class="UserNameToReport" type="text" id="UserNameToReport" placeholder="Имя пользователя" oninput="ReportsFilterUpdate()">
+                <!--<input class="UserNameToReport" type="text" id="UserNameToReport" placeholder="Имя пользователя" oninput="ReportsFilterUpdate()">-->
+                <select id="UserNameToReport" class="UserNameToReport">
+                    <option>Все пользователи</option>
+                </select>
                 <input class="ReportMonth" type="month" id="ReportMonth" name="month" onchange="ReportsMonthUpdate()">
             </div>
         </div>

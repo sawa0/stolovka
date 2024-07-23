@@ -104,7 +104,7 @@ socket.on('week_menu', function (data) {
     document.getElementById('menu_conteiner').innerHTML = table;
 });
 
-function UpdateMenu(day, row) {socket.emit('menu_update', [document.getElementById('week').value, [day, row, document.querySelector(`#dey${day} #name${row}`).value]])}
+function UpdateMenu(day, row) { socket.emit('menu_update', [document.getElementById('week').value, [day, row, document.querySelector(`#dey${day} #name${row}`).value]]) }
 /*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*/
 /*=*=*=*=*=*=*   JS для users  *=*=*=*=*=*=*/
 socket.on('users', function (data) {
@@ -118,11 +118,8 @@ socket.on('users', function (data) {
                     <input class="table_input_user_name" type="text" id="UserName${user[0]}" value="${user[1]}" onfocus="showEditButton(${user[0]})" onblur="hideEditButtonWithDelay(${user[0]})">
                     <button id="editButton${user[0]}" style="display: none;" title="Сохранить изменённое имя" style="hiden;" onclick="EditUserName(${user[0]})">✏️</button>
                 </td>
-                <td class="user_status">${user[2] ? '✔️' : '❌'}</td>
-                <td class="user_actions">
-                    <button style="width: 140px;" title="Деактивированный пользователь не будет отображатся в списке пользователей на странице заказов. его всегда можно будет активировать снова" onclick="ChangeUserStatus(${user[0]})">${user[2] ? 'Деактивировать' : 'Активировать'}</button>
-                    <button title="Удалить пользователя (не удалит его из отчётов. если пользователь временно не будет пользоватся столовой деактивируйте его.)" class="delete_user" onclick="DeleteUser(${user[0]})">Удалить</button>
-                </td>
+                <td class="dish_status"><div style="display: flex;"><div class="user_status_div">${user[2] ? '✔️' : '❌'}</div><div><button class="change_user_status_btn" title="Деактивированный пользователь не будет отображатся в списке пользователей на странице заказов. его всегда можно будет активировать снова" onclick="ChangeUserStatus(${user[0]})">${user[2] ? 'Деактивировать' : 'Активировать'}</button></div></div></td>
+                <td class="user_actions"><button title="Удалить пользователя (не удалит его из отчётов. если пользователь временно не будет пользоватся столовой деактивируйте его.)" class="delete_user" onclick="DeleteUser(${user[0]})">Удалить</button></td>
             </tr>
         `;
         users_table.insertAdjacentHTML('beforeend', users_rows);
@@ -150,9 +147,9 @@ function FilterUserList() {
     }
 }
 
-function ChangeUserStatus(id) {socket.emit('ChangeUserStatus', id);}
+function ChangeUserStatus(id) { socket.emit('ChangeUserStatus', id); }
 
-function DeleteUser(id) {socket.emit('DeleteUser', id);}
+function DeleteUser(id) { socket.emit('DeleteUser', id); }
 
 function EditUserName(id) { socket.emit('EditUserName', [id, document.getElementById('UserName' + id).value]); }
 
@@ -161,9 +158,9 @@ function NewUser() {
     document.getElementById('newUserName').value = '';
 }
 
-function showEditButton(userId) {var editButton = document.getElementById("editButton" + userId); editButton.style.display = "inline-block";} // Показываем кнопку
-function hideEditButton(userId) {var editButton = document.getElementById("editButton" + userId); editButton.style.display = "none";} // Скрываем кнопку
-function hideEditButtonWithDelay(userId) {setTimeout(function () { hideEditButton(userId); }, 300);}
+function showEditButton(userId) { var editButton = document.getElementById("editButton" + userId); editButton.style.display = "inline-block"; } // Показываем кнопку
+function hideEditButton(userId) { var editButton = document.getElementById("editButton" + userId); editButton.style.display = "none"; } // Скрываем кнопку
+function hideEditButtonWithDelay(userId) { setTimeout(function () { hideEditButton(userId); }, 300); }
 /*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*/
 /*=*=*=*=*=*=* JS для purchase *=*=*=*=*=*=*/
 socket.on('Purchase', function (data) {
@@ -199,8 +196,8 @@ function editPrice(id) {
 
 function NewIngredient() {
     var newIngredient = [document.getElementById('newIngredientName').value,
-                        document.getElementById('newIngredientVolume').value,
-                        document.getElementById('newIngredientPrice').value];
+    document.getElementById('newIngredientVolume').value,
+    document.getElementById('newIngredientPrice').value];
     if (newIngredient[0] == '') { alert('Необходимо указать название нового ингредиента'); return; }
 
     document.getElementById('newIngredientName').value = '';
@@ -268,8 +265,6 @@ socket.on('Dishes', function (data) {
     const dish_table = document.getElementById('dish_table');
     dish_table.innerHTML = '';
 
-    console.log(data);
-
     data.forEach((dish) => {
         var dish_rows = `
         <tr class="dish_column">
@@ -288,11 +283,11 @@ socket.on('Dishes', function (data) {
     FilterDishList();
 });
 
-function showDishNameEditButton(dishId) { var editButton = document.getElementById("editDishNameButton" + dishId);editButton.style.display = "inline-block";} // Показываем кнопку
+function showDishNameEditButton(dishId) { var editButton = document.getElementById("editDishNameButton" + dishId); editButton.style.display = "inline-block"; } // Показываем кнопку
 
-function hideDishNameEditButton(dishId) { var editButton = document.getElementById("editDishNameButton" + dishId);editButton.style.display = "none";} // Скрываем кнопку
+function hideDishNameEditButton(dishId) { var editButton = document.getElementById("editDishNameButton" + dishId); editButton.style.display = "none"; } // Скрываем кнопку
 
-function hideDishNameEditButtonWithDelay(dishId) { setTimeout(function () { hideDishNameEditButton(dishId); }, 300);}
+function hideDishNameEditButtonWithDelay(dishId) { setTimeout(function () { hideDishNameEditButton(dishId); }, 300); }
 
 function NewDish() {
     if (document.getElementById("newDishName").value === '') { alert('Название блюда не может быть пустым'); return; }
@@ -335,7 +330,7 @@ function DeleteDishConfirmationDialog(id) {
     document.getElementById("accept_dish_delete_conteiner").style.display = 'block';
 }
 
-function DeleteDish() { 
+function DeleteDish() {
     document.getElementById("accept_dish_delete_conteiner").style.display = 'none';
     socket.emit("DeleteDish", DishToDelete);
     DishToDelete = 0;
@@ -371,7 +366,7 @@ socket.on('Recipe', function (data) {
     recipeTable.innerHTML = '';
 
     var ItogPrice = 0;
-    
+
     recipeKeys.forEach((key) => {
         var ingredient = data['Recipe'][key];
         var recipeRow = `
@@ -381,7 +376,7 @@ socket.on('Recipe', function (data) {
                 <td class="input_volume">
                     <input id="set_ingridient_volume${key}" class="input" type="number" value="${ingredient}" onblur="EditVolume(${data['id']}, ${key})"> ${data['ingridients'][key]['volume']}
                 </td>
-                <td style="width: 100px;">${(data['ingridients'][key]['price'] * ingredient).toFixed(2) } грн</td>
+                <td style="width: 100px;">${(data['ingridients'][key]['price'] * ingredient).toFixed(2)} грн</td>
                 <td class="ingredients_actions"><button class="delete_ingredient" onclick="DeleteIngredientFromRecipe(${data['id']}, ${key})">Удалить</button></td>
             </tr>
         `;
@@ -408,7 +403,7 @@ function addIngredient(id) {
 
     var IngredientName = document.getElementById('newIngredient').options[document.getElementById('newIngredient').selectedIndex].text;
 
-    socket.emit("AddIngredientToRecipe", { 'DishID': id, 'IngredientID': IngredientID, 'IngredientName': IngredientName, 'volume': newIngredientVolume})
+    socket.emit("AddIngredientToRecipe", { 'DishID': id, 'IngredientID': IngredientID, 'IngredientName': IngredientName, 'volume': newIngredientVolume })
 }
 
 function DeleteIngredientFromRecipe(DishID, IngredientID) { socket.emit("DeleteIngredientFromRecipe", { 'DishID': DishID, 'IngredientID': IngredientID }) }
@@ -418,13 +413,31 @@ function EditVolume(DishID, IngredientID) {
 }
 
 /*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*/
-/*=*=*=*=*=*=*  JS для reports *=*=*=*=*=*=*/
+/*=*=*=*=*=*=* JS для reports  *=*=*=*=*=*=*/
 
 var ActiveReportMonth;
 
 socket.on('Reports', function (data) {
     document.getElementById('ReportMonth').value = data[0];
-    console.log(data[1])
+
+    const usersMap = new Map(data[1].map(item => [item[4], item[3]]));
+    usersMap.forEach((name, id) => {
+        const newOption = new Option(name, id.toString());
+        document.getElementById('UserNameToReport').add(newOption);
+    });
+
+        //// 2. Получение списка чисел дней
+        //const datesSet = new Set();
+        //data.forEach(item => {
+        //    const date = new Date(item[1]);
+        //    const day = date.getDate();
+        //    datesSet.add(day);
+        //});
+
+        //const days = Array.from(datesSet);
+
+
+
 });
 
 function ReportsMonthUpdate() {

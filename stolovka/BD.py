@@ -14,7 +14,9 @@ class DB:
                             data TEXT NOT NULL,
                             time TEXT NOT NULL,
                             person TEXT NOT NULL,
-                            "order" TEXT NOT NULL)''')   #   таблица заказов
+                            person_id INTEGER NOT NULL,
+                            "order" TEXT NOT NULL,
+                            price FLOAT NOT NULL)''')   #   таблица заказов
             cursor.execute('''CREATE TABLE IF NOT EXISTS "menu" (
                             week_number VARCHAR(10) PRIMARY KEY,
                             MenuText TEXT,
@@ -33,9 +35,16 @@ class DB:
             conn.commit()   #   Создает структуру базы данных, если таковой нет 
         
     def NewTransaction(self, data):
+
+        order_total = sum(float(item[1][0]) * int(item[1][1]) for item in data['order'])
+        current_date = datetime.now().strftime('%Y-%m-%d')
+        current_time = datetime.now().strftime('%H:%M')
+        serialized_order = json.dumps(data['order'])
+
         with sqlite3.connect('stolovka.db') as conn:
             cursor = conn.cursor()
-            cursor.execute("""INSERT INTO transactions (data, time, person_id, "order") VALUES (?, ?, ?, ?)""", (datetime.now().strftime('%Y-%m-%d'), datetime.now().strftime('%H:%M'), data['userName'], json.dumps(data['order'])))
+            cursor.execute("""INSERT INTO transactions (data, time, person, person_id, "order", price) VALUES (?, ?, ?, ?, ?, ?)""",
+                           (current_date, current_time, data['userName'], data['userID'], serialized_order, order_total))
             conn.commit()
             
     def GetTodayTtransactions(swlf):
