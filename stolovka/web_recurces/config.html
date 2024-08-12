@@ -24,12 +24,12 @@
             </div>
             <div id="purchase_header_container" class="purchase_header_container">
                 <input class="input_ingredient_name" type="text" id="newIngredientName" placeholder="Название ингридеента" oninput="FilterIngredientList()">
+                <input id="newIngredientPrice" class="newIngredientPrice" type="number" placeholder="Цена   /" />
                 <select id="newIngredientVolume" class="volume_input">
                     <option>кг.</option>
                     <option>л.</option>
                     <option>шт.</option>
                 </select>
-                <input id="newIngredientPrice" class="newIngredientPrice" type="number" placeholder="Цена" />
                 <button class="add_ingredient" onclick="NewIngredient()">Добавить</button>
             </div>
             <div id="menu_header_container" class="menu_header_container">
@@ -43,13 +43,11 @@
             <div id="settings_header_container" class="settings_header_container">
 
             </div>
-            <div id="reports_header_container" class="reports_header_container">
-                <!--<input class="UserNameToReport" type="text" id="UserNameToReport" placeholder="Имя пользователя" oninput="ReportsFilterUpdate()">-->
-                <select id="UserNameToReport" class="UserNameToReport">
-                    <option>Все пользователи</option>
-                </select>
+            <div id="reports_header_container" class= "reports_header_container">
+                <select id="UserNameToReport" class="UserNameToReport"></select>
                 <input class="ReportMonth" type="month" id="ReportMonth" name="month" onchange="ReportsMonthUpdate()">
             </div>
+            
         </div>
 
         <div class="page_container">
@@ -107,7 +105,16 @@
 
             </div>
 
-            <div style="display: none;" id="reports_page"></div>
+            <div style="display: none;" id="reports_page">
+                <div class="report_table_div">
+                    <table id="month_report_table">
+                        <tbody id="report_table_body">
+                        </tbody>
+                    </table>
+                    
+                </div>
+                <div class="report_footer"><button class="DownloadMonthlyReport" onclick="DownloadMonthlyReport()">Скачать отчёт за месяц</button></div>
+            </div>
 
             <div style="display: none;" id="users_page">
                 <table>
@@ -116,7 +123,12 @@
                 </table>
             </div>
 
-            <div style="display: none;" id="settings_page"></div>
+            <div style="display: none;" id="settings_page">
+                <p>Настройка автоотправки отчётов</p>
+                <p>Время/необходимость автоподтверждения</p>
+                <p>Язык</p>
+                <p>Константы (Валюта/...)</p>
+            </div>
 
         </div>
     </div>

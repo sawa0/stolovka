@@ -1,4 +1,4 @@
-﻿var socket = io.connect('http://' + document.domain + ':' + location.port);
+﻿var socket = io.connect(document.domain + ':' + location.port);
 socket.on('connect', function () {  // подключение к серверу
     console.log('WebSocket connection established');
     socket.emit('regestration', "order");
@@ -119,7 +119,7 @@ socket.on('users', function (data) {
                     <button id="editButton${user[0]}" style="display: none;" title="Сохранить изменённое имя" style="hiden;" onclick="EditUserName(${user[0]})">✏️</button>
                 </td>
                 <td class="dish_status"><div style="display: flex;"><div class="user_status_div">${user[2] ? '✔️' : '❌'}</div><div><button class="change_user_status_btn" title="Деактивированный пользователь не будет отображатся в списке пользователей на странице заказов. его всегда можно будет активировать снова" onclick="ChangeUserStatus(${user[0]})">${user[2] ? 'Деактивировать' : 'Активировать'}</button></div></div></td>
-                <td class="user_actions"><button title="Удалить пользователя (не удалит его из отчётов. если пользователь временно не будет пользоватся столовой деактивируйте его.)" class="delete_user" onclick="DeleteUser(${user[0]})">Удалить</button></td>
+                <td class="delete_btn_column"><button title="Удалить пользователя (не удалит его из отчётов. если пользователь временно не будет пользоватся столовой деактивируйте его.)" class="delete_btn" onclick="DeleteUser(${user[0]})">Удалить</button></td>
             </tr>
         `;
         users_table.insertAdjacentHTML('beforeend', users_rows);
@@ -174,11 +174,11 @@ socket.on('Purchase', function (data) {
                 <input class="table_input_ingredient_name" type="text" id="IngredientName${ingredient[0]}" value="${ingredient[1]}" onfocus="showIngredientNameEditButton(${ingredient[0]})" onblur="hideIngredientNameEditButtonWithDelay(${ingredient[0]})">
                 <button id="editIngredientNameButton${ingredient[0]}" style="display: none;" title="Сохранить изменённое название" onclick="EditIngredientName(${ingredient[0]})">✏️</button>
             </td>
-            <td class="ingredient_volume" style="font-size: 18px;width: 160px;">
-                <input id="newPrice${ingredient[0]}" value="${ingredient[3]}" class="price_input" type="number" max="999" onblur="editPrice(${ingredient[0]})">грн/${ingredient[2]}
+            <td class="ingredient_volume">
+                <div class="ingredient_volume_div"><input id="newPrice${ingredient[0]}" value="${ingredient[3]}" class="price_input" type="number" max="999" onblur="editPrice(${ingredient[0]})"><div class="ingredient_price_volume">грн/${ingredient[2]}</div></div>
             </td>
-            <td class="ingredients_actions" style="width: 100px;">
-                <button class="delete_ingredient" onclick="DeleteIngredientConfirmationDialog(${ingredient[0]})">Удалить</button>
+            <td class="delete_btn_column">
+                <button class="delete_btn" onclick="DeleteIngredientConfirmationDialog(${ingredient[0]})">Удалить</button>
             </td>
         </tr>
         `;
@@ -272,9 +272,9 @@ socket.on('Dishes', function (data) {
                 <input class="table_input_dish_name" type="text" id="DishName${dish[0]}" value="${dish[1]}" onfocus="showDishNameEditButton(${dish[0]})" onblur="hideDishNameEditButtonWithDelay(${dish[0]})">
                 <button id="editDishNameButton${dish[0]}" style="display: none;" title="Сохранить изменённое название" style="hiden;" onclick="EditDishName(${dish[0]})">✏️</button>
             </td>
-            <td class="dish_status"><div style="display: flex;"><div class="dish_status_div">${dish[2] ? '✔️' : '❌'}</div><div><button class="change_dish_status_btn" title="Деактивированное блюдо не будет отображатся в списке блюд. Его всегда можно будет активировать снова" onclick="ChangeDishStatus(${dish[0]})">${dish[2] ? 'Деактивировать' : 'Активировать'}</button></div></div></td>
             <td class="dish_status"><div style="display: flex;"><div class="dish_price">${dish[4]} грн</div><div><button style="border-top-left-radius: 0px; border-bottom-left-radius: 0px;" onclick="Recipe(${dish[0]})">Рецептура</button></div></div></td>
-            <td class="delete_dish_btn"><button title="Удалить блюдо" class="delete_dish" onclick="DeleteDishConfirmationDialog(${dish[0]})">Удалить</button></td>
+            <td class="dish_status"><div style="display: flex;"><div class="dish_status_div">${dish[2] ? '✔️' : '❌'}</div><div><button class="change_dish_status_btn" title="Деактивированное блюдо не будет отображатся в списке блюд. Его всегда можно будет активировать снова" onclick="ChangeDishStatus(${dish[0]})">${dish[2] ? 'Деактивировать' : 'Активировать'}</button></div></div></td>
+            <td class="delete_btn_column"><button title="Удалить блюдо" class="delete_btn" onclick="DeleteDishConfirmationDialog(${dish[0]})">Удалить</button></td>
         </tr>
         `;
 
@@ -377,7 +377,7 @@ socket.on('Recipe', function (data) {
                     <input id="set_ingridient_volume${key}" class="input" type="number" value="${ingredient}" onblur="EditVolume(${data['id']}, ${key})"> ${data['ingridients'][key]['volume']}
                 </td>
                 <td style="width: 100px;">${(data['ingridients'][key]['price'] * ingredient).toFixed(2)} грн</td>
-                <td class="ingredients_actions"><button class="delete_ingredient" onclick="DeleteIngredientFromRecipe(${data['id']}, ${key})">Удалить</button></td>
+                <td class="delete_btn_column"><button class="delete_btn" onclick="DeleteIngredientFromRecipe(${data['id']}, ${key})">Удалить</button></td>
             </tr>
         `;
 
@@ -416,29 +416,69 @@ function EditVolume(DishID, IngredientID) {
 /*=*=*=*=*=*=* JS для reports  *=*=*=*=*=*=*/
 
 var ActiveReportMonth;
+var ActiveReportData;
 
 socket.on('Reports', function (data) {
+    ActiveReportMonth = data[0];
+    ActiveReportData = data[1];
     document.getElementById('ReportMonth').value = data[0];
 
+    document.getElementById('UserNameToReport').innerHTML = '<option value="0">Все пользователи</option>';
     const usersMap = new Map(data[1].map(item => [item[4], item[3]]));
     usersMap.forEach((name, id) => {
         const newOption = new Option(name, id.toString());
         document.getElementById('UserNameToReport').add(newOption);
     });
-
-        //// 2. Получение списка чисел дней
-        //const datesSet = new Set();
-        //data.forEach(item => {
-        //    const date = new Date(item[1]);
-        //    const day = date.getDate();
-        //    datesSet.add(day);
-        //});
-
-        //const days = Array.from(datesSet);
-
-
-
+    MonthReport()
 });
+
+function MonthReport() {
+    const daysOfWeek = ["воскресенье", "понедельник", "вторник", "среда", "четверг", "пятница", "суббота"];
+    const months = ["января", "февраля", "марта", "апреля", "мая", "июня", "июля", "августа", "сентября", "октября", "ноября", "декабря"];
+
+    const dict_result = ActiveReportData.reduce((acc, item) => {
+        const date = new Date(item[1]);
+        const dayOfWeek = daysOfWeek[date.getUTCDay()];
+        const day = date.getUTCDate();
+        const month = months[date.getUTCMonth()];
+        const formattedDate = `${dayOfWeek}, ${day} ${month}`;
+        const total = item[6];
+
+        if (!acc[date]) {
+            acc[date] = [item[1], formattedDate, total.toFixed(2)];
+        } else {
+            acc[date][2] = (parseFloat(acc[date][2]) + total).toFixed(2);
+        }
+
+        return acc;
+    }, {});
+
+    const result = Object.values(dict_result);
+
+    const users_table = document.getElementById('report_table_body');
+    users_table.innerHTML = '';
+
+    result.forEach((day) => {
+        var row = `
+            <tr id="${day[0]}" class="">
+                <td>
+                    <div class="display_flex">
+                        <div class="report_day">${day[1]}</div><div class="report_day_price">${day[2]} грн.</div>
+                    </div>
+                </td>
+                <td class="report_day_action">
+                    <button>Просмотреть подробности</button><button>Скачать отчёт</button>
+                </td>
+            </tr>
+        `;
+        users_table.insertAdjacentHTML('beforeend', row);
+
+    });
+}
+
+function UserReport() {
+
+}
 
 function ReportsMonthUpdate() {
     socket.emit('getReports', document.getElementById('ReportMonth').value);

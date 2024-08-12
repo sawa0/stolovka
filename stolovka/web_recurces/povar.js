@@ -1,10 +1,9 @@
-var socket = io.connect('http://' + document.domain + ':' + location.port);
+var socket = io.connect(document.domain + ':' + location.port);
 
 socket.on('connect', function () {
     console.log('WebSocket connection established');
 });
 
-//  active order
 var active_order;
 var order_data;
 socket.on('new_order', function (order) {

@@ -1,4 +1,4 @@
-﻿var socket = io.connect('http://' + document.domain + ':' + location.port);
+﻿var socket = io.connect(document.domain + ':' + location.port);
 
 socket.on('connect', function () {  // подключение к серверу
     console.log('WebSocket connection established');
