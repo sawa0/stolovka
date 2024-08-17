@@ -44,7 +44,7 @@
 
             </div>
             <div id="reports_header_container" class= "reports_header_container">
-                <select id="UserNameToReport" class="UserNameToReport"></select>
+                <select id="UserNameToReport" class="UserNameToReport" onchange="ReportsFilterUpdate()"></select>
                 <input class="ReportMonth" type="month" id="ReportMonth" name="month" onchange="ReportsMonthUpdate()">
             </div>
             
@@ -113,7 +113,13 @@
                     </table>
                     
                 </div>
-                <div class="report_footer"><button class="DownloadMonthlyReport" onclick="DownloadMonthlyReport()">Скачать отчёт за месяц</button></div>
+                <div class="report_footer">
+                    <div class="display_flex" style="height: 29px;">
+                        <button class="DownloadMonthlyReport" onclick="DownloadMonthlyReport()">Скачать отчёт за месяц</button>
+                        <div id="month_cost" class="report_day_price" style="width: auto; padding-left: 8px; padding-right: 8px;"></div>
+                    </div>
+                    
+                </div>
             </div>
 
             <div style="display: none;" id="users_page">
@@ -128,6 +134,8 @@
                 <p>Время/необходимость автоподтверждения</p>
                 <p>Язык</p>
                 <p>Константы (Валюта/...)</p>
+                <p>Настройки ценообразования</p>
+
             </div>
 
         </div>

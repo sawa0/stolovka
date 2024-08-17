@@ -102,7 +102,7 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 socket.on('today_transactions', function (data) {
-    console.log(data)
+    data.reverse();
 
     const countdownElement = document.getElementById('order_history');
     countdownElement.innerHTML = '';

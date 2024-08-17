@@ -97,7 +97,7 @@ def get_request_handler(data):
 
     elif data == 'users':   #   Загрузка списка пользователей на странице заказа  
         answer = []
-        for user in db.LoadUserList():  #   Очистка списка от не активных пользователей
+        for user in db.GetUserList():  #   Очистка списка от не активных пользователей
             if user[2]:
                 answer.append([user[0], user[1]])
         emit('users', answer)   #   Отправка списка пользователей в браузер
@@ -124,27 +124,27 @@ def menu_update(data):
 
 @flask_web_interface.on('getUsers')
 def getUsers():
-    emit('users', db.LoadUserList())
+    emit('users', db.GetUserList())
     
 @flask_web_interface.on('newUserName')
 def newUserName(data):
     db.NewUser(data)
-    emit('users', db.LoadUserList())
+    emit('users', db.GetUserList())
     
 @flask_web_interface.on('EditUserName')
 def EditUserName(data):
     db.EditUserName(data[0], data[1])
-    emit('users', db.LoadUserList())
+    emit('users', db.GetUserList())
     
 @flask_web_interface.on('DeleteUser')
 def DeleteUser(data):
     db.DeleteUser(data)
-    emit('users', db.LoadUserList())
+    emit('users', db.GetUserList())
     
 @flask_web_interface.on('ChangeUserStatus')
 def ChangeUserStatus(data):
     db.ChangeUserStatus(data)
-    emit('users', db.LoadUserList())
+    emit('users', db.GetUserList())
 
 @flask_web_interface.on('getPurchase')
 def getPurchase():
@@ -219,7 +219,7 @@ def EditVolume(data):
 
 @flask_web_interface.on('getReports')
 def getReports(data):
-    emit("Reports", [data, db.GetReports(data)])
+    emit("Reports", [data, db.GetUserList(), db.GetReports(data)])
 
 ##################################################
 #                 запуск сервера                 #        

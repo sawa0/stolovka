@@ -417,30 +417,43 @@ function EditVolume(DishID, IngredientID) {
 
 var ActiveReportMonth;
 var ActiveReportData;
+var ActiveReportUser = 0;
 
 socket.on('Reports', function (data) {
     ActiveReportMonth = data[0];
-    ActiveReportData = data[1];
+    ActiveReportData = data[2];
     document.getElementById('ReportMonth').value = data[0];
 
     document.getElementById('UserNameToReport').innerHTML = '<option value="0">Все пользователи</option>';
-    const usersMap = new Map(data[1].map(item => [item[4], item[3]]));
-    usersMap.forEach((name, id) => {
-        const newOption = new Option(name, id.toString());
+
+    data[1].forEach((user) => {
+
+        const newOption = new Option(user[1], user[0].toString());
+
+        if (ActiveReportUser == user[0]) {
+            newOption.selected = true;
+        }
+
         document.getElementById('UserNameToReport').add(newOption);
+
     });
+
     MonthReport()
 });
 
 function MonthReport() {
-    const daysOfWeek = ["воскресенье", "понедельник", "вторник", "среда", "четверг", "пятница", "суббота"];
-    const months = ["января", "февраля", "марта", "апреля", "мая", "июня", "июля", "августа", "сентября", "октября", "ноября", "декабря"];
+    const daysOfWeek = ["вс", "пн", "вт", "ср", "чт", "пт", "сб"];
+    const shortmonths = ["янв", "фев", "мар", "апр", "мая", "июн", "июл", "авг", "сен", "окт", "ноя", "дек"];
 
     const dict_result = ActiveReportData.reduce((acc, item) => {
+
+        if (ActiveReportUser != 0 && ActiveReportUser != item[0]) { return acc; }
+
+
         const date = new Date(item[1]);
         const dayOfWeek = daysOfWeek[date.getUTCDay()];
         const day = date.getUTCDate();
-        const month = months[date.getUTCMonth()];
+        const month = shortmonths[date.getUTCMonth()];
         const formattedDate = `${dayOfWeek}, ${day} ${month}`;
         const total = item[6];
 
@@ -453,7 +466,15 @@ function MonthReport() {
         return acc;
     }, {});
 
+    if (dict_result == undefined) {
+        const users_table = document.getElementById('report_table_body');
+        users_table.innerHTML = '';
+        return;
+    }
+
     const result = Object.values(dict_result);
+
+    document.getElementById('month_cost').innerText = result.reduce((acc, item) => acc + parseFloat(item[2]), 0).toFixed(2) + " грн.";
 
     const users_table = document.getElementById('report_table_body');
     users_table.innerHTML = '';
@@ -485,6 +506,6 @@ function ReportsMonthUpdate() {
 }
 
 function ReportsFilterUpdate() {
-
-
+    ActiveReportUser = document.getElementById('UserNameToReport').value;
+    MonthReport()
 }

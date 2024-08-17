@@ -267,7 +267,7 @@ class DB:
     
     ##################\ Для страницы users /##################
     
-    def LoadUserList(self):
+    def GetUserList(self):
         with sqlite3.connect('stolovka.db') as conn:
             cursor = conn.cursor()
             cursor.execute("""SELECT * FROM users""")

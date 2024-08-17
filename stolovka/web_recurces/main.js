@@ -66,6 +66,8 @@ function select_user(id) {
         }
     }
 
+    socket.emit('get', "menu");
+
     document.querySelector('.choise_user').style.display = "none";
     
     document.getElementById('user_name').innerText = user[1];
@@ -171,9 +173,6 @@ document.addEventListener('DOMContentLoaded', function () {
     if (currentDate.getDay() !== 1) {
         document.getElementById('previous_dey').style.display = "block";
     }
-
-    socket.emit('get', "menu");
-
 });
 ////////////////////////////////////////////
 //             loading menu
@@ -183,6 +182,9 @@ var today_menu;
 var previous_day_menu;
 let dishes;
 socket.on('menu', function (data) {
+
+    console.log("menu loading");
+
     today_menu = data['today_data'];
     previous_day_menu = data['previous_dey_data'];
     dishes = data['dishes'];
@@ -197,6 +199,7 @@ function menu_table_filling(menu) {
 
     for (var i = 1; i < 9; i++) {
 
+        if (menu == undefined) { break; }
         if (menu[i] == "") { continue; }
 
         var dish_name = dishes[menu[i]]['name'];

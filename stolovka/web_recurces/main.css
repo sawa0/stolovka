@@ -16,15 +16,11 @@
     align-items: center;
 }
 
-
-body:has(.choise_user) {
-    margin: 0px
-}
-
 .choise_user {
     max-width: 1200px;
     padding: 0 15px;
     margin: 0px auto;
+    padding-top: 20px;
 }
 
 .key {
@@ -298,7 +294,7 @@ p {
 
 .previous_dey {
     margin-right: 20px;
-    width: 140px;
+    width: 240px;
     color: white;
     background-color: #6b6b6b;
     font-size: 18px;
