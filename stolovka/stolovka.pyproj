@@ -23,6 +23,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="BD.py" />
+    <Compile Include="exel.py" />
     <Compile Include="stolovka.py" />
   </ItemGroup>
   <ItemGroup>

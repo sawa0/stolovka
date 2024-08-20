@@ -1,4 +1,4 @@
-﻿import datetime
+﻿import datetime, os
 from itertools import product
 
 from flask import *
@@ -82,7 +82,7 @@ def new_order(data):
     
 ##################################################
 #            Обработчик GET запросов             #
-##################################################
+##################################################    
 @flask_web_interface.on('get')
 def get_request_handler(data):
 #####  запросы страницы настроек  #####
@@ -112,6 +112,8 @@ def get_request_handler(data):
             data['today_data'] = db.GetMemu(current_week)[current_date] #   загрузить меню на сегодня
         data['dishes'] = db.GetDishDict()
         emit('menu', data)  #   отправить данные в браузер
+        
+################################################## 
         
 @flask_web_interface.on('get_week_menu')
 def get_week_menu(data):    #   передаёт в браузер [номер недели, меню на неделю, список названий активных блюд]
@@ -196,7 +198,6 @@ def DeleteDish(data):
     
 @flask_web_interface.on('GetRecipe')
 def GetRecipe(data):
-
     dish_info = db.GetDishInfo(data)
     dish_info['ingridients'] = db.GetIngredientsDict()
 
@@ -218,9 +219,26 @@ def EditVolume(data):
     GetRecipe(data['DishID'])
 
 @flask_web_interface.on('getReports')
-def getReports(data):
+def GetReports(data):
     emit("Reports", [data, db.GetUserList(), db.GetReports(data)])
+    
+@flask_web_interface.on('DownloadReport')
+def DownloadMonthlyReport(data):
+    data = db.GetReports(data[0], data[1])
 
+    from exel import create_excel_report as exel
+    emit("DownloadReport", exel(data))
+
+@app.route('/reports/<filename>')
+def download_file(filename):
+    reports_dir = os.path.join(app.root_path, "reports")
+    file_path = os.path.join(reports_dir, filename)
+    
+    if not os.path.isfile(file_path):
+        return 'File not found', 404
+    
+    return send_file(file_path, mimetype=filename)
+    
 ##################################################
 #                 запуск сервера                 #        
 ##################################################        

@@ -319,10 +319,11 @@ class DB:
         
     ##################\ Для страницы reports /##################
     
-    def GetReports(self, month):
+    def GetReports(self, month, user=0):
         with sqlite3.connect('stolovka.db') as conn:
             cursor = conn.cursor()
-            cursor.execute("""SELECT * FROM transactions WHERE data LIKE ?""", (str(month)+"%",))
+            cursor.execute(f"""SELECT * FROM transactions WHERE data LIKE ?{'' if int(user) == 0 else f' AND person_id = {user}'}""", (str(month) + "%",))
             return cursor.fetchall()
+
             
 db = DB()

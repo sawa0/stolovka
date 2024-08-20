@@ -447,8 +447,7 @@ function MonthReport() {
 
     const dict_result = ActiveReportData.reduce((acc, item) => {
 
-        if (ActiveReportUser != 0 && ActiveReportUser != item[0]) { return acc; }
-
+        if (ActiveReportUser != 0 && ActiveReportUser != item[4]) { return acc; }
 
         const date = new Date(item[1]);
         const dayOfWeek = daysOfWeek[date.getUTCDay()];
@@ -488,17 +487,13 @@ function MonthReport() {
                     </div>
                 </td>
                 <td class="report_day_action">
-                    <button>Просмотреть подробности</button><button>Скачать отчёт</button>
+                    <button>Просмотреть подробности</button><button onclick="DownloadDayReport('${day[0]}')">Скачать отчёт</button>
                 </td>
             </tr>
         `;
         users_table.insertAdjacentHTML('beforeend', row);
 
     });
-}
-
-function UserReport() {
-
 }
 
 function ReportsMonthUpdate() {
@@ -509,3 +504,16 @@ function ReportsFilterUpdate() {
     ActiveReportUser = document.getElementById('UserNameToReport').value;
     MonthReport()
 }
+
+function DownloadMonthlyReport() {
+    socket.emit('DownloadReport', [ActiveReportMonth, ActiveReportUser]);
+}
+
+function DownloadDayReport(Day) {
+    socket.emit('DownloadReport', [Day, ActiveReportUser]);
+}
+
+socket.on('DownloadReport', function (data) {
+    window.open("reports/" + data, '_blank');
+    console.log(data);
+});
