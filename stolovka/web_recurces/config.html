@@ -3,6 +3,10 @@
 <head>
     <title>Конфигурация</title>
     <script src="/libs/socket.io.js"></script>
+
+    <link rel="stylesheet" href="/libs/select2.css">
+    <script src="/libs/select2.js"></script>
+
     <script src="/config.js"></script>
     <link rel="stylesheet" href="/config.css">
 </head>
@@ -43,8 +47,10 @@
             <div id="settings_header_container" class="settings_header_container">
 
             </div>
-            <div id="reports_header_container" class= "reports_header_container">
-                <select id="UserNameToReport" class="UserNameToReport" onchange="ReportsFilterUpdate()"></select>
+            <div id="reports_header_container" class="reports_header_container">
+                <div class="UserNameToReport">
+                    <select id="UserNameToReport" class="select2_item" onchange="ReportsFilterUpdate()"></select>
+                </div>
                 <input class="ReportMonth" type="month" id="ReportMonth" name="month" onchange="ReportsMonthUpdate()">
             </div>
             
@@ -115,10 +121,15 @@
                 </div>
                 <div class="report_footer">
                     <div class="display_flex" style="height: 29px;">
-                        <button class="DownloadMonthlyReport" onclick="DownloadMonthlyReport()">Скачать отчёт за месяц</button>
+                        <button class="DownloadMonthlyReport" onclick="DownloadReport()">Скачать отчёт за месяц</button>
                         <div id="month_cost" class="report_day_price" style="width: auto; padding-left: 8px; padding-right: 8px;"></div>
                     </div>
-                    
+                </div>
+                <div id="ReportDitailsConteiner" class="report_ditails_conteiner" style="display: none;">
+                    <div id="ReportDitailsConteinerHeader">
+                        <button class="close_ReportDitails" onclick="СloseReportDitailsWindow()">Закрыть</button>
+                    </div>
+                    <div id="ReportDitailsConteinerBody"></div>
                 </div>
             </div>
 
@@ -135,6 +146,7 @@
                 <p>Язык</p>
                 <p>Константы (Валюта/...)</p>
                 <p>Настройки ценообразования</p>
+                <p>Скачать/Загрузить БД</p>
 
             </div>
 

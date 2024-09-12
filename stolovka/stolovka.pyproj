@@ -30,16 +30,18 @@
     <InterpreterReference Include="Global|VisualStudio|fore web app" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="web_recurces\JS_WEB_Libs\" />
+    <Folder Include="web_recurces\JS_Libs\" />
     <Folder Include="web_recurces\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="web_recurces\config.css" />
     <Content Include="web_recurces\config.html" />
     <Content Include="web_recurces\config.js" />
+    <Content Include="web_recurces\JS_Libs\select2.css" />
+    <Content Include="web_recurces\JS_Libs\select2.js" />
     <Content Include="web_recurces\main.css" />
     <Content Include="web_recurces\main.html" />
-    <Content Include="web_recurces\JS_WEB_Libs\socket.io.js" />
+    <Content Include="web_recurces\JS_Libs\socket.io.js" />
     <Content Include="web_recurces\main.js" />
     <Content Include="web_recurces\povar.css" />
     <Content Include="web_recurces\povar.html" />

@@ -7,8 +7,23 @@ socket.on('connect', function () {  // подключение к серверу
 var active_page = null;
 
 document.addEventListener('DOMContentLoaded', function () {
-    openpage("menu");
+    /* == Устанавливаем текущую дату == */
+
+    const date = new Date();
+
+    const getWeekNumber = (date) => {
+        const firstDayOfYear = new Date(date.getFullYear(), 0, 1);
+        return Math.ceil(((date - firstDayOfYear) / 86400000 + firstDayOfYear.getDay() + 1) / 7);
+    };
+    document.getElementById('week').value = `${date.getFullYear()}-W${String(getWeekNumber(date)).padStart(2, '0')}`;
+
+    const formattedDate = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+    document.getElementById('ReportMonth').value = formattedDate
+
+    /* == Открываем первую страницу == */
+    openpage('menu');
 });
+
 function openpage(key) {
     if (active_page != null) {
         document.getElementById("sidebar_btn_" + active_page).classList.remove('sidebar_btn_active');
@@ -21,14 +36,6 @@ function openpage(key) {
     document.getElementById(active_page + "_header_container").style.display = "flex";
 
     if (active_page == "menu") {
-        /* == Устанавливаем текущую дату == */
-        const currentDate = new Date();
-        const getWeekNumber = (date) => {
-            const firstDayOfYear = new Date(date.getFullYear(), 0, 1);
-            return Math.ceil(((date - firstDayOfYear) / 86400000 + firstDayOfYear.getDay() + 1) / 7);
-        };
-        document.getElementById('week').value = `${currentDate.getFullYear()}-W${String(getWeekNumber(currentDate)).padStart(2, '0')}`;
-        /* ================================ */
         socket.emit('get_week_menu', document.getElementById('week').value);
     }
     if (active_page == "users") {
@@ -41,12 +48,10 @@ function openpage(key) {
         socket.emit('getDishList');
     }
     if (active_page == "reports") {
-        const date = new Date();
-        const formattedDate = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-        ActiveReportMonth = formattedDate;
-        socket.emit('getReports', formattedDate);
+        socket.emit('getReports', document.getElementById('ReportMonth').value);
     }
 
+    СloseRecipeWindow()
 }
 /*=*=*=*=*=*=*   JS для меню   *=*=*=*=*=*=*/
 function WeekChange() {
@@ -56,6 +61,27 @@ socket.on('week_menu', function (data) {
     document.getElementById('week').value = data[0];
     document.getElementById('menu_conteiner').innerHTML = '';
 
+    function getWeekDatesFormatted(weekString) {
+        const [year, week] = weekString.split('-W').map(Number);
+
+        const daysOfWeek = ['Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота', 'Воскресенье'];
+        const months = ['Января', 'Февраля', 'Марта', 'Апреля', 'Мая', 'Июня', 'Июля', 'Августа', 'Сентября', 'Октября', 'Ноября', 'Декабря'];
+
+        const firstDayOfYear = new Date(year, 0, 1);
+        const firstMonday = new Date(firstDayOfYear.getFullYear(), 0, 1 + (firstDayOfYear.getDay() || 7) - 1);
+        const weekStart = new Date(firstMonday.getTime() + ((week - 1) * 7 + 1 - firstMonday.getDay()) * 24 * 60 * 60 * 1000);
+
+        const weekDates = Array.from({ length: 7 }, (_, i) => {
+            const date = new Date(weekStart.getTime() + i * 24 * 60 * 60 * 1000);
+            const dayOfWeekName = daysOfWeek[date.getDay() - 1];
+            const day = date.getDate();
+            const month = months[date.getMonth()];
+            return `${dayOfWeekName}, ${day} ${month}`;
+        });
+
+        return weekDates;
+    }
+
     var dish_select;
     Object.keys(data[2]).forEach((dish) => {
         dish = parseInt(dish)
@@ -64,7 +90,7 @@ socket.on('week_menu', function (data) {
         }
     });
 
-    let days = ["Понедельник", "Вторник", "Среда", "Четверг", "Пятница"];
+    let days = getWeekDatesFormatted(data[0]);
     var table = '';
 
     for (var day = 0; day < 5; day++) {
@@ -89,11 +115,15 @@ socket.on('week_menu', function (data) {
             table = table + `
 <tr class="table_borders_1_px">
     <td class="eda table_borders_1_px">
-        <select class="menu_filling_table_dish_name" id="name${pos}" onchange="UpdateMenu(${day}, ${pos})" style="width: 300px;">
-            <option>${DishName}</option>
-            ${DishName !== '' ? '<option></option>' : ''}
-            ${dish_select}
-        </select>
+
+        <div style="display: flex;height: 28px;">
+            <select class="menu_filling_table_dish_name select2_item_cl" id="dey${day}name${pos}" onchange="UpdateMenu(${day}, ${pos})" style="width: 300px;">
+                <option>${DishName}</option>
+                ${DishName !== '' ? '<option></option>' : ''}
+                ${dish_select}
+            </select>
+        </div>
+        
     </td>
     <td class="price" ><div id="price${pos}" class="menu_filling_table_price_input">${DishPrice}</div></td>
 </tr>
@@ -102,9 +132,10 @@ socket.on('week_menu', function (data) {
         table = table + `</table>`;
     }
     document.getElementById('menu_conteiner').innerHTML = table;
+
 });
 
-function UpdateMenu(day, row) { socket.emit('menu_update', [document.getElementById('week').value, [day, row, document.querySelector(`#dey${day} #name${row}`).value]]) }
+function UpdateMenu(day, row) { socket.emit('menu_update', [document.getElementById('week').value, [day, row, document.querySelector(`#dey${day} #dey${day}name${row}`).value]]) }
 /*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*/
 /*=*=*=*=*=*=*   JS для users  *=*=*=*=*=*=*/
 socket.on('users', function (data) {
@@ -354,10 +385,12 @@ socket.on('Recipe', function (data) {
     });
 
     var addIngredientMenu = `
-        <select id="newIngredient" class="add_ingredient_select">
-            <option value=''></option>
-            ${ingredientToAdd}
-        </select>
+        <div class="add_ingredient_select">
+            <select id="newIngredient" class="select2_item_cl">
+                <option value=''></option>
+                ${ingredientToAdd}
+            </select>
+        </div>
         <input id="newRecipeIngredientVolume" class="add_ingredient_volume" type="number" placeholder="Объем">
         <button class="add_ingredient" onclick="addIngredient(${data['id']})">Добавить</button>
     `;
@@ -415,12 +448,10 @@ function EditVolume(DishID, IngredientID) {
 /*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*/
 /*=*=*=*=*=*=* JS для reports  *=*=*=*=*=*=*/
 
-var ActiveReportMonth;
 var ActiveReportData;
 var ActiveReportUser = 0;
 
 socket.on('Reports', function (data) {
-    ActiveReportMonth = data[0];
     ActiveReportData = data[2];
     document.getElementById('ReportMonth').value = data[0];
 
@@ -486,9 +517,9 @@ function MonthReport() {
                         <div class="report_day">${day[1]}</div><div class="report_day_price">${day[2]} грн.</div>
                     </div>
                 </td>
-                <td class="report_day_action">
-                    <button>Просмотреть подробности</button><button onclick="DownloadDayReport('${day[0]}')">Скачать отчёт</button>
-                </td>
+                <td style="width: 120px;"><button onclick="DayReportDetails('${day[0]}')">Подробности</button></td>
+                <td style="width: 131px;"><button onclick="DownloadReport('${day[0]}')">Скачать отчёт</button></td>
+                <td class="delete_btn_column"><button class="delete_btn" onclick="">Очистить</button></td>
             </tr>
         `;
         users_table.insertAdjacentHTML('beforeend', row);
@@ -505,11 +536,7 @@ function ReportsFilterUpdate() {
     MonthReport()
 }
 
-function DownloadMonthlyReport() {
-    socket.emit('DownloadReport', [ActiveReportMonth, ActiveReportUser]);
-}
-
-function DownloadDayReport(Day) {
+function DownloadReport(Day = document.getElementById('ReportMonth').value) {
     socket.emit('DownloadReport', [Day, ActiveReportUser]);
 }
 
@@ -517,3 +544,17 @@ socket.on('DownloadReport', function (data) {
     window.open("reports/" + data, '_blank');
     console.log(data);
 });
+
+function DayReportDetails(Day) {
+    socket.emit('DayReportDetails', [Day, ActiveReportUser])
+}
+
+socket.on('DayReportDetails', function (data) {
+
+    document.getElementById('ReportDitailsConteiner').style.display = 'block';
+    document.getElementById('ReportDitailsConteinerBody').innerText = data;
+
+});
+
+function СloseReportDitailsWindow() { socket.emit('getReports', document.getElementById('ReportMonth').value); document.getElementById('ReportDitailsConteiner').style.display = 'none'; }
+

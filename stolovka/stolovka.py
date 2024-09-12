@@ -36,7 +36,7 @@ def main_page():
 #                files loading               #
 ##############################################
 
-web_recurces_directory = app.root_path + "/web_recurces"
+web_recurces_directory = app.root_path + "\\web_recurces"
 
 @app.route('/<filename>.css')
 def css_files(filename):
@@ -56,13 +56,15 @@ def JS_files(filename):
 #       Обработка отправки JS библиотек      #
 ##############################################
 
+web_libs_directory = app.root_path + "\\web_recurces\\JS_Libs"
+
 @app.route('/libs/<filename>')
 def serve_libs(filename):
     try:
-        with open('./web_recurces/JS_WEB_Libs/' + filename) as f:
-            return f.read()
+        return send_from_directory(web_libs_directory, filename)
     except FileNotFoundError:
         abort(404)
+
 
 #####################################################
 #         обработка событий отправки/приема         #
@@ -238,6 +240,10 @@ def download_file(filename):
         return 'File not found', 404
     
     return send_file(file_path, mimetype=filename)
+
+@flask_web_interface.on('DayReportDetails')
+def DayReportDetails(data):
+    emit("DayReportDetails", db.GetReports(data[0], data[1]))
     
 ##################################################
 #                 запуск сервера                 #        

@@ -5,7 +5,6 @@ input::-webkit-inner-spin-button {
     margin: 0;
 }
 
-
 .body {
     margin: 0;
 }
@@ -391,21 +390,6 @@ th {
     width: 40px;
 }
 
-.add_ingredient {
-    padding: 7px 10px;
-    margin-right: 5px;
-    border: none;
-    border-bottom-right-radius: 10px;
-    border-top-right-radius: 10px;
-    background-color: #4CAF50;
-    color: white;
-    cursor: pointer;
-}
-
-    .add_ingredient:hover {
-        background-color: #45a049;
-    }
-
 /*****************************************************/
 
 .ingredients-table-conteiner {
@@ -643,7 +627,7 @@ thead th {
 
 /************   блок с рецептами блюд   *************/
 
-.recipe_conteiner {
+.recipe_conteiner, .report_ditails_conteiner {
     min-width: 700px;
     position: fixed;
     height: 500px;
@@ -657,7 +641,7 @@ thead th {
 }
 
 .recipe_conteiner_header {
-    height: 50px;
+    height: 43px;
     border: 2px solid #4CAF50;
     border-top-left-radius: 7px;
     border-top-right-radius: 7px;
@@ -666,11 +650,11 @@ thead th {
 }
 
 .recipe_conteiner_body {
-    height: 408px;
+    height: 415px;
     overflow-x: auto;
 }
 
-.close_recipe {
+.close_recipe, .close_ReportDitails {
     width: 200px;
     margin-top: 4px;
     margin-bottom: 4px;
@@ -688,13 +672,18 @@ thead th {
     border-bottom-right-radius: 10px;
     background-color: #4CAF50;
 }
+    .add_ingredient:hover {
+        background-color: #45a049;
+    }
 
 .add_ingredient_select {
     border: 2px solid #4CAF50;
     border-top-left-radius: 10px;
     border-bottom-left-radius: 10px;
     background-color: #f2f2f2;
-    width: 200px;
+    display: flex;
+    padding-left: 5px;
+    padding-right: 2px;
 }
 
 .input {
@@ -746,6 +735,13 @@ thead th {
     color: #f1f1f1;
     margin: 6px;
     text-align: center;
+    font-size: 30px;
+    margin-top: 5px;
+    height: 34px;
+    white-space: nowrap;
+    width: calc(100vw - 926px);
+    min-width: 170px;
+    overflow: hidden;
 }
 
 .recipe_result {
@@ -868,6 +864,9 @@ thead th {
     border-bottom-left-radius: 10px;
     border-top-left-radius: 10px;
     width: 261.5px;
+
+    display: grid;
+    padding-left: 5px;
 }
 
 
@@ -896,6 +895,10 @@ thead th {
     table, th, td, select {
         border: 1px solid #ddd;
         border-collapse: collapse;
+    }
+
+    .select2-selection__arrow, .select2-selection__clear {
+        display: none
     }
 }
 
@@ -946,10 +949,6 @@ thead th {
 
 .display_flex {
     display: flex;
-}
-
-.report_day_action {
-    width: 360px;
 }
 
 .DownloadMonthlyReport {
