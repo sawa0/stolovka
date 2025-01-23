@@ -10,7 +10,6 @@ socket.on('connect', function () {  // подключение к серверу
 ////////////////////////////////////////////
 var users;
 socket.on('users', function (data) {
-    console.log(data);
     users = data;
     let letters = [];
     for (var i = 0; i < users.length; i++) {
@@ -66,14 +65,14 @@ function select_user(id) {
         }
     }
 
-    socket.emit('get', "menu");
 
     document.querySelector('.choise_user').style.display = "none";
     
     document.getElementById('user_name').innerText = user[1];
-    menu_table_filling(today_menu);
 
     document.querySelector('.wrapper').style.display = "flex";
+
+    socket.emit('get', "menu");
 }
 ////////////////////////////////////////////
 var order;
@@ -109,11 +108,12 @@ document.addEventListener('DOMContentLoaded', function () {
             menu_table_filling(today_menu);
         }
     }); //  обработчик переключения дня
+
     document.querySelector('.buy').addEventListener('click', function () {
         let basket = [];
         for (let i = 1; i <= 8; i++) {
 
-            if (document.getElementById("dish_price" + i) == null) { break; }
+            if (document.getElementById("dish_price" + i) == null) { continue; }
             if (document.getElementById("quantity" + i).value == 0) { continue; }
 
             var dish_name = document.getElementById("dish_name" + i).textContent;
@@ -180,26 +180,37 @@ document.addEventListener('DOMContentLoaded', function () {
 var active_dey = 0;
 var today_menu;
 var previous_day_menu;
+var regular_menu;
 let dishes;
+
 socket.on('menu', function (data) {
 
     console.log("menu loading");
+    console.log(data);
 
     today_menu = data['today_data'];
     previous_day_menu = data['previous_dey_data'];
     dishes = data['dishes'];
+    regular_menu = data['regular'];
 
     menu_table_filling(today_menu);
 });
 
 function menu_table_filling(menu) {
+
+    for (var i = 1; i < 9; i++) {
+        if (regular_menu[i] != "") {
+            menu[i] = regular_menu[i];
+        }
+    }
+
     const table = document.querySelector('.menu_table');
     table.innerHTML = '';
     total_price_resume();
 
+
     for (var i = 1; i < 9; i++) {
 
-        if (menu == undefined) { break; }
         if (menu[i] == "") { continue; }
 
         var dish_name = dishes[menu[i]]['name'];
@@ -211,7 +222,7 @@ function menu_table_filling(menu) {
             <td class="quantity-control">
                 <span class="price" id="dish_price${i}">${dish_price} грн</span>
                 <button class="left-qua" onclick="decrement(${i})">➖</button>
-                <input class="counter" type="value" id="quantity${i}" oninput="total_price_resume()" value="0">
+                <input class="counter" type="value" id="quantity${i}" oninput="total_price_resume()" readonly value="0">
                 <button class="right-qua" onclick="increment(${i})">➕</button>
             </td>
         </tr>
@@ -228,7 +239,7 @@ function total_price_resume() {
     let basket = [];
     for (let i = 1; i <= 8; i++) {
 
-        if (document.getElementById("dish_price" + i) == null) {break;}
+        if (document.getElementById("dish_price" + i) == null) { continue; }
 
         var dish_price = document.getElementById("dish_price" + i).textContent.slice(0, -4);
         var quantity = document.getElementById("quantity" + i).value;

@@ -6,9 +6,9 @@ socket.on('connect', function () {
 
 var active_order;
 var order_data;
-socket.on('new_order', function (order) {
+socket.on('new_order', function (data) {
 
-    console.log(JSON.stringify(order));
+    order = data[1];
     
     document.querySelector('.username').innerHTML = '';
     document.querySelector('.username').innerText = order["userName"];
@@ -39,25 +39,35 @@ socket.on('new_order', function (order) {
 
     order_status = "waiting";
 
-    startConfirmationTimer()
+    if (data[0][0] == "off") {
+        return
+    } else if (data[0][0] == "on") {
+        document.querySelectorAll('.btn').forEach(btn => {
+            btn.style.display = 'block';
+            btn.style.animation = 'none';
+        });
+    } else if (data[0][0] == "auto") {
+        document.querySelectorAll('.btn').forEach(btn => {
+            btn.style.display = 'block';
+            btn.style.animation = 'none';
+        });
+        startConfirmationTimer(data[0][1])
+    };
 })
 
 let countdown;
-function startConfirmationTimer() {
+function startConfirmationTimer(timer) {
 
-    document.querySelectorAll('.btn').forEach(btn => {
-        btn.style.display = 'block';
-        btn.style.animation = 'none';
-    });
+    document.getElementById('countdown').style.display = "block";
 
     const countdownElement = document.getElementById('countdown');
-    countdown = 15;
-    countdownElement.textContent = countdown;
+    countdown = timer;
+    countdownElement.textContent = "(" + countdown + "c)";
 
     const interval = setInterval(() => {
         if (order_status == "waiting") {
             countdown--;
-            countdownElement.textContent = countdown;
+            countdownElement.textContent = "(" + countdown + "c)";
             if (countdown <= 0) {
                 clearInterval(interval);
                 orderDecision("accept");
@@ -70,6 +80,8 @@ function startConfirmationTimer() {
 }
 
 function orderDecision(decision) {
+
+    document.getElementById('countdown').style.display = "none";
 
     document.querySelectorAll('.btn').forEach(btn => {
         btn.style.display = 'none';

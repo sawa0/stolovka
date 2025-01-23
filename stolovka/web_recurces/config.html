@@ -4,21 +4,23 @@
     <title>Конфигурация</title>
     <script src="/libs/socket.io.js"></script>
 
-    <link rel="stylesheet" href="/libs/select2.css">
-    <script src="/libs/select2.js"></script>
-
     <script src="/config.js"></script>
     <link rel="stylesheet" href="/config.css">
 </head>
-<body style="margin: 0px;">
+<body style="margin: 0px; overflow: hidden;">
     <div class="sidebar">
-        <h2>Конфигурация Столовой</h2>
-        <button id="sidebar_btn_menu" class="key" onclick="openpage('menu')">Меню</button>
-        <button id="sidebar_btn_purchase" class="key" onclick="openpage('purchase')">Продукты</button>
-        <button id="sidebar_btn_dish_list" class="key" onclick="openpage('dish_list')">Рецепты</button>
-        <button id="sidebar_btn_reports" class="key" onclick="openpage('reports')">Отчёты</button>
-        <button id="sidebar_btn_users" class="key" onclick="openpage('users')">Пользователи</button>
-        <button id="sidebar_btn_settings" class="key" onclick="openpage('settings')">Настройки</button>
+        <div>
+            <h2>Конфигурация Столовой</h2>
+            <div class="sidebar_body">
+                <button id="sidebar_btn_menu" class="key" onclick="openpage('menu')">Меню</button>
+                <button id="sidebar_btn_purchase" class="key" onclick="openpage('purchase')">Продукты</button>
+                <button id="sidebar_btn_dish_list" class="key" onclick="openpage('dish_list')">Рецепты</button>
+                <button id="sidebar_btn_reports" class="key" onclick="openpage('reports')">Отчёты</button>
+                <button id="sidebar_btn_users" class="key" onclick="openpage('users')">Пользователи</button>
+                <button id="sidebar_btn_settings" class="key" onclick="openpage('settings')">Настройки</button>
+            </div>
+        </div>
+        <div class="sidebar_futter"></div>
     </div>
     <div class="content">
         <div class="header">
@@ -117,7 +119,7 @@
                         <tbody id="report_table_body">
                         </tbody>
                     </table>
-                    
+
                 </div>
                 <div class="report_footer">
                     <div class="display_flex" style="height: 29px;">
@@ -126,10 +128,15 @@
                     </div>
                 </div>
                 <div id="ReportDitailsConteiner" class="report_ditails_conteiner" style="display: none;">
-                    <div id="ReportDitailsConteinerHeader">
+                    <div id="ReportDitailsConteinerHeader" class="report_ditails_conteiner_header">
                         <button class="close_ReportDitails" onclick="СloseReportDitailsWindow()">Закрыть</button>
                     </div>
-                    <div id="ReportDitailsConteinerBody"></div>
+                    <div id="ReportDitailsConteinerBody" class="report_ditails_conteiner_body">
+                        <table>
+                            <tbody id="ReportDitailsTable">
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
 
@@ -141,12 +148,26 @@
             </div>
 
             <div style="display: none;" id="settings_page">
-                <p>Настройка автоотправки отчётов</p>
-                <p>Время/необходимость автоподтверждения</p>
-                <p>Язык</p>
-                <p>Константы (Валюта/...)</p>
-                <p>Настройки ценообразования</p>
-                <p>Скачать/Загрузить БД</p>
+                <div class="settings_div">Настройка автоотправки отчётов</div>
+                <div class="settings_div">
+                    <div>Настройки подтверждения заказа</div>
+                    <div style="display: flex;">
+                        <button id="OrderConfirmationType_off" onclick="OrderConfirmationTypeUpdate('off')">Не требуется</button>
+                        <button id="OrderConfirmationType_auto" onclick="OrderConfirmationTypeUpdate('auto')">Авто подтверждение</button>
+                        <button id="OrderConfirmationType_on" onclick="OrderConfirmationTypeUpdate('on')">Требуется</button>
+                    </div>
+                    <div style="display: flex;">
+                        <div>Время автоматического подтверждения</div>
+                        <input id="OrderAutoConfirmationTime" onblur="OrderAutoConfirmationTimeUpdate()" type="number" onchange="" onfocus="" />
+                        <div>сек</div>
+                    </div>
+                </div>
+                <div class="settings_div">Язык</div>
+                <div class="settings_div">Константы (Валюта/...)</div>
+                <div class="settings_div">Настройки ценообразования</div>
+                <div class="settings_div">Скачать/Загрузить БД</div>
+                <div class="settings_div">Пароль на настройки</div>
+                <div class="settings_div">Обновить</div>
 
             </div>
 

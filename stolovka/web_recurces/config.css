@@ -10,7 +10,6 @@ input::-webkit-inner-spin-button {
 }
 
 .content {
-    min-width: 850px;
     margin-left: 200px; /* Учитывает ширину боковой панели */
     padding: 0px;
 }
@@ -181,6 +180,7 @@ button {
     display: flex;
     align-items: center;
     flex-direction: column;
+    justify-content: space-between;
 }
 
     .sidebar h2 {
@@ -270,7 +270,7 @@ button {
 .menu_filling_table_dish_name {
     margin: 0px;
     border-width: 0px;
-    height: 30px;
+    background-color: transparent;
 }
 
 .menu_filling_table_price_input {
@@ -346,6 +346,7 @@ th {
     padding-left: 5px;
     border-top-right-radius: 5px;
     border-bottom-right-radius: 5px;
+    min-width: 50px;
 }
 
 .header {
@@ -640,13 +641,15 @@ thead th {
     background-color: #f2f2f2;
 }
 
-.recipe_conteiner_header {
+.recipe_conteiner_header, .report_ditails_conteiner_header {
     height: 43px;
-    border: 2px solid #4CAF50;
+    border: 0px solid #4CAF50;
+    border-bottom-width: 3px;
     border-top-left-radius: 7px;
     border-top-right-radius: 7px;
     background: #878787;
     display: flex;
+    padding-right: 4px;
 }
 
 .recipe_conteiner_body {
@@ -654,10 +657,15 @@ thead th {
     overflow-x: auto;
 }
 
+.report_ditails_conteiner_body {
+    height: 453.5px;
+    overflow-x: auto;
+}
+
 .close_recipe, .close_ReportDitails {
     width: 200px;
     margin-top: 4px;
-    margin-bottom: 4px;
+    margin-bottom: 4px; `1-=
     margin-right: 12px;
     border: 2px solid #af4c4c;
     color: white;
@@ -683,7 +691,6 @@ thead th {
     background-color: #f2f2f2;
     display: flex;
     padding-left: 5px;
-    padding-right: 2px;
 }
 
 .input {
@@ -698,6 +705,18 @@ thead th {
     padding: 4px;
 }
 
+.delete_check_btn {
+    border: 2px solid #af4c4c;
+    color: white;
+    border-radius: 5px;
+    background-color: #af4c4c;
+    border-radius: 11px;
+    border-top-right-radius: 0px;
+    border-bottom-right-radius: 0px;
+    margin-right: 0px;
+    height: 30px;
+}
+
 .delete_btn {
     border: 2px solid #af4c4c;
     color: white;
@@ -705,7 +724,7 @@ thead th {
     background-color: #af4c4c;
 }
 
-    .delete_btn:hover {
+    .delete_btn:hover, .delete_check_btn:hover {
         background-color: #a04545;
     }
 
@@ -900,6 +919,10 @@ thead th {
     .select2-selection__arrow, .select2-selection__clear {
         display: none
     }
+
+    .regular_menu_filling_table {
+        display: none
+    }
 }
 
 .report_day {
@@ -959,4 +982,96 @@ thead th {
     align-items: center;
     background-color: #4caf50;
     color: #fff;
+}
+
+.OrderID {
+    width: max-content;
+    height: 20px;
+    background-color: #4caf50;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 10px;
+    color: azure;
+    padding-left: 5px;
+    padding-right: 5px;
+    margin-right: 5px;
+}
+
+.sidebar_futter {
+    height: 80px;
+    width: 100%;
+    border-color: #ffffff;
+    border-top: solid azure 2px;
+    transition: 0.2s;
+}
+
+    .sidebar_futter:hover {
+        background-color: #353d42;
+    }
+
+.sidebar_body {
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+}
+
+/*.regular_menu_conteiner {
+    
+}*/
+
+.option_unset {
+    background-color: #f00;
+
+}
+
+.order_id_div, .check_div {
+    display: flex;
+    align-items: center;
+    border: solid, #4caf50, 3px;
+    border-radius: 16px;
+    background-color: #4caf50;
+    justify-content: space-between;
+    width: min-content;
+}
+
+.check_div {
+    padding: 0px;
+    height: 24px;
+    border-radius: 11px;
+    width: 79px;
+    background-color: #f3fff3;
+    color: #000;
+}
+
+    .check_div:hover {
+        background-color: #f3fff3;
+    }
+
+.order_time_div {
+    background-color: #fff;
+    border-bottom-right-radius: 9px;
+    border-top-right-radius: 9px;
+    padding-left: 3px;
+    padding-right: 4px;
+    margin-right: 1px;
+    border-top-left-radius: 1px;
+    border-bottom-left-radius: 1px;
+}
+
+.settings_div {
+    margin: 5px;
+    padding: 5px;
+    border: solid, #f2f2f2, 3px;
+    border-radius: 5px;
+}
+
+    .settings_div:hover {
+        background-color: #f3f3f3;
+        transition: all 0.5s;
+    }
+
+.choised_settings {
+    background-color: #4CAF50;
+    color: white;
 }

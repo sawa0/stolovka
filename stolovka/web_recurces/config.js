@@ -50,6 +50,9 @@ function openpage(key) {
     if (active_page == "reports") {
         socket.emit('getReports', document.getElementById('ReportMonth').value);
     }
+    if (active_page == "settings") {
+        socket.emit('getSettings');
+    }
 
     СloseRecipeWindow()
 }
@@ -58,6 +61,11 @@ function WeekChange() {
     socket.emit('get_week_menu', document.getElementById('week').value);
 }
 socket.on('week_menu', function (data) {
+
+    console.log(data);
+
+
+
     document.getElementById('week').value = data[0];
     document.getElementById('menu_conteiner').innerHTML = '';
 
@@ -73,10 +81,9 @@ socket.on('week_menu', function (data) {
 
         const weekDates = Array.from({ length: 7 }, (_, i) => {
             const date = new Date(weekStart.getTime() + i * 24 * 60 * 60 * 1000);
-            const dayOfWeekName = daysOfWeek[date.getDay() - 1];
             const day = date.getDate();
             const month = months[date.getMonth()];
-            return `${dayOfWeekName}, ${day} ${month}`;
+            return `${daysOfWeek[i]}, ${day} ${month}`;
         });
 
         return weekDates;
@@ -93,16 +100,25 @@ socket.on('week_menu', function (data) {
     let days = getWeekDatesFormatted(data[0]);
     var table = '';
 
-    for (var day = 0; day < 5; day++) {
+    for (var day = 0; day < 7; day++) {
         table = table + `
-            <table id = "dey${day}" class="menu_filling_table">
+            <table id="dey${day}" class="menu_filling_table">
                 <tr class="table_borders_1_px">
                     <th colspan="2">${days[day]}</th>
                 </tr>
         `;
         for (var pos = 1; pos < 9; pos++) {
 
-            var DishID = data[1][day][pos];
+            var DishID = '';
+            var active = '';
+
+            if (data[3][pos] == "") {
+                DishID = data[1][day][pos];
+            } else {
+                DishID = data[3][pos];
+                active = 'disabled';
+            }
+
             var DishName = '';
             var DishPrice = '';
 
@@ -117,9 +133,9 @@ socket.on('week_menu', function (data) {
     <td class="eda table_borders_1_px">
 
         <div style="display: flex;height: 28px;">
-            <select class="menu_filling_table_dish_name select2_item_cl" id="dey${day}name${pos}" onchange="UpdateMenu(${day}, ${pos})" style="width: 300px;">
+            <select class="menu_filling_table_dish_name select2_item" id="dey${day}name${pos}" onchange="UpdateMenu(${day}, ${pos})" style="width: 300px;" ${active}>
                 <option>${DishName}</option>
-                ${DishName !== '' ? '<option></option>' : ''}
+                ${DishName !== '' ? '<option class="option_unset"></option>' : ''}
                 ${dish_select}
             </select>
         </div>
@@ -131,9 +147,64 @@ socket.on('week_menu', function (data) {
         }
         table = table + `</table>`;
     }
+
+    var regular_menu_table_rows = '';
+
+
+    for (var pos = 1; pos < 9; pos++) {
+
+        var DishID = data[3][pos];
+        var DishName = '';
+        var DishPrice = '';
+
+        if (DishID !== '' && data[2][DishID]) {
+            const { name, price } = data[2][DishID];
+            DishName = name;
+            DishPrice = price;
+        }
+
+        regular_menu_table_rows = regular_menu_table_rows + `
+<tr class="table_borders_1_px">
+    <td class="eda table_borders_1_px">
+
+        <div style="display: flex;height: 28px;">
+            <select class="menu_filling_table_dish_name select2_item" id="RegularMenuName${pos}" onchange="UpdateRegularMenu(${pos})" style="width: 300px;">
+                <option>${DishName}</option>
+                ${DishName !== '' ? '<option class="option_unset"></option>' : ''}
+                ${dish_select}
+            </select>
+        </div>
+        
+    </td>
+    <td class="price" ><div id="price${pos}" class="menu_filling_table_price_input">${DishPrice}</div></td>
+</tr>
+`;
+    }
+
+
+    table = table + `
+            <table id="regular" class="menu_filling_table regular_menu_filling_table">
+                <tr class="table_borders_1_px">
+                    <th colspan="2">
+                        <div style="height: 20px;display: flex;flex-wrap: nowrap;justify-content: center;align-items: center;">
+                            <div>Регулярное меню</div>
+                            <div style="height: 16px;">
+                                <div title="Части меню, повторяющееся каждый день. Например хлеб. (Желательно заполнять с конца, пустые строки не отображаются)" style="display: flex; height: 12px; width: 12px; background-color: #4caf50; justify-content: center; align-items: center; border-radius: 5px; margin-left: 5px; font-size: smaller; color: azure;">?</div>
+                            </div>
+                        </div>
+                    </th>
+                </tr>
+
+                ${regular_menu_table_rows}
+
+            </table>
+        `;
+
     document.getElementById('menu_conteiner').innerHTML = table;
 
 });
+
+function UpdateRegularMenu(row) { socket.emit('regular_menu_update', [document.getElementById('week').value, [row, document.querySelector(`#RegularMenuName${row}`).value]]) }
 
 function UpdateMenu(day, row) { socket.emit('menu_update', [document.getElementById('week').value, [day, row, document.querySelector(`#dey${day} #dey${day}name${row}`).value]]) }
 /*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*/
@@ -485,10 +556,10 @@ function MonthReport() {
         const day = date.getUTCDate();
         const month = shortmonths[date.getUTCMonth()];
         const formattedDate = `${dayOfWeek}, ${day} ${month}`;
-        const total = item[6];
+        const total = Number(item[6]);
 
         if (!acc[date]) {
-            acc[date] = [item[1], formattedDate, total.toFixed(2)];
+            acc[date] = [item[1], formattedDate, total];
         } else {
             acc[date][2] = (parseFloat(acc[date][2]) + total).toFixed(2);
         }
@@ -527,34 +598,110 @@ function MonthReport() {
     });
 }
 
-function ReportsMonthUpdate() {
-    socket.emit('getReports', document.getElementById('ReportMonth').value);
-}
+function ReportsMonthUpdate() {socket.emit('getReports', document.getElementById('ReportMonth').value);}
 
 function ReportsFilterUpdate() {
     ActiveReportUser = document.getElementById('UserNameToReport').value;
     MonthReport()
 }
 
-function DownloadReport(Day = document.getElementById('ReportMonth').value) {
-    socket.emit('DownloadReport', [Day, ActiveReportUser]);
-}
+function DownloadReport(Day = document.getElementById('ReportMonth').value) {socket.emit('DownloadReport', [Day, ActiveReportUser]);}
+socket.on('DownloadReport', function (data) {window.open("reports/" + data, '_blank');});
 
-socket.on('DownloadReport', function (data) {
-    window.open("reports/" + data, '_blank');
-    console.log(data);
-});
+var details_date = "";
+function DayReportDetails(Day) { details_date = Day; socket.emit('DayReportDetails', [Day, ActiveReportUser])}
 
-function DayReportDetails(Day) {
-    socket.emit('DayReportDetails', [Day, ActiveReportUser])
-}
+function DeleteOrder(OrderID) { socket.emit('DeleteOrder', [OrderID, [details_date, document.getElementById('UserNameToReport').value]]);}
 
 socket.on('DayReportDetails', function (data) {
 
-    document.getElementById('ReportDitailsConteiner').style.display = 'block';
-    document.getElementById('ReportDitailsConteinerBody').innerText = data;
+    var ReportDitailsTable = document.getElementById('ReportDitailsTable');
 
+    ReportDitailsTable.innerHTML = "";
+
+    data.forEach((order) => {
+
+        var bill = JSON.parse(order[5]);
+        console.log(bill);
+
+        var HTML_bill = "";
+        bill.forEach((dish) => {
+            function padString(text, filler, length) {
+                if (text.length >= length) {
+                    return text;
+                }
+                let fillerLength = length - text.length;
+                let fillerString = filler.repeat(fillerLength);
+                return text + fillerString;
+            }
+
+            HTML_bill = HTML_bill + `<div style="display: flex;">
+                                        <div>${padString(dish[0], ".", 35)}</div>
+                                        <div style="display: flex;">
+                                            <div style="padding-left: 8px;width: 66px;">${dish[1][0]}</div>
+                                            <div>x</div>
+                                            <div>${dish[1][1]}</div>
+                                        </div>
+                                    </div>`;
+        });
+
+        var row = `
+            <tr>
+                <td style="align-content: flex-start;">
+                    <div style="display: flex;">
+                        <div class="order_id_div">
+                            <div class="OrderID">ID#${order[0]}</div>
+                            <div class="order_time_div">${order[2]}</div>
+                        </div>
+                        <div style="padding-top: 4px;padding-left: 6px;">
+                            ${order[3]}
+                        </div>
+                    </div>
+                </td>
+
+                <td style="width: 430px;">
+                    <div style="font-family: 'Courier New', Courier, monospace;">${HTML_bill}</div>
+                    <div style="display: flex;justify-content: flex-end;padding-top: 9px;">
+                        <button class="delete_check_btn" onclick="DeleteOrder(${order[0]})">Удалить</button>
+                        <div style="width: 80px;border-top-left-radius: 0px;border-bottom-left-radius: 0px;" class="check_div">&#129534; ${order[6]}</div>
+                    </div>
+                </td>
+
+            </tr>
+        `;
+
+        ReportDitailsTable.insertAdjacentHTML('beforeend', row);
+    });
+
+
+
+    document.getElementById('ReportDitailsConteiner').style.display = 'block';
 });
 
 function СloseReportDitailsWindow() { socket.emit('getReports', document.getElementById('ReportMonth').value); document.getElementById('ReportDitailsConteiner').style.display = 'none'; }
 
+/*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*/
+/*=*=*=*=*=*=* JS для setting  *=*=*=*=*=*=*/
+
+function OrderAutoConfirmationTimeUpdate() {
+    socket.emit("updateSettings", ["OrderAutoConfirmationTime", document.getElementById('OrderAutoConfirmationTime').value])
+}
+
+function OrderConfirmationTypeUpdate(tupe) {
+    socket.emit("updateSettings", ["OrderConfirmationType", tupe])
+}
+
+socket.on('Settings', function (data) {
+
+
+    console.log(data);
+
+    document.getElementById('OrderConfirmationType_on').classList.remove('choised_settings');
+    document.getElementById('OrderConfirmationType_off').classList.remove('choised_settings');
+    document.getElementById('OrderConfirmationType_auto').classList.remove('choised_settings');
+
+    document.getElementById('OrderConfirmationType_' + data[0]).classList.add('choised_settings');
+
+    document.getElementById('OrderAutoConfirmationTime').value = data[1];
+
+});

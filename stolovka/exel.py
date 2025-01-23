@@ -6,6 +6,9 @@ import os, json
 
 def create_excel_report(data):
     
+    if data == []:
+        return
+    
     formated = {}
 
     for order in data:
@@ -34,7 +37,7 @@ def create_excel_report(data):
         # Печать имени клиента и итога за месяц
         ws.cell(row=row, column=user_column_offset, value=value[0]).font = header_font
         ws.cell(row=row, column=user_column_offset + 1, value="Итог за месяц:").font = header_font
-        month_total = sum(order[4] for order in value[1])
+        month_total = sum(float(order[4]) for order in value[1])
         ws.cell(row=row, column=user_column_offset + 2, value=month_total).font = header_font
 
         # Индекс начала строк с подробностями для группировки

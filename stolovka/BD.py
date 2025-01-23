@@ -16,7 +16,7 @@ class DB:
                             person TEXT NOT NULL,
                             person_id INTEGER NOT NULL,
                             "order" TEXT NOT NULL,
-                            price FLOAT NOT NULL)''')   #   таблица заказов
+                            price TEXT NOT NULL)''')   #   таблица заказов
             cursor.execute('''CREATE TABLE IF NOT EXISTS "menu" (
                             week_number VARCHAR(10) PRIMARY KEY,
                             MenuText TEXT,
@@ -32,6 +32,27 @@ class DB:
                             name TEXT NOT NULL,
                             volume TEXT NOT NULL,
                             price INTEGER NOT NULL)''')   #   таблица ингредиентов
+            cursor.execute('''CREATE TABLE IF NOT EXISTS "settings" (
+                            parameter TEXT PRIMARY KEY,
+                            Value TEXT);''')  #   таблица меню
+            
+            #############################################################################
+            #     создаёт в таблице "settings" параметр "RegularMenu", если его нет
+            #############################################################################
+            cursor.execute("""SELECT * FROM "settings" WHERE parameter = 'RegularMenu' """)
+            if not cursor.fetchone():
+                cursor.execute("""INSERT INTO "settings" (parameter, Value) VALUES (?, ?)""",
+                              ('RegularMenu', json.dumps({'1': '', '2': '', '3': '', '4': '', '5': '', '6': '', '7': '', '8': ''})))
+            #############################################################################
+            #     создаёт в таблице "settings" параметр "OrderConfirmationType", если его нет
+            #############################################################################
+            cursor.execute("""SELECT * FROM "settings" WHERE parameter = 'OrderConfirmationType' """)
+            data = cursor.fetchone()
+            self.OrderConfirmationType = None
+            if not data:
+                cursor.execute("""INSERT INTO "settings" (parameter, Value) VALUES (?, ?)""",
+                              ('OrderConfirmationType', json.dumps(["auto", 10])))  #   auto/on/off
+
             conn.commit()   #   Создает структуру базы данных, если таковой нет 
         
     def NewTransaction(self, data):
@@ -68,7 +89,7 @@ class DB:
             menu = cursor.fetchone()
 
             if not menu:
-                menu = [{'1': '', '2': '', '3': '', '4': '', '5': '', '6': '', '7': '', '8': ''} for _ in range(5)]
+                menu = [{'1': '', '2': '', '3': '', '4': '', '5': '', '6': '', '7': '', '8': ''} for _ in range(7)]
                 cursor.execute(f"""INSERT INTO "menu" (week_number, MenuText) VALUES (?, ?);""", (week, json.dumps(menu)))
                 conn.commit()
             else:
@@ -84,6 +105,23 @@ class DB:
             cursor.execute(f"""UPDATE "menu" SET MenuText = ? WHERE week_number = ?;""", (json.dumps(menu), week))
             conn.commit()   #   Обновляет меню
     
+    def GetRegularMenu(self):
+        with sqlite3.connect('stolovka.db') as conn:
+            cursor = conn.cursor()
+            cursor.execute("""SELECT Value FROM "settings" WHERE parameter = 'RegularMenu' """)
+            return json.loads(cursor.fetchone()[0])
+
+
+    def UpdateRegularMenu(self, data):
+        RegMenu = self.GetRegularMenu()
+        RegMenu[str(data[0])] = data[1]
+
+        with sqlite3.connect('stolovka.db') as conn:
+            cursor = conn.cursor()
+            cursor.execute("""UPDATE "settings" SET Value = ? WHERE parameter = 'RegularMenu'""", (json.dumps(RegMenu),) )
+            conn.commit()
+
+
     ################\ Для страницы purchase  /################
 
     def FindDishWhereIngredient(self, IngredientID):
@@ -324,6 +362,32 @@ class DB:
             cursor = conn.cursor()
             cursor.execute(f"""SELECT * FROM transactions WHERE data LIKE ?{'' if int(user) == 0 else f' AND person_id = {user}'}""", (str(month) + "%",))
             return cursor.fetchall()
-
+        
+    def DeleteOrder(self, OrderID):
+        with sqlite3.connect('stolovka.db') as conn:
+            cursor = conn.cursor()
+            cursor.execute("""DELETE FROM transactions WHERE order_id = ?""", (OrderID,))
             
+    ##################\ Для страницы settings /##################
+    def UpdateSettings(self, parametr, value):
+        
+        with sqlite3.connect('stolovka.db') as conn:
+            cursor = conn.cursor()
+        
+            if parametr == "OrderConfirmationType":
+                old_value = self.GetOrderConfirmationType()
+                cursor.execute(f"""UPDATE 'settings' SET Value = ? WHERE parameter = 'OrderConfirmationType'""", (json.dumps([value, old_value[1]]),))
+            
+            elif parametr == "OrderAutoConfirmationTime":
+                old_value = self.GetOrderConfirmationType()
+                cursor.execute(f"""UPDATE 'settings' SET Value = ? WHERE parameter = 'OrderConfirmationType'""", (json.dumps([old_value[0], value]),))
+
+        
+    def GetOrderConfirmationType(self):
+        with sqlite3.connect('stolovka.db') as conn:
+            cursor = conn.cursor()
+            cursor.execute("""SELECT Value FROM 'settings' WHERE parameter = 'OrderConfirmationType'""")
+            return json.loads(cursor.fetchall()[0][0])
+
+
 db = DB()

@@ -1,4 +1,10 @@
-﻿import datetime, os
+﻿
+print("""#################################
+ * http://127.0.0.1:8080/config
+ * http://127.0.0.1:8080/povar
+#################################""")
+
+import datetime, os
 from itertools import product
 
 from flask import *
@@ -80,7 +86,10 @@ def order_decision(data):
 
 @flask_web_interface.on('new_order')    #   Отправка нового заказа на страницу Повара
 def new_order(data):
-    emit('new_order', data, broadcast=True)
+    ConfirmationType = db.GetOrderConfirmationType()
+    if ConfirmationType[0] == "off":
+        emit('decision', 'accept', broadcast=True)
+    emit('new_order', [ConfirmationType, data], broadcast=True)
     
 ##################################################
 #            Обработчик GET запросов             #
@@ -113,18 +122,25 @@ def get_request_handler(data):
                 data['previous_dey_data'] = db.GetMemu(current_week)[current_date - 1]  #   загрузить меню на предыдущий день 
             data['today_data'] = db.GetMemu(current_week)[current_date] #   загрузить меню на сегодня
         data['dishes'] = db.GetDishDict()
+        data['regular'] = db.GetRegularMenu()
         emit('menu', data)  #   отправить данные в браузер
         
 ################################################## 
         
 @flask_web_interface.on('get_week_menu')
 def get_week_menu(data):    #   передаёт в браузер [номер недели, меню на неделю, список названий активных блюд]
-    emit('week_menu', [data, db.GetMemu(data), db.GetDishDict()])
+    emit('week_menu', [data, db.GetMemu(data), db.GetDishDict(), db.GetRegularMenu()])
     
 @flask_web_interface.on('menu_update')
 def menu_update(data):
     db.UpdateMenu(data[0], data[1])
-    emit('week_menu', [data[0], db.GetMemu(data[0]), db.GetDishDict()])    #   Отправляем событие с обновленным недельным меню в браузер
+    get_week_menu(data[0])    #   Отправляем событие с обновленным недельным меню в браузер
+    
+@flask_web_interface.on('regular_menu_update')
+def regular_menu_update(data):
+    db.UpdateRegularMenu(data[1])
+    get_week_menu(data[0])
+    
 
 @flask_web_interface.on('getUsers')
 def getUsers():
@@ -244,6 +260,20 @@ def download_file(filename):
 @flask_web_interface.on('DayReportDetails')
 def DayReportDetails(data):
     emit("DayReportDetails", db.GetReports(data[0], data[1]))
+    
+@flask_web_interface.on('DeleteOrder')
+def DeleteOrder(data):
+    db.DeleteOrder(data[0])
+    emit("DayReportDetails", db.GetReports(data[1][0], data[1][1]))
+    
+@flask_web_interface.on('getSettings')
+def getSettings():
+    emit("Settings", db.GetOrderConfirmationType())
+    
+@flask_web_interface.on('updateSettings')
+def updateSettings(data):
+    db.UpdateSettings(data[0], data[1])
+    getSettings()
     
 ##################################################
 #                 запуск сервера                 #        
