@@ -88,6 +88,7 @@ def order_decision(data):
 def new_order(data):
     ConfirmationType = db.GetOrderConfirmationType()
     if ConfirmationType[0] == "off":
+        db.NewTransaction(data)
         emit('decision', 'accept', broadcast=True)
     emit('new_order', [ConfirmationType, data], broadcast=True)
     
