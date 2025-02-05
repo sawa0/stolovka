@@ -130,7 +130,7 @@ def get_request_handler(data):
         
 @flask_web_interface.on('get_week_menu')
 def get_week_menu(data):    #   передаёт в браузер [номер недели, меню на неделю, список названий активных блюд]
-    emit('week_menu', [data, db.GetMemu(data), db.GetDishDict(), db.GetRegularMenu()])
+    emit('week_menu', [data, db.GetMemu(data), db.GetDishDict(), db.GetRegularMenu(), db.GetPrintFlag()])
     
 @flask_web_interface.on('menu_update')
 def menu_update(data):
@@ -267,6 +267,11 @@ def DeleteOrder(data):
     db.DeleteOrder(data[0])
     emit("DayReportDetails", db.GetReports(data[1][0], data[1][1]))
     
+@flask_web_interface.on('DayReportDelete')
+def DayReportDelete(data):
+    db.DeleteDayReport(data)
+    emit("Reports", [data[0][:7], db.GetUserList(), db.GetReports(data[0][:7])])
+    
 @flask_web_interface.on('getSettings')
 def getSettings():
     emit("Settings", db.GetOrderConfirmationType())
@@ -276,18 +281,19 @@ def updateSettings(data):
     db.UpdateSettings(data[0], data[1])
     getSettings()
     
+@flask_web_interface.on('IngredientPriceEditFromRecipe')
+def IngredientPriceEditFromRecipe(data):
+    db.NewPrice(data['ingredientID'], data['newPrice'])
+    GetRecipe(data['DishID'])
+
+@flask_web_interface.on('print_flag_change')
+def print_flag_change(data):
+    db.PrintFlagChange(data)
+
+
 ##################################################
 #                 запуск сервера                 #        
 ##################################################        
 if __name__ == '__main__':
     flask_web_interface.run(app, debug=False, port="8080", host="0.0.0.0")
 ##################################################
-
-
-"""
-Доделать:
-
-Кнопка для печати меню на неделю
-
-страница отчётов
-"""

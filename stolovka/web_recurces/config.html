@@ -40,7 +40,7 @@
             </div>
             <div id="menu_header_container" class="menu_header_container">
                 <input class="week" type="week" id="week" name="week" onchange="WeekChange()">
-                <button class="print_menu" onclick="print()">Печать</button>
+                <button class="print_menu" onclick="print_memu()">Печать</button>
             </div>
             <div id="dish_list_header_container" class="dish_list_header_container">
                 <input class="input_dish_name" type="text" id="newDishName" placeholder="Название блюда" oninput="FilterDishList()">
@@ -51,7 +51,7 @@
             </div>
             <div id="reports_header_container" class="reports_header_container">
                 <div class="UserNameToReport">
-                    <select id="UserNameToReport" class="select2_item" onchange="ReportsFilterUpdate()"></select>
+                    <select id="UserNameToReport" class="select_report_user" onchange="ReportsFilterUpdate()"></select>
                 </div>
                 <input class="ReportMonth" type="month" id="ReportMonth" name="month" onchange="ReportsMonthUpdate()">
             </div>

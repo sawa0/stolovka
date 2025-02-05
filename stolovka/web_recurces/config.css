@@ -750,6 +750,14 @@ thead th {
     padding: 4px;
 }
 
+.input_ingridient_per_volume_unit_price {
+    width: 120px;
+    display: flex;
+    justify-content: space-around;
+    height: 32px;
+    align-items: center;
+}
+
 .recipe_dish_name {
     color: #f1f1f1;
     margin: 6px;
@@ -916,13 +924,26 @@ thead th {
         border-collapse: collapse;
     }
 
-    .select2-selection__arrow, .select2-selection__clear {
+    .print_control_div, .print_icon, .regular_menu_filling_table, .select2-selection__arrow, .select2-selection__clear, .hide_to_print {
         display: none
     }
 
-    .regular_menu_filling_table {
-        display: none
+    .day_div {
+        display: flex;
+        justify-content: center;
+        align-items: center;
     }
+
+    .menu_filling_table_dish_name {
+        border-width: 0px;
+        padding-left: 10px;
+    }
+
+}
+
+.select_report_user {
+    background-color: transparent;
+    border-width: 0px;
 }
 
 .report_day {
@@ -1074,4 +1095,19 @@ thead th {
 .choised_settings {
     background-color: #4CAF50;
     color: white;
+}
+
+.print_control_div {
+    display: flex;
+    justify-content: flex-end;
+    padding-left: 8px;
+    padding-right: 8px;
+}
+
+.day_div {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding-left: 50px;
+    width: -webkit-fill-available;
 }

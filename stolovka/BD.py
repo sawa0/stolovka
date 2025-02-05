@@ -1,5 +1,8 @@
-﻿import sqlite3, json
+﻿from operator import ne
+from re import T
+import sqlite3, json
 from datetime import datetime
+from tkinter import W
 
 class DB:
     def __init__(self):
@@ -36,22 +39,29 @@ class DB:
                             parameter TEXT PRIMARY KEY,
                             Value TEXT);''')  #   таблица меню
             
-            #############################################################################
+            ###################################################################################
             #     создаёт в таблице "settings" параметр "RegularMenu", если его нет
-            #############################################################################
+            ###################################################################################
             cursor.execute("""SELECT * FROM "settings" WHERE parameter = 'RegularMenu' """)
             if not cursor.fetchone():
                 cursor.execute("""INSERT INTO "settings" (parameter, Value) VALUES (?, ?)""",
                               ('RegularMenu', json.dumps({'1': '', '2': '', '3': '', '4': '', '5': '', '6': '', '7': '', '8': ''})))
-            #############################################################################
+            ###################################################################################
             #     создаёт в таблице "settings" параметр "OrderConfirmationType", если его нет
-            #############################################################################
+            ###################################################################################
             cursor.execute("""SELECT * FROM "settings" WHERE parameter = 'OrderConfirmationType' """)
             data = cursor.fetchone()
             self.OrderConfirmationType = None
             if not data:
                 cursor.execute("""INSERT INTO "settings" (parameter, Value) VALUES (?, ?)""",
                               ('OrderConfirmationType', json.dumps(["auto", 10])))  #   auto/on/off
+            ###################################################################################
+            #     создаёт в таблице "settings" параметр "HideToPrint", если его нет
+            ###################################################################################
+            cursor.execute("""SELECT * FROM "settings" WHERE parameter = 'HideToPrint' """)
+            if not cursor.fetchone():
+                cursor.execute("""INSERT INTO "settings" (parameter, Value) VALUES (?, ?)""",
+                              ('HideToPrint', json.dumps({0: True, 1: True, 2: True, 3: True, 4: True, 5: False, 6: False})))
 
             conn.commit()   #   Создает структуру базы данных, если таковой нет 
         
@@ -121,6 +131,21 @@ class DB:
             cursor.execute("""UPDATE "settings" SET Value = ? WHERE parameter = 'RegularMenu'""", (json.dumps(RegMenu),) )
             conn.commit()
 
+    def GetPrintFlag(self):
+        with sqlite3.connect('stolovka.db') as conn:
+            cursor = conn.cursor()
+            cursor.execute("""SELECT Value FROM "settings" WHERE parameter = 'HideToPrint' """)
+            return json.loads(cursor.fetchone()[0])
+
+    def PrintFlagChange(self, data):
+
+        new_print_flag = self.GetPrintFlag()
+        new_print_flag[str(data[0])] = data[1]
+
+        with sqlite3.connect('stolovka.db') as conn:
+            cursor = conn.cursor()
+            cursor.execute("""UPDATE "settings" SET Value = ? WHERE parameter = 'HideToPrint'""", (json.dumps(new_print_flag),) )
+            conn.commit()
 
     ################\ Для страницы purchase  /################
 
@@ -367,6 +392,14 @@ class DB:
         with sqlite3.connect('stolovka.db') as conn:
             cursor = conn.cursor()
             cursor.execute("""DELETE FROM transactions WHERE order_id = ?""", (OrderID,))
+            
+    def DeleteDayReport(self, data):
+        with sqlite3.connect('stolovka.db') as conn:
+            cursor = conn.cursor()
+            if data[1] == '0':
+                cursor.execute("""DELETE FROM transactions WHERE data = ?""", (data[0],))
+            else:
+                cursor.execute("""DELETE FROM transactions WHERE data = ? AND person_id = ?""", (data[0], data[1]))
             
     ##################\ Для страницы settings /##################
     def UpdateSettings(self, parametr, value):

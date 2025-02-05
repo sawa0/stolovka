@@ -104,7 +104,15 @@ socket.on('week_menu', function (data) {
         table = table + `
             <table id="dey${day}" class="menu_filling_table">
                 <tr class="table_borders_1_px">
-                    <th colspan="2">${days[day]}</th>
+                    <th colspan="2">
+                        <div style="display: flex;justify-content: center;align-items: center;">
+                            <div class="day_div">${days[day]}</div>
+                            <div class="print_control_div">
+                                <div class="print_icon">🖨️</div>
+                                <input type="checkbox" ${data[4][day] ? 'checked' : ''} id="print_check${day}" onchange="print_flag_change(${day}, this.checked)"></input>
+                            </div>
+                        </div>
+                    </th>
                 </tr>
         `;
         for (var pos = 1; pos < 9; pos++) {
@@ -132,8 +140,8 @@ socket.on('week_menu', function (data) {
 <tr class="table_borders_1_px">
     <td class="eda table_borders_1_px">
 
-        <div style="display: flex;height: 28px;">
-            <select class="menu_filling_table_dish_name select2_item" id="dey${day}name${pos}" onchange="UpdateMenu(${day}, ${pos})" style="width: 300px;" ${active}>
+        <div style="display: flex;">
+            <select class="menu_filling_table_dish_name" id="dey${day}name${pos}" onchange="UpdateMenu(${day}, ${pos})" style="width: 300px;" ${active}>
                 <option>${DishName}</option>
                 ${DishName !== '' ? '<option class="option_unset"></option>' : ''}
                 ${dish_select}
@@ -168,7 +176,7 @@ socket.on('week_menu', function (data) {
     <td class="eda table_borders_1_px">
 
         <div style="display: flex;height: 28px;">
-            <select class="menu_filling_table_dish_name select2_item" id="RegularMenuName${pos}" onchange="UpdateRegularMenu(${pos})" style="width: 300px;">
+            <select class="menu_filling_table_dish_name" id="RegularMenuName${pos}" onchange="UpdateRegularMenu(${pos})" style="width: 300px;">
                 <option>${DishName}</option>
                 ${DishName !== '' ? '<option class="option_unset"></option>' : ''}
                 ${dish_select}
@@ -207,6 +215,24 @@ socket.on('week_menu', function (data) {
 function UpdateRegularMenu(row) { socket.emit('regular_menu_update', [document.getElementById('week').value, [row, document.querySelector(`#RegularMenuName${row}`).value]]) }
 
 function UpdateMenu(day, row) { socket.emit('menu_update', [document.getElementById('week').value, [day, row, document.querySelector(`#dey${day} #dey${day}name${row}`).value]]) }
+
+function print_flag_change(day, status) {socket.emit('print_flag_change', [day, status]);}
+
+function print_memu() {
+    for (var day = 0; day < 7; day++) {
+
+        var table = document.getElementById('dey' + day);
+
+        if (table.classList.contains("hide_to_print")) {
+            table.classList.remove('hide_to_print');
+        }
+
+        if ( !document.getElementById('print_check' + day).checked) {
+            table.classList.add('hide_to_print');
+        }
+    }
+    print();
+}
 /*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*/
 /*=*=*=*=*=*=*   JS для users  *=*=*=*=*=*=*/
 socket.on('users', function (data) {
@@ -457,7 +483,7 @@ socket.on('Recipe', function (data) {
 
     var addIngredientMenu = `
         <div class="add_ingredient_select">
-            <select id="newIngredient" class="select2_item_cl">
+            <select id="newIngredient">
                 <option value=''></option>
                 ${ingredientToAdd}
             </select>
@@ -473,12 +499,22 @@ socket.on('Recipe', function (data) {
 
     recipeKeys.forEach((key) => {
         var ingredient = data['Recipe'][key];
+
+        console.log(data);
+
         var recipeRow = `
             <tr class="">
                 <td class="padding_4">${data['ingridients'][key]['name']}</td>
-                <td style="width: 80px;">${data['ingridients'][key]['price']}грн/${data['ingridients'][key]['volume']}</td>
+                <td style="width: 140px;">
+                    <div class="input_ingridient_per_volume_unit_price">
+                        <input class="input" type="number" value="${data['ingridients'][key]['price']}" onblur="IngredientPriceEditFromRecipe(${key}, this.value, ${data['id']})">
+                        <div>
+                            грн/${data['ingridients'][key]['volume']}
+                        </div>
+                    </div>
+                </td>
                 <td class="input_volume">
-                    <input id="set_ingridient_volume${key}" class="input" type="number" value="${ingredient}" onblur="EditVolume(${data['id']}, ${key})"> ${data['ingridients'][key]['volume']}
+                    <input id="set_ingridient_volume${key}" class="input" type="number" value="${ingredient}" onblur="EditVolume(${data['id']}, ${key}, this.value)"> ${data['ingridients'][key]['volume']}
                 </td>
                 <td style="width: 100px;">${(data['ingridients'][key]['price'] * ingredient).toFixed(2)} грн</td>
                 <td class="delete_btn_column"><button class="delete_btn" onclick="DeleteIngredientFromRecipe(${data['id']}, ${key})">Удалить</button></td>
@@ -494,6 +530,13 @@ socket.on('Recipe', function (data) {
 
     document.getElementById("recipeWindow").style.display = 'block';
 });
+
+function IngredientPriceEditFromRecipe(id, newPrice, DishID) {
+    if (newPrice == '') { newPrice = 0 }
+    socket.emit('IngredientPriceEditFromRecipe', {
+        ingredientID: id, newPrice: newPrice, DishID: DishID
+    });
+}
 
 function СloseRecipeWindow() { socket.emit('getDishList'); document.getElementById('recipeWindow').style.display = 'none'; }
 
@@ -512,8 +555,9 @@ function addIngredient(id) {
 
 function DeleteIngredientFromRecipe(DishID, IngredientID) { socket.emit("DeleteIngredientFromRecipe", { 'DishID': DishID, 'IngredientID': IngredientID }) }
 
-function EditVolume(DishID, IngredientID) {
-    socket.emit("EditVolume", { 'DishID': DishID, 'IngredientID': IngredientID, 'Volume': document.getElementById('set_ingridient_volume' + IngredientID).value })
+function EditVolume(DishID, IngredientID, newVolume) {
+    if (newVolume == '') { newVolume = 0 }
+    socket.emit("EditVolume", { 'DishID': DishID, 'IngredientID': IngredientID, 'Volume': newVolume })
 }
 
 /*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*/
@@ -590,7 +634,7 @@ function MonthReport() {
                 </td>
                 <td style="width: 120px;"><button onclick="DayReportDetails('${day[0]}')">Подробности</button></td>
                 <td style="width: 131px;"><button onclick="DownloadReport('${day[0]}')">Скачать отчёт</button></td>
-                <td class="delete_btn_column"><button class="delete_btn" onclick="">Очистить</button></td>
+                <td class="delete_btn_column"><button class="delete_btn" onclick="deleteDayReport('${day[0]}')">Очистить</button></td>
             </tr>
         `;
         users_table.insertAdjacentHTML('beforeend', row);
@@ -611,7 +655,9 @@ socket.on('DownloadReport', function (data) {window.open("reports/" + data, '_bl
 var details_date = "";
 function DayReportDetails(Day) { details_date = Day; socket.emit('DayReportDetails', [Day, ActiveReportUser])}
 
-function DeleteOrder(OrderID) { socket.emit('DeleteOrder', [OrderID, [details_date, document.getElementById('UserNameToReport').value]]);}
+function DeleteOrder(OrderID) { socket.emit('DeleteOrder', [OrderID, [details_date, document.getElementById('UserNameToReport').value]]); }
+
+function deleteDayReport(Day) { socket.emit('DayReportDelete', [Day, ActiveReportUser]); }
 
 socket.on('DayReportDetails', function (data) {
 

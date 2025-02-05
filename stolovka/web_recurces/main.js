@@ -109,6 +109,15 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }); //  обработчик переключения дня
 
+    document.querySelector('.full_lunch').addEventListener('click', function () {
+        for (let i = 1; i <= 8; i++) {
+            const quantityElement = document.getElementById("quantity" + i);
+            if (quantityElement) {
+                quantityElement.value = 1;
+            }
+        }
+    }); //  обработчик заказа полного обеда
+
     document.querySelector('.buy').addEventListener('click', function () {
         let basket = [];
         for (let i = 1; i <= 8; i++) {
@@ -185,9 +194,6 @@ let dishes;
 
 socket.on('menu', function (data) {
 
-    console.log("menu loading");
-    console.log(data);
-
     today_menu = data['today_data'];
     previous_day_menu = data['previous_dey_data'];
     dishes = data['dishes'];
@@ -197,6 +203,10 @@ socket.on('menu', function (data) {
 });
 
 function menu_table_filling(menu) {
+
+    if (menu == undefined) {
+        menu = { 1: '', 2: '', 3: '', 4: '', 5: '', 6: '', 7: '', 8: '' }
+    };
 
     for (var i = 1; i < 9; i++) {
         if (regular_menu[i] != "") {
