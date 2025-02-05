@@ -116,6 +116,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 quantityElement.value = 1;
             }
         }
+        total_price_resume();
     }); //  обработчик заказа полного обеда
 
     document.querySelector('.buy').addEventListener('click', function () {
