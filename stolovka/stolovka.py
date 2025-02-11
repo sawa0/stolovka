@@ -287,7 +287,7 @@ def print_flag_change(data):
     db.PrintFlagChange(data)
 
 @flask_web_interface.on('app_update')
-def app_update(data):
+def app_update():
     update()
     emit('reboot', broadcast=True)
     
