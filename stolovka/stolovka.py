@@ -97,24 +97,20 @@ def new_order(data):
 ##################################################    
 @flask_web_interface.on('get')
 def get_request_handler(data):
-#####  запросы страницы настроек  #####
-    if data == '':
-        ...
-    
 #####   запросы страницы повара   #####
-    elif data == 'transactions':    #   Загрузка списка заказов за сегодня для истории заказов на странице повара
+    if data == 'transactions':    #   Загрузка списка заказов за сегодня для истории заказов на странице повара
         emit('today_transactions', db.GetTodayTtransactions())
 
 #####   запросы страницы заказа   #####
 
-    elif data == 'users':   #   Загрузка списка пользователей на странице заказа  
+    elif data == 'users':       #   Загрузка списка пользователей на странице заказа  
         answer = []
         for user in db.GetUserList():  #   Очистка списка от не активных пользователей
             if user[2]:
                 answer.append([user[0], user[1]])
         emit('users', answer)   #   Отправка списка пользователей в браузер
         
-    elif data == 'menu':    #   Загрузка меню за сегодя, и вчера, на страницу заказа  
+    elif data == 'menu':        #   Загрузка меню за сегодя, и вчера, на страницу заказа  
         current_date = datetime.datetime.now().weekday()
         current_week = f"{datetime.date.today().year}-W{datetime.date.today().isocalendar()[1]:02d}"
         data = {}
@@ -124,9 +120,9 @@ def get_request_handler(data):
             data['today_data'] = db.GetMemu(current_week)[current_date] #   загрузить меню на сегодня
         data['dishes'] = db.GetDishDict()
         data['regular'] = db.GetRegularMenu()
-        emit('menu', data)  #   отправить данные в браузер
+        emit('menu', data)      #   отправить данные в браузер
         
-################################################## 
+#####   запросы страницы настроек   #####
         
 @flask_web_interface.on('get_week_menu')
 def get_week_menu(data):    #   передаёт в браузер [номер недели, меню на неделю, список названий активных блюд]
@@ -290,6 +286,11 @@ def IngredientPriceEditFromRecipe(data):
 def print_flag_change(data):
     db.PrintFlagChange(data)
 
+@flask_web_interface.on('app_update')
+def app_update(data):
+    update()
+    emit('reboot', broadcast=True)
+
 
 ##################################################
 #                 запуск сервера                 #        
@@ -297,3 +298,34 @@ def print_flag_change(data):
 if __name__ == '__main__':
     flask_web_interface.run(app, debug=False, port="8080", host="0.0.0.0")
 ##################################################
+
+
+def update():
+    import requests, os, zipfile, io
+
+    # URL репозитория
+    repo_url = "https://github.com/user/repository/archive/refs/heads/main.zip"
+    extract_folder = "stolovka-master/stolovka"  # Папка внутри архива, которую нужно извлечь
+    destination = os.path.dirname(os.path.abspath(__file__))  # Текущая папка со скриптом
+
+    # Скачиваем архив в оперативную память
+    response = requests.get(repo_url, stream=True)
+    if response.status_code == 200:
+        with zipfile.ZipFile(io.BytesIO(response.content)) as zip_ref:
+            # Фильтруем файлы из нужной папки
+            files_to_extract = [f for f in zip_ref.namelist() if f.startswith(extract_folder + "/")]
+
+            # Извлекаем файлы без вложенной структуры `stolovka-master/stolovka`
+            for file in files_to_extract:
+                relative_path = os.path.relpath(file, extract_folder)  # Относительный путь
+                target_path = os.path.join(destination, relative_path)  # Путь сохранения
+            
+                if file.endswith("/"):  # Если папка — создаём её
+                    os.makedirs(target_path, exist_ok=True)
+                else:  # Если файл — записываем его
+                    with zip_ref.open(file) as source, open(target_path, "wb") as target:
+                        target.write(source.read())
+
+        print(f"Файлы из {extract_folder} загружены и извлечены в {destination} с заменой.")
+    else:
+        print("Ошибка скачивания:", response.status_code)

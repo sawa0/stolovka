@@ -4,6 +4,8 @@ socket.on('connect', function () {
     console.log('WebSocket connection established');
 });
 
+socket.on('reboot', function (data) { location.reload(); });
+
 var active_order;
 var order_data;
 socket.on('new_order', function (data) {

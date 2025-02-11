@@ -4,6 +4,8 @@ socket.on('connect', function () {  // подключение к серверу
     console.log('WebSocket connection established');
 });
 
+socket.on('reboot', function (data) { location.reload(); });
+
 ////////////////////////////////////////////
 //          Заполнение клавиатуры
 //     для выбора первой буквы фамилии

@@ -1,8 +1,11 @@
 ﻿var socket = io.connect(document.domain + ':' + location.port);
+
 socket.on('connect', function () {  // подключение к серверу
     console.log('WebSocket connection established');
     socket.emit('regestration', "order");
 });
+
+socket.on('reboot', function (data) { location.reload(); });
 
 var active_page = null;
 
@@ -60,6 +63,7 @@ function openpage(key) {
 function WeekChange() {
     socket.emit('get_week_menu', document.getElementById('week').value);
 }
+
 socket.on('week_menu', function (data) {
 
     console.log(data);
@@ -751,3 +755,5 @@ socket.on('Settings', function (data) {
     document.getElementById('OrderAutoConfirmationTime').value = data[1];
 
 });
+
+function app_update() { socket.emit('app_update') }
