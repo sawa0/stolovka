@@ -299,7 +299,7 @@ def app_update():
 
 
 def update():
-    import requests, os, zipfile, io
+    import requests, zipfile, io
 
     # URL репозитория
     repo_url = "https://github.com/user/repository/archive/refs/heads/main.zip"
