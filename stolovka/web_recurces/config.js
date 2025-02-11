@@ -5,7 +5,7 @@ socket.on('connect', function () {  // подключение к серверу
     socket.emit('regestration', "order");
 });
 
-socket.on('reboot', function (data) { location.reload(); });
+socket.on('reboot', function (data) {setTimeout(function () {location.reload();}, 5000);});
 
 var active_page = null;
 

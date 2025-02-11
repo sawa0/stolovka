@@ -4,7 +4,7 @@ print("""#################################
  * http://127.0.0.1:8080/povar
 #################################""")
 
-import datetime, os
+import datetime, os, sys, subprocess
 from itertools import product
 
 from flask import *
@@ -290,6 +290,12 @@ def print_flag_change(data):
 def app_update(data):
     update()
     emit('reboot', broadcast=True)
+    
+    python = sys.executable
+    script = os.path.abspath(sys.argv[0])
+
+    subprocess.Popen([python, script], creationflags=subprocess.CREATE_NEW_CONSOLE)
+    sys.exit()
 
 
 ##################################################

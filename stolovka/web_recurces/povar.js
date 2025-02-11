@@ -4,7 +4,7 @@ socket.on('connect', function () {
     console.log('WebSocket connection established');
 });
 
-socket.on('reboot', function (data) { location.reload(); });
+socket.on('reboot', function (data) { setTimeout(function () { location.reload(); }, 5000); });
 
 var active_order;
 var order_data;
