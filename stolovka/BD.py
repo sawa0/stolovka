@@ -1,8 +1,5 @@
-﻿from operator import ne
-from re import T
-import sqlite3, json
+﻿import sqlite3, json
 from datetime import datetime
-from tkinter import W
 
 class DB:
     def __init__(self):

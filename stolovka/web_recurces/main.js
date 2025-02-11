@@ -100,11 +100,11 @@ document.addEventListener('DOMContentLoaded', function () {
     document.querySelector('.previous_dey').addEventListener('click', function () {
         if (active_dey == 0) {
             active_dey = 1;
-            document.getElementById('previous_dey').innerText = 'Текущий день';
+            document.getElementById('previous_dey').innerText = 'Поточний день';
             menu_table_filling(previous_day_menu);
         } else {
             active_dey = 0;
-            document.getElementById('previous_dey').innerText = 'Предыдущий день';
+            document.getElementById('previous_dey').innerText = 'Попередній день';
             menu_table_filling(today_menu);
         }
     }); //  обработчик переключения дня
@@ -263,7 +263,7 @@ function total_price_resume() {
     }
 
     var total_price_item = document.getElementById("total_price");
-    total_price_item.innerText = "Всего: " + total_price.toFixed(2) + " грн";
+    total_price_item.innerText = "Усього: " + total_price.toFixed(2) + " грн";
 
 }
 function increment(index) {

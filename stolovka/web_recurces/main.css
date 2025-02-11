@@ -311,7 +311,7 @@ p {
     }
 
 .buy {
-    width: 85px;
+    width: 110px;
     color: white;
     background-color: #4CAF50;
     font-size: 18px;
@@ -380,7 +380,7 @@ p {
 }
 
 .edit_order_btn {
-    width: 105px;
+    width: 115px;
     color: white;
     background-color: red;
     font-size: 18px;
