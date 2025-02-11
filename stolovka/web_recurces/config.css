@@ -1081,16 +1081,12 @@ thead th {
 }
 
 .settings_div {
-    margin: 5px;
-    padding: 5px;
+    margin: 15px;
+    padding: 15px;
     border: solid, #f2f2f2, 3px;
     border-radius: 5px;
+    background-color: #f2f2f2;
 }
-
-    .settings_div:hover {
-        background-color: #f3f3f3;
-        transition: all 0.5s;
-    }
 
 .choised_settings {
     background-color: #4CAF50;

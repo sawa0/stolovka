@@ -150,15 +150,18 @@
             <div style="display: none;" id="settings_page">
                 <div class="settings_div">Настройка автоотправки отчётов</div>
                 <div class="settings_div">
-                    <div>Настройки подтверждения заказа</div>
-                    <div style="display: flex;">
-                        <button id="OrderConfirmationType_off" onclick="OrderConfirmationTypeUpdate('off')">Не требуется</button>
+                    <h2 style="margin-top: 0px;text-align: center;">Настройки подтверждения заказа</h2>
+                    <div style="display: flex;margin-bottom: 10px;">
+                        <button style="border-top-left-radius: 10px;border-bottom-left-radius: 10px;width: 126px;"
+                                id="OrderConfirmationType_off" onclick="OrderConfirmationTypeUpdate('off')">Не требуется</button>
                         <button id="OrderConfirmationType_auto" onclick="OrderConfirmationTypeUpdate('auto')">Авто подтверждение</button>
-                        <button id="OrderConfirmationType_on" onclick="OrderConfirmationTypeUpdate('on')">Требуется</button>
+                        <button style="border-top-right-radius: 10px;border-bottom-right-radius: 10px;width: 101px;"
+                                id="OrderConfirmationType_on" onclick="OrderConfirmationTypeUpdate('on')">Требуется</button>
                     </div>
-                    <div style="display: flex;">
-                        <div>Время автоматического подтверждения</div>
-                        <input id="OrderAutoConfirmationTime" onblur="OrderAutoConfirmationTimeUpdate()" type="number" onchange="" onfocus="" />
+                    <div style="display: flex; align-items: center;">
+                        <div style="font-size: 19px;">Время автоматического подтверждения</div>
+                        <input style="width: 50px;padding: 3px;margin-left: 10px;margin-right: 3px;border: solid, 2px, #4caf50;border-radius: 10px;"
+                               id="OrderAutoConfirmationTime" onblur="OrderAutoConfirmationTimeUpdate()" type="number" onchange="" onfocus="" />
                         <div>сек</div>
                     </div>
                 </div>

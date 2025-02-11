@@ -37,8 +37,6 @@
     <Content Include="web_recurces\config.css" />
     <Content Include="web_recurces\config.html" />
     <Content Include="web_recurces\config.js" />
-    <Content Include="web_recurces\JS_Libs\select2.css" />
-    <Content Include="web_recurces\JS_Libs\select2.js" />
     <Content Include="web_recurces\main.css" />
     <Content Include="web_recurces\main.html" />
     <Content Include="web_recurces\JS_Libs\socket.io.js" />
