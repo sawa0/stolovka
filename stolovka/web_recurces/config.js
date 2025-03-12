@@ -149,11 +149,16 @@ socket.on('week_menu', function (data) {
         </div>
         
     </td>
-    <td class="price" ><div id="price${pos}" class="menu_filling_table_price_input">${DishPrice}</div></td>
+    <td class="price" ><div id="price${pos}" class="menu_filling_table_price_input  ${pos}dish_price">${DishPrice}</div></td>
 </tr>
 `;
         }
-        table = table + `</table>`;
+        table = table + `
+        <tr>
+            <td><div style="display: flex; justify-content: flex-end;">Сумма:</div></td>
+            <td><div style="display: flex; justify-content: center;" id="day_summ${day}" class="day_summ"></div></td>
+        </tr>
+        </table>`;
     }
 
     var regular_menu_table_rows = '';
@@ -210,6 +215,18 @@ socket.on('week_menu', function (data) {
 
     document.getElementById('menu_conteiner').innerHTML = table;
 
+    for (var i = 0; i < 7; i++) {
+        var summ = 0;
+        var day_table = document.getElementById('dey' + i)
+
+        for (var j = 1; j < 9; j++) {
+            var price = parseFloat(day_table.querySelector("#price" + j).innerHTML)
+            if (price == "" || isNaN(price)) { continue; }
+            summ += price;
+        }
+
+        document.getElementById("day_summ" + i).innerHTML = summ.toFixed(2);
+    }
 });
 
 function UpdateRegularMenu(row) { socket.emit('regular_menu_update', [document.getElementById('week').value, [row, document.querySelector(`#RegularMenuName${row}`).value]]) }
@@ -238,6 +255,8 @@ function print_memu() {
 socket.on('users', function (data) {
     const users_table = document.getElementById('users_table');
     users_table.innerHTML = '';
+
+    data.sort((a, b) => a[1].localeCompare(b[1], 'uk'));
 
     data.forEach((user) => {
         var users_rows = `
@@ -294,6 +313,8 @@ function hideEditButtonWithDelay(userId) { setTimeout(function () { hideEditButt
 socket.on('Purchase', function (data) {
     const purchase_table = document.getElementById('purchase_table');
     purchase_table.innerHTML = '';
+
+    data.sort((a, b) => a[1].localeCompare(b[1], 'uk'));
 
     data.forEach((ingredient) => {
         var purchase_rows = `
@@ -392,6 +413,8 @@ function hideIngredientNameEditButtonWithDelay(dishId) { setTimeout(function () 
 socket.on('Dishes', function (data) {
     const dish_table = document.getElementById('dish_table');
     dish_table.innerHTML = '';
+
+    data.sort((a, b) => a[1].localeCompare(b[1], 'uk'));
 
     data.forEach((dish) => {
         var dish_rows = `
