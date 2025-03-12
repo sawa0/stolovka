@@ -1025,11 +1025,17 @@ thead th {
     border-color: #ffffff;
     border-top: solid azure 2px;
     transition: 0.2s;
+    display: flex;
 }
 
     .sidebar_futter:hover {
         background-color: #353d42;
     }
+
+.sidebar_futter_git_link {
+    width: 100%;
+    height: 100%;
+}
 
 .sidebar_body {
     display: flex;
