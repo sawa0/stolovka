@@ -48,20 +48,13 @@
     box-sizing: border-box;
 }
 
-.menu_table {
+.today_menu_table, .previous_day_menu_table {
     margin-bottom: 40px;
     width: 100%;
     margin: 0 auto;
     padding: 10px;
     background-color: #c1c1c1;
     border-radius: 25px;
-    tbody
-
-{
-    flex-direction: column;
-    gap: 10px;
-}
-
 }
 
 .dish_column {

@@ -11,7 +11,7 @@
     <OutputPath>.</OutputPath>
     <Name>stolovka</Name>
     <RootNamespace>stolovka</RootNamespace>
-    <InterpreterId>Global|VisualStudio|fore web app</InterpreterId>
+    <InterpreterId>Global|VisualStudio|venv fore flusk web app</InterpreterId>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <DebugSymbols>true</DebugSymbols>
@@ -27,13 +27,11 @@
     <Compile Include="stolovka.py" />
   </ItemGroup>
   <ItemGroup>
-    <InterpreterReference Include="Global|VisualStudio|fore web app" />
-  </ItemGroup>
-  <ItemGroup>
     <Folder Include="web_recurces\JS_Libs\" />
     <Folder Include="web_recurces\" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="requirements.txt" />
     <Content Include="web_recurces\config.css" />
     <Content Include="web_recurces\config.html" />
     <Content Include="web_recurces\config.js" />
@@ -44,6 +42,9 @@
     <Content Include="web_recurces\povar.css" />
     <Content Include="web_recurces\povar.html" />
     <Content Include="web_recurces\povar.js" />
+  </ItemGroup>
+  <ItemGroup>
+    <InterpreterReference Include="Global|VisualStudio|venv fore flusk web app" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
   <!-- Uncomment the CoreCompile target to enable the Build command in

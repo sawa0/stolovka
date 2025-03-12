@@ -103,17 +103,24 @@ document.addEventListener('DOMContentLoaded', function () {
         if (active_dey == 0) {
             active_dey = 1;
             document.getElementById('previous_dey').innerText = 'Поточний день';
-            menu_table_filling(previous_day_menu);
+            document.getElementById("today_menu_table").style.display = "none";
+            document.getElementById("previous_day_menu_table").style.display = "table";
         } else {
             active_dey = 0;
             document.getElementById('previous_dey').innerText = 'Попередній день';
-            menu_table_filling(today_menu);
+            document.getElementById("today_menu_table").style.display = "table";
+            document.getElementById("previous_day_menu_table").style.display = "none";
         }
     }); //  обработчик переключения дня
 
     document.querySelector('.full_lunch').addEventListener('click', function () {
+
+        const tableId = active_dey === 0 ? "today_menu_table" : "previous_day_menu_table";
+
         for (let i = 1; i <= 8; i++) {
-            const quantityElement = document.getElementById("quantity" + i);
+
+            const quantityElement = document.getElementById(tableId).querySelector(`#quantity${i}`);
+
             if (quantityElement) {
                 quantityElement.value = 1;
             }
@@ -123,16 +130,22 @@ document.addEventListener('DOMContentLoaded', function () {
 
     document.querySelector('.buy').addEventListener('click', function () {
         let basket = [];
-        for (let i = 1; i <= 8; i++) {
+        function table_price_calc(table) {
 
-            if (document.getElementById("dish_price" + i) == null) { continue; }
-            if (document.getElementById("quantity" + i).value == 0) { continue; }
+            for (let i = 1; i <= 8; i++) {
 
-            var dish_name = document.getElementById("dish_name" + i).textContent;
-            var dish_price = document.getElementById("dish_price" + i).textContent.slice(0, -4);
-            var quantity = document.getElementById("quantity" + i).value;
-            basket.push([dish_name, [dish_price, quantity]]);
+                if (table.querySelector("#quantity" + i) == null) { continue; }
+                if (table.querySelector("#quantity" + i).value == 0) { continue; }
+
+                var dish_price = table.querySelector("#dish_price" + i).textContent.slice(0, -4);
+                var quantity = table.querySelector("#quantity" + i).value;
+                var dish_name = table.querySelector("#dish_name" + i).textContent;
+                basket.push([dish_name, [dish_price, quantity]]);
+            }
         }
+
+        table_price_calc(document.getElementById("previous_day_menu_table"))
+        table_price_calc(document.getElementById("today_menu_table"))
 
         if (basket.length == 0) { return; }
 
@@ -197,86 +210,102 @@ let dishes;
 
 socket.on('menu', function (data) {
 
-    today_menu = data['today_data'];
-    previous_day_menu = data['previous_dey_data'];
     dishes = data['dishes'];
     regular_menu = data['regular'];
 
-    menu_table_filling(today_menu);
-});
+    today_menu = data['today_data'] || { 1: '', 2: '', 3: '', 4: '', 5: '', 6: '', 7: '', 8: '' };
+    previous_day_menu = data['previous_dey_data'] || { 1: '', 2: '', 3: '', 4: '', 5: '', 6: '', 7: '', 8: '' };
 
-function menu_table_filling(menu) {
-
-    if (menu == undefined) {
-        menu = { 1: '', 2: '', 3: '', 4: '', 5: '', 6: '', 7: '', 8: '' }
-    };
-
-    for (var i = 1; i < 9; i++) {
-        if (regular_menu[i] != "") {
-            menu[i] = regular_menu[i];
+    for (let dayIndex = 1; dayIndex < 9; dayIndex++) {
+        if (regular_menu[dayIndex] != "") {
+            today_menu[dayIndex] = regular_menu[dayIndex];
+            previous_day_menu[dayIndex] = regular_menu[dayIndex];
         }
     }
 
-    const table = document.querySelector('.menu_table');
-    table.innerHTML = '';
-    total_price_resume();
+    menu_table_filling();
+});
+
+function menu_table_filling() {
+
+    const today_menu_table = document.getElementById('today_menu_table');
+    const previous_day_menu_table = document.getElementById('previous_day_menu_table');
+
+    today_menu_table.innerHTML = '';
+    previous_day_menu_table.innerHTML = '';
 
 
-    for (var i = 1; i < 9; i++) {
+    function table_filling(menu, table) {
 
-        if (menu[i] == "") { continue; }
+        for (var i = 1; i < 9; i++) {
 
-        var dish_name = dishes[menu[i]]['name'];
-        var dish_price = dishes[menu[i]]['price'];
+            if (menu[i] == "") { continue; }
 
-        var newRowHTML = `
+            var dish_name = dishes[menu[i]]['name'];
+            var dish_price = dishes[menu[i]]['price'];
+
+            var newRowHTML = `
         <tr class="dish_column" id="dish_column_${i}">
-            <td><p class="dish_name" id="dish_name${i}">${dish_name}</p></td>
+            <td><p class="dish_name dish_name${i}" id="dish_name${i}">${dish_name}</p></td>
             <td class="quantity-control">
-                <span class="price" id="dish_price${i}">${dish_price} грн</span>
+                <span class="price dish_price${i}" id="dish_price${i}">${dish_price} грн</span>
                 <button class="left-qua" onclick="decrement(${i})">➖</button>
-                <input class="counter" type="value" id="quantity${i}" oninput="total_price_resume()" readonly value="0">
+                <input class="counter quantity${i}" type="value" id="quantity${i}" oninput="total_price_resume()" readonly value="0">
                 <button class="right-qua" onclick="increment(${i})">➕</button>
             </td>
         </tr>
         `;
 
-        table.insertAdjacentHTML('beforeend', newRowHTML);
+            table.insertAdjacentHTML('beforeend', newRowHTML);
+        }
     }
+
+    table_filling(today_menu, today_menu_table)
+    table_filling(previous_day_menu, previous_day_menu_table)
+
+
+    total_price_resume();
 }
 
 ////////////////////////////////////////////
 //              menu functions
 ////////////////////////////////////////////
 function total_price_resume() {
-    let basket = [];
-    for (let i = 1; i <= 8; i++) {
-
-        if (document.getElementById("dish_price" + i) == null) { continue; }
-
-        var dish_price = document.getElementById("dish_price" + i).textContent.slice(0, -4);
-        var quantity = document.getElementById("quantity" + i).value;
-        basket.push([dish_price, quantity]);
-    }
 
     let total_price = 0;
-    for (let i = 0; i < basket.length; i++) {
-        total_price += basket[i][0] * basket[i][1];
+    function table_price_calc(table) {
+
+        for (let i = 1; i <= 8; i++) {
+
+            if (table.querySelector("#quantity" + i) == null) { continue; }
+
+            var dish_price = table.querySelector("#dish_price" + i).textContent.slice(0, -4);
+            var quantity = table.querySelector("#quantity" + i).value;
+            total_price += parseFloat(dish_price) * quantity;
+        }
     }
 
-    var total_price_item = document.getElementById("total_price");
-    total_price_item.innerText = "Усього: " + total_price.toFixed(2) + " грн";
+    table_price_calc(document.getElementById("previous_day_menu_table"))
+    table_price_calc(document.getElementById("today_menu_table"))
+
+    document.getElementById("total_price").innerText = "Усього: " + total_price.toFixed(2) + " грн";
 
 }
 function increment(index) {
-    var inputElement = document.getElementById("quantity" + index);
+
+    const tableId = active_dey === 0 ? "today_menu_table" : "previous_day_menu_table";
+    const inputElement = document.getElementById(tableId).querySelector(`#quantity${index}`);
+
     var value = parseInt(inputElement.value, 10);
     inputElement.value = value + 1;
     total_price_resume();
 }
 
 function decrement(index) {
-    var inputElement = document.getElementById("quantity" + index);
+
+    const tableId = active_dey === 0 ? "today_menu_table" : "previous_day_menu_table";
+    const inputElement = document.getElementById(tableId).querySelector(`#quantity${index}`);
+
     var value = parseInt(inputElement.value, 10);
     if (value > 0) {
         inputElement.value = value - 1;

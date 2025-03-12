@@ -66,10 +66,6 @@ function WeekChange() {
 
 socket.on('week_menu', function (data) {
 
-    console.log(data);
-
-
-
     document.getElementById('week').value = data[0];
     document.getElementById('menu_conteiner').innerHTML = '';
 
