@@ -154,9 +154,9 @@ socket.on('week_menu', function (data) {
 `;
         }
         table = table + `
-        <tr>
-            <td><div style="display: flex; justify-content: flex-end;">Сумма:</div></td>
-            <td><div style="display: flex; justify-content: center;" id="day_summ${day}" class="day_summ"></div></td>
+        <tr style="background-color: #f2f2f2; padding-top: 0px; padding-bottom: 0px;">
+            <td style="padding-top: 4px; padding-bottom: 4px;"><div style="display: flex; justify-content: flex-end;">Сумма:</div></td>
+            <td style="padding-top: 4px; padding-bottom: 4px;"><div style="display: flex; justify-content: center;" id="day_summ${day}" class="day_summ"></div></td>
         </tr>
         </table>`;
     }
