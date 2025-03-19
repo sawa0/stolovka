@@ -1,5 +1,4 @@
-﻿
-print("""#################################
+﻿print("""#################################
  * http://127.0.0.1:8080/config
  * http://127.0.0.1:8080/povar
 #################################""")
@@ -289,45 +288,64 @@ def print_flag_change(data):
 
 @flask_web_interface.on('app_update')
 def app_update():
-    update()
-    emit('reboot', broadcast=True)
+    print("update")
+
+    # update()
+    # emit('reboot', broadcast=True)
     
-    python = sys.executable
-    script = os.path.abspath(sys.argv[0])
+    # python = sys.executable
+    # script = os.path.abspath(sys.argv[0])
 
-    subprocess.Popen([python, script], creationflags=subprocess.CREATE_NEW_CONSOLE)
-    sys.exit()
+    # subprocess.Popen([python, script], creationflags=subprocess.CREATE_NEW_CONSOLE)
+    # sys.exit()
 
 
-def update():
-    import requests, zipfile, io
+# def update():
 
-    # URL репозитория
-    repo_url = "https://github.com/user/repository/archive/refs/heads/main.zip"
-    extract_folder = "stolovka-master/stolovka"  # Папка внутри архива, которую нужно извлечь
-    destination = os.path.dirname(os.path.abspath(__file__))  # Текущая папка со скриптом
+#     import requests
+#     import zipfile
+#     import os
+#     import shutil
+#     from io import BytesIO
 
-    # Скачиваем архив в оперативную память
-    response = requests.get(repo_url, stream=True)
-    if response.status_code == 200:
-        with zipfile.ZipFile(io.BytesIO(response.content)) as zip_ref:
-            # Фильтруем файлы из нужной папки
-            files_to_extract = [f for f in zip_ref.namelist() if f.startswith(extract_folder + "/")]
+#     # Настройки
+#     INSTALL_PATH = "C:\\Users\\sawa\\desktop\\stolovka"  # Куда копировать файлы
+#     BRANCH = "main"  # Ветка, откуда скачивать, если нет релизов
 
-            # Извлекаем файлы без вложенной структуры `stolovka-master/stolovka`
-            for file in files_to_extract:
-                relative_path = os.path.relpath(file, extract_folder)  # Относительный путь
-                target_path = os.path.join(destination, relative_path)  # Путь сохранения
-            
-                if file.endswith("/"):  # Если папка — создаём её
-                    os.makedirs(target_path, exist_ok=True)
-                else:  # Если файл — записываем его
-                    with zip_ref.open(file) as source, open(target_path, "wb") as target:
-                        target.write(source.read())
+#     # Получение последнего релиза
+#     url = "https://api.github.com/repos/sawa0/stolovka/releases/latest"
+#     response = requests.get(url)
+#     release_data = response.json()
 
-        print(f"Файлы из {extract_folder} загружены и извлечены в {destination} с заменой.")
-    else:
-        print("Ошибка скачивания:", response.status_code)
+
+#     # Скачивание архива
+#     response = requests.get(release_data["zipball_url"])
+#     if response.status_code == 200:
+#         zip_file = zipfile.ZipFile(BytesIO(response.content))
+#         extract_path = "temp_repo"
+#         zip_file.extractall(extract_path)
+#         zip_file.close()
+
+#         # Поиск корневой папки (GitHub добавляет префикс в названии)
+#         repo_folder = next(os.scandir(extract_path)).path
+    
+#         # Удаляем старые файлы, кроме определённых (если надо)
+#         for item in os.listdir(INSTALL_PATH):
+#             item_path = os.path.join(INSTALL_PATH, item)
+#             if os.path.isdir(item_path):
+#                 shutil.rmtree(item_path)
+#             else:
+#                 os.remove(item_path)
+    
+#         # Копируем новые файлы
+#         for item in os.listdir(repo_folder):
+#             shutil.move(os.path.join(repo_folder, item), INSTALL_PATH)
+    
+#         # Чистим временные файлы
+#         shutil.rmtree(extract_path)
+#         print("Обновление завершено!")
+#     else:
+#         print("Ошибка загрузки архива!")
 
 
 ##################################################

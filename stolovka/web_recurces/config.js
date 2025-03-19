@@ -133,7 +133,7 @@ socket.on('week_menu', function (data) {
             if (DishID !== '' && data[2][DishID]) {
                 const { name, price } = data[2][DishID];
                 DishName = name;
-                DishPrice = price;
+                DishPrice = price.toFixed(2);
             }
 
             table = table + `
