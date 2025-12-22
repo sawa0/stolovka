@@ -110,17 +110,31 @@ def get_request_handler(data):
                 answer.append([user[0], user[1]])
         emit('users', answer)   #   Отправка списка пользователей в браузер
         
-    elif data == 'menu':        #   Загрузка меню за сегодя, и вчера, на страницу заказа  
-        current_date = datetime.datetime.now().weekday()
-        current_week = f"{datetime.date.today().year}-W{datetime.date.today().isocalendar()[1]:02d}"
+    elif data == 'menu':
+        today = datetime.date.today()
+        weekday_idx = today.weekday()  # 0=понедельник, 6=воскресенье
+
+        # ISO-неделя
+        iso_year, iso_week, _ = today.isocalendar()
+        current_week = f"{iso_year}-W{iso_week:02d}"
+
         data = {}
-        if current_date < 5:    #   если сегодня будний день
-            if current_date:    #   если сегодня не понедельник (истина - всё что отличается от нуля)
-                data['previous_dey_data'] = db.GetMemu(current_week)[current_date - 1]  #   загрузить меню на предыдущий день 
-            data['today_data'] = db.GetMemu(current_week)[current_date] #   загрузить меню на сегодня
+        week_menu = db.GetMemu(current_week)  # список меню на неделю (0=Пн, 1=Вт ...)
+
+        # Загрузка меню только для будних дней
+        if weekday_idx < 5:
+            # предыдущий день (если не понедельник)
+            if weekday_idx > 0:
+                data['previous_day_data'] = week_menu[weekday_idx - 1]
+            # сегодня
+            data['today_data'] = week_menu[weekday_idx]
+
+        # Остальные данные
         data['dishes'] = db.GetDishDict()
         data['regular'] = db.GetRegularMenu()
-        emit('menu', data)      #   отправить данные в браузер
+
+        emit('menu', data)
+
         
 #####   запросы страницы настроек   #####
         

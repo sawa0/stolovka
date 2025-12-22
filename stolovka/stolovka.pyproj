@@ -11,7 +11,7 @@
     <OutputPath>.</OutputPath>
     <Name>stolovka</Name>
     <RootNamespace>stolovka</RootNamespace>
-    <InterpreterId>Global|VisualStudio|venv fore flusk web app</InterpreterId>
+    <InterpreterId>Global|VisualStudio|web app env</InterpreterId>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <DebugSymbols>true</DebugSymbols>
@@ -44,7 +44,7 @@
     <Content Include="web_recurces\povar.js" />
   </ItemGroup>
   <ItemGroup>
-    <InterpreterReference Include="Global|VisualStudio|venv fore flusk web app" />
+    <InterpreterReference Include="Global|VisualStudio|web app env" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
   <!-- Uncomment the CoreCompile target to enable the Build command in

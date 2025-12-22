@@ -10,22 +10,41 @@ socket.on('reboot', function (data) {setTimeout(function () {location.reload();}
 var active_page = null;
 
 document.addEventListener('DOMContentLoaded', function () {
-    /* == Устанавливаем текущую дату == */
 
     const date = new Date();
 
-    const getWeekNumber = (date) => {
-        const firstDayOfYear = new Date(date.getFullYear(), 0, 1);
-        return Math.ceil(((date - firstDayOfYear) / 86400000 + firstDayOfYear.getDay() + 1) / 7);
-    };
-    document.getElementById('week').value = `${date.getFullYear()}-W${String(getWeekNumber(date)).padStart(2, '0')}`;
+    /* === ISO-неделя === */
 
-    const formattedDate = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-    document.getElementById('ReportMonth').value = formattedDate
+    // Копия даты
+    const tmp = new Date(date);
 
-    /* == Открываем первую страницу == */
+    // Переносим дату на четверг текущей недели (ISO-правило)
+    tmp.setDate(tmp.getDate() + 3 - (tmp.getDay() + 6) % 7);
+
+    // Первый четверг года
+    const firstThursday = new Date(tmp.getFullYear(), 0, 4);
+
+    // Номер ISO-недели
+    const weekNumber = 1 + Math.round(
+        ((tmp - firstThursday) / 86400000 - 3 + (firstThursday.getDay() + 6) % 7) / 7
+    );
+
+    const weekValue = `${tmp.getFullYear()}-W${String(weekNumber).padStart(2, '0')}`;
+    document.getElementById('week').value = weekValue;
+
+    /* === Месяц отчёта === */
+
+    const formattedDate =
+        `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+    document.getElementById('ReportMonth').value = formattedDate;
+
+    /* === Лог для проверки === */
+    console.log(`ISO неделя установлена: ${weekValue}`);
+
+    /* === Открываем первую страницу === */
     openpage('menu');
 });
+
 
 function openpage(key) {
     if (active_page != null) {
@@ -75,19 +94,19 @@ socket.on('week_menu', function (data) {
         const daysOfWeek = ['Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота', 'Воскресенье'];
         const months = ['Января', 'Февраля', 'Марта', 'Апреля', 'Мая', 'Июня', 'Июля', 'Августа', 'Сентября', 'Октября', 'Ноября', 'Декабря'];
 
-        const firstDayOfYear = new Date(year, 0, 1);
-        const firstMonday = new Date(firstDayOfYear.getFullYear(), 0, 1 + (firstDayOfYear.getDay() || 7) - 1);
-        const weekStart = new Date(firstMonday.getTime() + ((week - 1) * 7 + 1 - firstMonday.getDay()) * 24 * 60 * 60 * 1000);
+        // Находим понедельник ISO недели
+        const simpleDate = new Date(year, 0, 4); // 4 января
+        const dayOfWeek = (simpleDate.getDay() + 6) % 7; // понедельник = 0
+        const weekStart = new Date(simpleDate);
+        weekStart.setDate(simpleDate.getDate() - dayOfWeek + (week - 1) * 7);
 
-        const weekDates = Array.from({ length: 7 }, (_, i) => {
-            const date = new Date(weekStart.getTime() + i * 24 * 60 * 60 * 1000);
-            const day = date.getDate();
-            const month = months[date.getMonth()];
-            return `${daysOfWeek[i]}, ${day} ${month}`;
+        return Array.from({ length: 7 }, (_, i) => {
+            const d = new Date(weekStart);
+            d.setDate(weekStart.getDate() + i);
+            return `${daysOfWeek[i]}, ${d.getDate()} ${months[d.getMonth()]}`;
         });
-
-        return weekDates;
     }
+
 
     var dish_select;
     Object.keys(data[2]).forEach((dish) => {
