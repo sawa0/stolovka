@@ -214,7 +214,7 @@ socket.on('menu', function (data) {
     regular_menu = data['regular'];
 
     today_menu = data['today_data'] || { 1: '', 2: '', 3: '', 4: '', 5: '', 6: '', 7: '', 8: '' };
-    previous_day_menu = data['previous_dey_data'] || { 1: '', 2: '', 3: '', 4: '', 5: '', 6: '', 7: '', 8: '' };
+    previous_day_menu = data['previous_day_data'] || { 1: '', 2: '', 3: '', 4: '', 5: '', 6: '', 7: '', 8: '' };
 
     for (let dayIndex = 1; dayIndex < 9; dayIndex++) {
         if (regular_menu[dayIndex] != "") {
