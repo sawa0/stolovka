@@ -10,7 +10,7 @@ input::-webkit-inner-spin-button {
 }
 
 .content {
-    margin-left: 200px; /* Учитывает ширину боковой панели */
+    margin-left: 250px; /* Учитывает ширину боковой панели */
     padding: 0px;
 }
 
@@ -189,12 +189,6 @@ button {
         text-align: center;
     }
 
-.content {
-    margin-left: 250px;
-    /* Учитывает ширину боковой панели */
-    padding: 0px;
-}
-
 .price {
     border-color: #ddd;
     padding: 0px;
@@ -268,6 +262,7 @@ button {
 }
 
 .menu_filling_table_dish_name {
+    width: 285px;
     margin: 0px;
     border-width: 0px;
     background-color: transparent;
@@ -291,7 +286,7 @@ button {
 .menu_filling_table {
     flex: none;
     border-collapse: collapse;
-    width: 300px;
+    width: auto;
     margin-top: 20px;
     margin-right: 20px;
 }
@@ -690,7 +685,11 @@ thead th {
     border-bottom-left-radius: 10px;
     background-color: #f2f2f2;
     display: flex;
-    padding-left: 5px;
+}
+
+.add_ingredient_in_dish_select {
+    border-top-left-radius: 8px;
+    border-bottom-left-radius: 8px;
 }
 
 .input {
@@ -771,16 +770,37 @@ thead th {
     overflow: hidden;
 }
 
+.download_recipe_button {
+    width: 150px;
+    height: 39px;
+    border-bottom-left-radius: 8px;
+    color: white;
+    background-color: #4CAF50;
+    border: 0px;
+    border-top: solid 2px #4CAF50;
+    border-right: solid 2px #4CAF50;
+    border-top-right-radius: 11px;
+}
+
+    .download_recipe_button:hover {
+        background-color: #45a049;
+    }
+
 .recipe_result {
-    padding-top: 7px;
-    height: 25px;
-    padding-bottom: 7px;
+    display: flex;
+    height: 39px;
     background-color: #878787;
     color: #f1f1f1;
     text-align: center;
-    border-bottom-left-radius: 9px;
-    border-bottom-right-radius: 9px;
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
     font-size: 20px;
+}
+
+.recipe_result_text {
+    width: -webkit-fill-available;
+    padding-top: 7px;
+    padding-bottom: 7px;
 }
 
 .user_status {

@@ -98,5 +98,103 @@ def create_excel_report(data):
     
     return filename
 
-# Пример вызова функции
-# create_excel_report(formated)
+def create_excel_recipe(data):
+    if not data:
+        return
+
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Рецепт"
+
+    # Стили
+    header_font = Font(bold=True)
+    alignment = Alignment(horizontal="center", vertical="center")
+    thin_border = Border(
+        left=Side(style='thin'),
+        right=Side(style='thin'),
+        top=Side(style='thin'),
+        bottom=Side(style='thin')
+    )
+
+    row = 1
+
+    # Название блюда
+    dish_name = data.get('Name', [''])[0]
+    ws.cell(row=row, column=1, value=f"Блюдо: {dish_name}").font = header_font
+    row += 2
+
+    # Заголовки (объединённая колонка)
+    headers = ["Ингредиент", "Норма", "Цена", "Сумма"]
+    for col_num, header in enumerate(headers, 1):
+        cell = ws.cell(row=row, column=col_num, value=header)
+        cell.font = header_font
+        cell.alignment = alignment
+        cell.border = thin_border
+    row += 1
+
+    recipe = data.get('Recipe', {})
+    ingredients = data.get('ingridients', {})
+
+    total_cost = 0
+    start_detail_row = row
+
+    for ing_id_str, amount in recipe.items():
+        ing_id = int(ing_id_str)
+
+        ing_data = ingredients.get(ing_id)
+        if not ing_data:
+            continue
+
+        name = ing_data.get('name', '')
+        volume = ing_data.get('volume', '')
+        price = float(ing_data.get('price', 0))
+
+        norm = f"{float(amount)} {volume}"
+        cost = price * float(amount)
+        total_cost += cost
+
+        ws.cell(row=row, column=1, value=name)
+        ws.cell(row=row, column=2, value=norm)
+        ws.cell(row=row, column=3, value=price)
+        ws.cell(row=row, column=4, value=cost)
+
+        # Границы
+        for col in range(1, 5):
+            ws.cell(row=row, column=col).border = thin_border
+
+        row += 1
+
+    # Себестоимость (объединяем ячейки под текст)
+    ws.merge_cells(start_row=row, start_column=1, end_row=row, end_column=3)
+    cell = ws.cell(row=row, column=1, value="Себестоимость")
+    cell.font = header_font
+    cell.alignment = Alignment(horizontal="right")
+
+    ws.cell(row=row, column=4, value=total_cost).font = header_font
+
+    # Группировка строк
+    ws.row_dimensions.group(start_detail_row, row - 1, hidden=False)
+
+    # Авторазмер колонок
+    for col in range(1, 5):
+        ws.column_dimensions[get_column_letter(col)].auto_size = True
+
+    ws.sheet_properties.outlineSummaryBelow = False
+
+    # Имя файла
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    filename = f"recipe_{timestamp}.xlsx"
+
+    reports_dir = "reports"
+    if not os.path.exists(reports_dir):
+        os.makedirs(reports_dir)
+
+    file_path = os.path.join(reports_dir, filename)
+
+    while os.path.exists(file_path):
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        file_path = os.path.join(reports_dir, f"recipe_{timestamp}.xlsx")
+
+    wb.save(file_path)
+
+    return filename

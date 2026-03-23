@@ -247,6 +247,14 @@ def EditVolume(data):
     db.IngredientVolumeEdit(data['DishID'], data['IngredientID'], data['Volume'])
     GetRecipe(data['DishID'])
 
+@flask_web_interface.on('DownloadRecipe')
+def DownloadRecipe(data):
+    dish_info = db.GetDishInfo(data['DishID'])
+    dish_info['ingridients'] = db.GetIngredientsDict()
+
+    from exel import create_excel_recipe as exel
+    emit("DownloadReport", exel(dish_info))
+
 @flask_web_interface.on('getReports')
 def GetReports(data):
     emit("Reports", [data, db.GetUserList(), db.GetReports(data)])

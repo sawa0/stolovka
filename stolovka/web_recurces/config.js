@@ -160,7 +160,7 @@ socket.on('week_menu', function (data) {
     <td class="eda table_borders_1_px">
 
         <div style="display: flex;">
-            <select class="menu_filling_table_dish_name" id="dey${day}name${pos}" onchange="UpdateMenu(${day}, ${pos})" style="width: 300px;" ${active}>
+            <select class="menu_filling_table_dish_name" id="dey${day}name${pos}" onchange="UpdateMenu(${day}, ${pos})" ${active}>
                 <option>${DishName}</option>
                 ${DishName !== '' ? '<option class="option_unset"></option>' : ''}
                 ${dish_select}
@@ -200,7 +200,7 @@ socket.on('week_menu', function (data) {
     <td class="eda table_borders_1_px">
 
         <div style="display: flex;height: 28px;">
-            <select class="menu_filling_table_dish_name" id="RegularMenuName${pos}" onchange="UpdateRegularMenu(${pos})" style="width: 300px;">
+            <select class="menu_filling_table_dish_name" id="RegularMenuName${pos}" onchange="UpdateRegularMenu(${pos})">
                 <option>${DishName}</option>
                 ${DishName !== '' ? '<option class="option_unset"></option>' : ''}
                 ${dish_select}
@@ -510,6 +510,7 @@ function Recipe(id) { socket.emit("GetRecipe", id); }
 
 socket.on('Recipe', function (data) {
     const recipeTable = document.getElementById('recipe_table');
+    const download_recipe_div = document.getElementById("download_recipe_div");
     const addIngredientsContainer = document.getElementById('add_ingredients_conteiner');
     document.getElementById("recipeName").innerText = data['Name'];
 
@@ -525,7 +526,7 @@ socket.on('Recipe', function (data) {
 
     var addIngredientMenu = `
         <div class="add_ingredient_select">
-            <select id="newIngredient">
+            <select class="add_ingredient_in_dish_select" id="newIngredient">
                 <option value=''></option>
                 ${ingredientToAdd}
             </select>
@@ -536,6 +537,12 @@ socket.on('Recipe', function (data) {
     addIngredientsContainer.innerHTML = addIngredientMenu;
 
     recipeTable.innerHTML = '';
+    download_recipe_div.innerHTML = '';
+
+    var download_recipe_button = `
+        <button class="download_recipe_button" onclick="DownloadRecipe(${data['id']})">Скачать рецепт</button>
+    `;
+    download_recipe_div.innerHTML = download_recipe_button;
 
     var ItogPrice = 0;
 
@@ -568,7 +575,7 @@ socket.on('Recipe', function (data) {
         recipeTable.insertAdjacentHTML('beforeend', recipeRow);
     });
 
-    document.getElementById("recipe_result").innerText = 'Цена всех ингридиентов: ' + ItogPrice.toFixed(2) + ' грн | Итоговая цена: ' + (ItogPrice * 1.11).toFixed(2) + ' грн';
+    document.getElementById("recipe_result_text").innerText = 'Цена всех ингридиентов: ' + ItogPrice.toFixed(2) + ' грн | Итоговая цена: ' + (ItogPrice * 1.11).toFixed(2) + ' грн';
 
     document.getElementById("recipeWindow").style.display = 'block';
 });
@@ -600,6 +607,10 @@ function DeleteIngredientFromRecipe(DishID, IngredientID) { socket.emit("DeleteI
 function EditVolume(DishID, IngredientID, newVolume) {
     if (newVolume == '') { newVolume = 0 }
     socket.emit("EditVolume", { 'DishID': DishID, 'IngredientID': IngredientID, 'Volume': newVolume })
+}
+
+function DownloadRecipe(DishID) {
+    socket.emit("DownloadRecipe", { 'DishID': DishID })
 }
 
 /*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*/
