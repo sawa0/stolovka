@@ -153,7 +153,34 @@
             </div>
 
             <div style="display: none;" id="settings_page">
-                <div class="settings_div">Настройка автоотправки отчётов</div>
+                <div class="settings_div" style="display: none">
+                    <h2 style="margin-top: 0px;text-align: center;">Настройка автоотправки отчётов</h2>
+                    <div class="settings_parametr_div" style="display: flex">
+                        <input type="checkbox" onchange="console.log('`Включить автоотправку отчётов` has a new status')" />
+                        <div>Включить автоотправку отчётов</div>
+                    </div>
+                    <div class="settings_parametr_div">
+
+                        <div style=" display: flex; justify-content: center; font-size: larger; font-weight: bold; margin-bottom: 10px;">Настройки телеграмм</div>
+
+                        <div style="display: flex; margin-bottom: 10px;">
+                            <input style="width: 250px;padding: 3px;margin-right: 20px;border: solid, 2px, #4caf50;border-radius: 10px;"
+                                   id="TG_Bot_API_Key" onblur="console.log('Bot API token was updated')" type="password" onchange="" onfocus="" />
+                            <div style="display: flex; align-items: center;">Bot API token</div>
+                        </div>
+                        <div style="display: flex;">
+                            <input style="width: 250px;padding: 3px;margin-right: 20px;border: solid, 2px, #4caf50;border-radius: 10px;"
+                                   id="TG_User_ID" onblur="console.log('')" type="number" onchange="" onfocus="" placeholder="" />
+                            <div style="display: flex; align-items: center;">ID пользователя, который будет получать отчёт</div>
+                        </div>
+
+                        <button onclick="telegram_test()">Проверить</button>
+
+                    </div>
+                    <div style="display: flex">
+                        <button> <!--style="display: none"-->Сохранить</button>
+                    </div>
+                </div>
                 <div class="settings_div">
                     <h2 style="margin-top: 0px;text-align: center;">Настройки подтверждения заказа</h2>
                     <div style="display: flex;margin-bottom: 10px;">

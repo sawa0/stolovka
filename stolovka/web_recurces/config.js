@@ -517,7 +517,8 @@ socket.on('Recipe', function (data) {
     const recipeKeys = Object.keys(data['Recipe']);
     const ingridientKeys = Object.keys(data['ingridients']);
 
-    var ingredientToAdd;
+    let ingredientToAdd = '';
+
     ingridientKeys.forEach((key) => {
         if (!recipeKeys.includes(key)) {
             ingredientToAdd += `<option value="${key}">${data['ingridients'][key]['name']}</option>`;
@@ -548,8 +549,6 @@ socket.on('Recipe', function (data) {
 
     recipeKeys.forEach((key) => {
         var ingredient = data['Recipe'][key];
-
-        console.log(data);
 
         var recipeRow = `
             <tr class="">
@@ -806,3 +805,31 @@ socket.on('Settings', function (data) {
 });
 
 function app_update() { socket.emit('app_update') }
+
+function telegram_test() {
+
+    function telegram_check_result(result) {
+        console.log(result)
+    }
+
+    var token = document.getElementById('TG_Bot_API_Key').value
+    var chatId = document.getElementById('TG_User_ID').value
+
+    if (!token || !chatId) {
+        console.log('Значения token или chatId не могут быть пустыми');
+        return; // остановка выполнения
+    }
+
+    fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            chat_id: chatId,
+            text: "test"
+        })
+    })
+        .then(data => telegram_check_result(data['ok']));
+
+}
