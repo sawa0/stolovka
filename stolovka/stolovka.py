@@ -57,9 +57,9 @@ scheduler = BackgroundScheduler()
 scheduler.add_job(
     previous_month_report_autosend,
     trigger='cron',
-    day=26,
-    hour=0,
-    minute=14
+    day=1,
+    hour=12,
+    minute=0
 )
 scheduler.start()
 
