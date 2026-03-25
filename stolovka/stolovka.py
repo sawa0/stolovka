@@ -39,7 +39,8 @@ def previous_month_report_autosend():
             with open(file_path, "rb") as f:
                 response = requests.post(
                     url,
-                    data={"chat_id": user_id},
+                    data={"chat_id": user_id,
+                          "caption": "Отчёт за прошедший месяц"},
                     files={"document": f}
                 )
 
