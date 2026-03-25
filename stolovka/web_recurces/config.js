@@ -791,16 +791,25 @@ function OrderConfirmationTypeUpdate(tupe) {
 
 socket.on('Settings', function (data) {
 
-
-    console.log(data);
+    //            OrderConfirmationType
+    const OrderConfirmation = data['OrderConfirmation'];
 
     document.getElementById('OrderConfirmationType_on').classList.remove('choised_settings');
     document.getElementById('OrderConfirmationType_off').classList.remove('choised_settings');
     document.getElementById('OrderConfirmationType_auto').classList.remove('choised_settings');
 
-    document.getElementById('OrderConfirmationType_' + data[0]).classList.add('choised_settings');
+    document.getElementById('OrderConfirmationType_' + OrderConfirmation[0]).classList.add('choised_settings');
 
-    document.getElementById('OrderAutoConfirmationTime').value = data[1];
+    document.getElementById('OrderAutoConfirmationTime').value = OrderConfirmation[1];
+
+    //            TGReportAutosendParametrs
+    const TGSettings = data['TGReportAutosendParametrs'];
+
+    document.getElementById('TG_Bot_API_Key').value = TGSettings['bot_api_key'];
+    document.getElementById('TG_User_ID').value = TGSettings['tg_user_id'];
+
+    //            TGReportAutosend
+    document.getElementById('TGReportAutosend').checked = data['TGReportAutosend'];
 
 });
 
@@ -808,16 +817,24 @@ function app_update() { socket.emit('app_update') }
 
 function telegram_test() {
 
-    function telegram_check_result(result) {
-        console.log(result)
+    function telegram_check_result(result, message = "") {
+        const el = document.getElementById('telegram_check_result');
+
+        if (result) {
+            el.textContent = 'test complete';
+            document.getElementById('telegram_save_button').style.display = 'block';
+            document.getElementById('telegram_test_button').style.display = 'none';
+        } else {
+            el.textContent = 'test failed' + (message ? `: ${message}` : '');
+        }
     }
 
-    var token = document.getElementById('TG_Bot_API_Key').value
-    var chatId = document.getElementById('TG_User_ID').value
+    var token = document.getElementById('TG_Bot_API_Key').value;
+    var chatId = document.getElementById('TG_User_ID').value;
 
     if (!token || !chatId) {
-        console.log('Значения token или chatId не могут быть пустыми');
-        return; // остановка выполнения
+        alert("Значения token или chatId не могут быть пустыми.");
+        return;
     }
 
     fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
@@ -830,6 +847,39 @@ function telegram_test() {
             text: "test"
         })
     })
-        .then(data => telegram_check_result(data['ok']));
+        .then(response => {
+            if (!response.ok) {
+                // HTTP ошибка (например 401)
+                throw new Error(`HTTP error ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.ok) {
+                telegram_check_result(true);
+            } else {
+                telegram_check_result(false, data.description);
+            }
+        })
+        .catch(error => {
+            telegram_check_result(false, error.message);
+        });
+}
 
+function tg_test_reset() {
+    document.getElementById('telegram_check_result').innerHTML = '';
+    document.getElementById('telegram_save_button').style.display = 'none';
+    document.getElementById('telegram_test_button').style.display = 'block';
+}
+
+function save_telegram_settings() {
+
+    const bot_api_key = document.getElementById('TG_Bot_API_Key').value;
+    const tg_user_id = document.getElementById('TG_User_ID').value;
+
+    socket.emit("updateSettings", ["TGReportAutosendParametrs", { 'bot_api_key': bot_api_key, 'tg_user_id': tg_user_id }])
+}
+
+function tg_autosend_update() {
+    socket.emit("updateSettings", ["TGReportAutosend", document.getElementById('TGReportAutosend').checked])
 }

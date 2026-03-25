@@ -47,11 +47,10 @@ class DB:
             #     создаёт в таблице "settings" параметр "OrderConfirmationType", если его нет
             ###################################################################################
             cursor.execute("""SELECT * FROM "settings" WHERE parameter = 'OrderConfirmationType' """)
-            data = cursor.fetchone()
             self.OrderConfirmationType = None
-            if not data:
+            if not cursor.fetchone():
                 cursor.execute("""INSERT INTO "settings" (parameter, Value) VALUES (?, ?)""",
-                              ('OrderConfirmationType', json.dumps(["auto", 10])))  #   auto/on/off
+                              ('OrderConfirmationType', json.dumps(["off", 10])))  #   auto/on/off
             ###################################################################################
             #     создаёт в таблице "settings" параметр "HideToPrint", если его нет
             ###################################################################################
@@ -59,6 +58,22 @@ class DB:
             if not cursor.fetchone():
                 cursor.execute("""INSERT INTO "settings" (parameter, Value) VALUES (?, ?)""",
                               ('HideToPrint', json.dumps({0: True, 1: True, 2: True, 3: True, 4: True, 5: False, 6: False})))
+            ###################################################################################
+            #     создаёт в таблице "settings" параметр "TGReportAutosendParametrs", если его нет
+            ###################################################################################
+            cursor.execute("""SELECT * FROM "settings" WHERE parameter = 'TGReportAutosendParametrs' """)
+            if not cursor.fetchone():
+                cursor.execute("""INSERT INTO "settings" (parameter, Value) VALUES (?, ?)""",
+                              ('TGReportAutosendParametrs', json.dumps({'bot_api_key': '', 'tg_user_id': ''})))
+            ###################################################################################
+            #     создаёт в таблице "settings" параметр "TGReportAutosend", если его нет
+            ###################################################################################
+            cursor.execute("""SELECT * FROM "settings" WHERE parameter = 'TGReportAutosend' """)
+            if not cursor.fetchone():
+                cursor.execute("""INSERT INTO "settings" (parameter, Value) VALUES (?, ?)""",
+                              ('TGReportAutosend', json.dumps(False)))
+
+
 
             conn.commit()   #   Создает структуру базы данных, если таковой нет 
         
@@ -412,6 +427,12 @@ class DB:
                 old_value = self.GetOrderConfirmationType()
                 cursor.execute(f"""UPDATE 'settings' SET Value = ? WHERE parameter = 'OrderConfirmationType'""", (json.dumps([old_value[0], value]),))
 
+            elif parametr == "TGReportAutosendParametrs":
+                cursor.execute(f"""UPDATE 'settings' SET Value = ? WHERE parameter = 'TGReportAutosendParametrs'""", (json.dumps(value),))
+
+            elif parametr == "TGReportAutosend":
+                cursor.execute(f"""UPDATE 'settings' SET Value = ? WHERE parameter = 'TGReportAutosend'""", (json.dumps(value),))
+
         
     def GetOrderConfirmationType(self):
         with sqlite3.connect('stolovka.db') as conn:
@@ -419,5 +440,16 @@ class DB:
             cursor.execute("""SELECT Value FROM 'settings' WHERE parameter = 'OrderConfirmationType'""")
             return json.loads(cursor.fetchall()[0][0])
 
+    def GetTGReportAutosendParametrs(self):
+        with sqlite3.connect('stolovka.db') as conn:
+            cursor = conn.cursor()
+            cursor.execute("""SELECT Value FROM 'settings' WHERE parameter = 'TGReportAutosendParametrs'""")
+            return json.loads(cursor.fetchone()[0])
+
+    def GetTGReportAutosend(self):
+        with sqlite3.connect('stolovka.db') as conn:
+            cursor = conn.cursor()
+            cursor.execute("""SELECT Value FROM 'settings' WHERE parameter = 'TGReportAutosend'""")
+            return json.loads(cursor.fetchone()[0])
 
 db = DB()

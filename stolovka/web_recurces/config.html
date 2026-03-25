@@ -134,7 +134,7 @@
                 </div>
                 <div id="ReportDitailsConteiner" class="report_ditails_conteiner" style="display: none;">
                     <div id="ReportDitailsConteinerHeader" class="report_ditails_conteiner_header">
-                        <button class="close_ReportDitails" onclick="СloseReportDitailsWindow()">Закрыть</button>
+                        <button style="margin-left: 3px;" class="close_ReportDitails" onclick="СloseReportDitailsWindow()">Закрыть</button>
                     </div>
                     <div id="ReportDitailsConteinerBody" class="report_ditails_conteiner_body">
                         <table>
@@ -153,32 +153,34 @@
             </div>
 
             <div style="display: none;" id="settings_page">
-                <div class="settings_div" style="display: none">
+                <div class="settings_div"> <!--style="display: none"-->
                     <h2 style="margin-top: 0px;text-align: center;">Настройка автоотправки отчётов</h2>
                     <div class="settings_parametr_div" style="display: flex">
-                        <input type="checkbox" onchange="console.log('`Включить автоотправку отчётов` has a new status')" />
-                        <div>Включить автоотправку отчётов</div>
+                        <input id="TGReportAutosend" type="checkbox" onchange="tg_autosend_update()" />
+                        <div>Включить автоотправку ежемесячных отчётов</div>
                     </div>
                     <div class="settings_parametr_div">
 
                         <div style=" display: flex; justify-content: center; font-size: larger; font-weight: bold; margin-bottom: 10px;">Настройки телеграмм</div>
 
                         <div style="display: flex; margin-bottom: 10px;">
-                            <input style="width: 250px;padding: 3px;margin-right: 20px;border: solid, 2px, #4caf50;border-radius: 10px;"
-                                   id="TG_Bot_API_Key" onblur="console.log('Bot API token was updated')" type="password" onchange="" onfocus="" />
+                            <input style="width: 400px;padding: 3px;margin-right: 20px;border: solid, 2px, #4caf50;border-radius: 10px;"
+                                   id="TG_Bot_API_Key" oninput="tg_test_reset()" />
                             <div style="display: flex; align-items: center;">Bot API token</div>
                         </div>
-                        <div style="display: flex;">
-                            <input style="width: 250px;padding: 3px;margin-right: 20px;border: solid, 2px, #4caf50;border-radius: 10px;"
-                                   id="TG_User_ID" onblur="console.log('')" type="number" onchange="" onfocus="" placeholder="" />
+
+                        <div style="display: flex; margin-bottom: 10px;">
+                            <input style="width: 170px;padding: 3px;margin-right: 20px;border: solid, 2px, #4caf50;border-radius: 10px;"
+                                   id="TG_User_ID" type="number" oninput="tg_test_reset()" placeholder="" />
                             <div style="display: flex; align-items: center;">ID пользователя, который будет получать отчёт</div>
                         </div>
 
-                        <button onclick="telegram_test()">Проверить</button>
+                        <div style="display: flex; justify-content: space-between;">
+                            <button id="telegram_test_button" class="settings_button" onclick="telegram_test()">Проверка</button>
+                            <div id="telegram_check_result" style="display: flex; align-items: center; font-size: 16px; "></div>
+                            <button style="display: none; margin-right: 0px;" id="telegram_save_button" class="settings_button" onclick="save_telegram_settings()">Сохранить</button>
+                        </div>
 
-                    </div>
-                    <div style="display: flex">
-                        <button> <!--style="display: none"-->Сохранить</button>
                     </div>
                 </div>
                 <div class="settings_div">

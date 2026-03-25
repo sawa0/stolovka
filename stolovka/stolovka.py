@@ -3,13 +3,65 @@
  * http://127.0.0.1:8080/povar
 #################################""")
 
-import datetime, os, sys, subprocess
-from itertools import product
+import datetime, os, sys, subprocess, requests
+from timeit import repeat
+
+from apscheduler.schedulers.background import BackgroundScheduler
+from pathlib import Path
 
 from flask import *
 from flask_socketio import SocketIO, send, emit
 
 from BD import db
+
+def previous_month_report_autosend():
+    if db.GetTGReportAutosend():
+        def get_prev_month():
+            now = datetime.datetime.now()
+
+            year = now.year
+            month = now.month - 1
+
+            if month == 0:
+                month = 12
+                year -= 1
+
+            return f"{year}-{month:02d}"
+
+        def get_report_path(report_month):
+            base_path = Path(__file__).resolve().parent
+            report_path = base_path / "reports" / report_month
+            return report_path
+
+        def send_report(bot_token, user_id, file_path):
+            url = f"https://api.telegram.org/bot{bot_token}/sendDocument"
+
+            with open(file_path, "rb") as f:
+                response = requests.post(
+                    url,
+                    data={"chat_id": user_id},
+                    files={"document": f}
+                )
+
+            return response.json()
+
+        TGSettings = db.GetTGReportAutosendParametrs()
+
+        from exel import create_excel_report as exel
+        repeat_path = get_report_path(exel(db.GetReports(get_prev_month(), 0)))
+
+        result = send_report(TGSettings['bot_api_key'], TGSettings['tg_user_id'], repeat_path)
+        #print(result)
+
+scheduler = BackgroundScheduler()
+scheduler.add_job(
+    previous_month_report_autosend,
+    trigger='cron',
+    day=26,
+    hour=0,
+    minute=14
+)
+scheduler.start()
 
 app = Flask(__name__)
 flask_web_interface = SocketIO(app) #   Flask app
@@ -292,7 +344,13 @@ def DayReportDelete(data):
     
 @flask_web_interface.on('getSettings')
 def getSettings():
-    emit("Settings", db.GetOrderConfirmationType())
+    data = {
+            'OrderConfirmation':db.GetOrderConfirmationType(),
+            'TGReportAutosendParametrs':db.GetTGReportAutosendParametrs(),
+            'TGReportAutosend':db.GetTGReportAutosend(),
+        }
+
+    emit("Settings", data)
     
 @flask_web_interface.on('updateSettings')
 def updateSettings(data):

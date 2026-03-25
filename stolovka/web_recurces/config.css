@@ -1141,3 +1141,11 @@ thead th {
     padding-left: 50px;
     width: -webkit-fill-available;
 }
+
+.settings_button {
+    margin-right: 20px;
+    border-radius: 10px;
+    width: 126px;
+    background-color: #4CAF50;
+    color: white;
+}
