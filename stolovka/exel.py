@@ -123,7 +123,7 @@ def create_excel_recipe(data):
     ws.cell(row=row, column=1, value=f"Блюдо: {dish_name}").font = header_font
     row += 2
 
-    # Заголовки (объединённая колонка)
+    # Заголовки
     headers = ["Ингредиент", "Норма", "Цена", "Сумма"]
     for col_num, header in enumerate(headers, 1):
         cell = ws.cell(row=row, column=col_num, value=header)
@@ -136,6 +136,9 @@ def create_excel_recipe(data):
     ingredients = data.get('ingridients', {})
 
     total_cost = 0
+    total_kg = 0
+    total_l = 0
+
     start_detail_row = row
 
     for ing_id_str, amount in recipe.items():
@@ -149,33 +152,62 @@ def create_excel_recipe(data):
         volume = ing_data.get('volume', '')
         price = float(ing_data.get('price', 0))
 
-        norm = f"{float(amount)} {volume}"
-        cost = price * float(amount)
+        amount = float(amount)
+        norm = f"{amount} {volume}"
+
+        cost = price * amount
         total_cost += cost
+
+        if volume == 'кг.':
+            total_kg += amount
+        elif volume == 'л.':
+            total_l += amount
 
         ws.cell(row=row, column=1, value=name)
         ws.cell(row=row, column=2, value=norm)
         ws.cell(row=row, column=3, value=price)
         ws.cell(row=row, column=4, value=cost)
 
-        # Границы
         for col in range(1, 5):
             ws.cell(row=row, column=col).border = thin_border
 
         row += 1
 
-    # Себестоимость (объединяем ячейки под текст)
+    # 👉 Общий объём (умный вывод)
+    ws.merge_cells(start_row=row, start_column=1, end_row=row, end_column=3)
+    cell = ws.cell(row=row, column=1, value="Общий объём ингредиентов")
+    cell.font = header_font
+    cell.alignment = Alignment(horizontal="right")
+
+    value_row = row
+
+    if total_kg > 0:
+        ws.cell(row=value_row, column=4, value=f"{round(total_kg, 3)} кг").font = header_font
+        value_row += 1
+
+    if total_l > 0:
+        ws.cell(row=value_row, column=4, value=f"{round(total_l, 3)} л").font = header_font
+        value_row += 1
+
+    # если вдруг оба 0 (маловероятно, но на всякий)
+    if total_kg == 0 and total_l == 0:
+        ws.cell(row=value_row, column=4, value="0").font = header_font
+        value_row += 1
+
+    row = value_row
+
+    # 👉 Себестоимость (уже с учётом сдвига)
     ws.merge_cells(start_row=row, start_column=1, end_row=row, end_column=3)
     cell = ws.cell(row=row, column=1, value="Себестоимость")
     cell.font = header_font
     cell.alignment = Alignment(horizontal="right")
 
-    ws.cell(row=row, column=4, value=total_cost).font = header_font
+    ws.cell(row=row, column=4, value=round(total_cost, 2)).font = header_font
 
-    # Группировка строк
-    ws.row_dimensions.group(start_detail_row, row - 1, hidden=False)
+    # Группировка
+    ws.row_dimensions.group(start_detail_row, row - 2, hidden=False)
 
-    # Авторазмер колонок
+    # Авторазмер
     for col in range(1, 5):
         ws.column_dimensions[get_column_letter(col)].auto_size = True
 

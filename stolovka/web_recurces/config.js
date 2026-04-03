@@ -432,24 +432,26 @@ function hideIngredientNameEditButtonWithDelay(dishId) { setTimeout(function () 
 socket.on('Dishes', function (data) {
     const dish_table = document.getElementById('dish_table');
     dish_table.innerHTML = '';
+    var dish_rows = '';
 
     data.sort((a, b) => a[1].localeCompare(b[1], 'uk'));
-
     data.forEach((dish) => {
-        var dish_rows = `
+        const zero_volume_ingredients = Object.values(JSON.parse(dish[3])).some(value => value === 0);
+
+        dish_rows += `
         <tr class="dish_column">
             <td>
                 <input class="table_input_dish_name" type="text" id="DishName${dish[0]}" value="${dish[1]}" onfocus="showDishNameEditButton(${dish[0]})" onblur="hideDishNameEditButtonWithDelay(${dish[0]})">
                 <button id="editDishNameButton${dish[0]}" style="display: none;" title="Сохранить изменённое название" style="hiden;" onclick="EditDishName(${dish[0]})">✏️</button>
             </td>
-            <td class="dish_status"><div style="display: flex;"><div class="dish_price">${dish[4]} грн</div><div><button style="border-top-left-radius: 0px; border-bottom-left-radius: 0px;" onclick="Recipe(${dish[0]})">Рецептура</button></div></div></td>
+            <td class="dish_status"><div style="display: flex;"><div class="dish_price">${dish[4]} грн</div><div style="position: relative;"><button style="border-top-left-radius: 0px; border-bottom-left-radius: 0px;" onclick="Recipe(${dish[0]})">Рецептура</button><div style="display: ${zero_volume_ingredients ? 'block' : 'none'};" class="dish_allert">Содержит ингредиенты с 0 объёмом</div></div></div></td>
             <td class="dish_status"><div style="display: flex;"><div class="dish_status_div">${dish[2] ? '✔️' : '❌'}</div><div><button class="change_dish_status_btn" title="Деактивированное блюдо не будет отображатся в списке блюд. Его всегда можно будет активировать снова" onclick="ChangeDishStatus(${dish[0]})">${dish[2] ? 'Деактивировать' : 'Активировать'}</button></div></div></td>
             <td class="delete_btn_column"><button title="Удалить блюдо" class="delete_btn" onclick="DeleteDishConfirmationDialog(${dish[0]})">Удалить</button></td>
         </tr>
         `;
-
-        dish_table.insertAdjacentHTML('beforeend', dish_rows);
     });
+
+    dish_table.innerHTML = dish_rows;
     FilterDishList();
 });
 
@@ -546,9 +548,12 @@ socket.on('Recipe', function (data) {
     download_recipe_div.innerHTML = download_recipe_button;
 
     var ItogPrice = 0;
+    var ItogWeight = 0;
+    var recipeTableСontent = '';
 
     recipeKeys.forEach((key) => {
         var ingredient = data['Recipe'][key];
+        if (data['ingridients'][key]['volume'] == "кг.") { ItogWeight += ingredient; }
 
         var recipeRow = `
             <tr class="">
@@ -562,17 +567,18 @@ socket.on('Recipe', function (data) {
                     </div>
                 </td>
                 <td class="input_volume">
-                    <input id="set_ingridient_volume${key}" class="input" type="number" value="${ingredient}" onblur="EditVolume(${data['id']}, ${key}, this.value)"> ${data['ingridients'][key]['volume']}
+                    <input style="${ingredient === 0 ? 'background-color: #ffa4a4; border-color: #c83838;' : ''}" id="set_ingridient_volume${key}" class="input" type="number" value="${ingredient}" onblur="EditVolume(${data['id']}, ${key}, this.value)"> ${data['ingridients'][key]['volume']}
                 </td>
                 <td style="width: 100px;">${(data['ingridients'][key]['price'] * ingredient).toFixed(2)} грн</td>
                 <td class="delete_btn_column"><button class="delete_btn" onclick="DeleteIngredientFromRecipe(${data['id']}, ${key})">Удалить</button></td>
             </tr>
         `;
 
+        recipeTableСontent += recipeRow;
         ItogPrice += data['ingridients'][key]['price'] * ingredient;
-
-        recipeTable.insertAdjacentHTML('beforeend', recipeRow);
     });
+
+    recipeTable.innerHTML = recipeTableСontent;
 
     document.getElementById("recipe_result_text").innerText = 'Цена всех ингридиентов: ' + ItogPrice.toFixed(2) + ' грн | Итоговая цена: ' + (ItogPrice * 1.11).toFixed(2) + ' грн';
 
