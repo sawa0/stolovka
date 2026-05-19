@@ -281,7 +281,14 @@ class GitHubUpdater:
     def restart_application(self):
         """Перезапустить приложение"""
         python = sys.executable
-        os.execl(python, python, *sys.argv)
+        script = os.path.abspath(sys.argv[0])
+
+        # Если скрипт запущен через python -m или другим способом
+        if not os.path.exists(script):
+            # Пытаемся найти stolovka.py в текущей директории
+            script = os.path.join(self.base_path, 'stolovka.py')
+
+        os.execl(python, python, script)
 
 
 if __name__ == '__main__':
