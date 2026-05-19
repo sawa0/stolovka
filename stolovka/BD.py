@@ -1,9 +1,17 @@
 ﻿import sqlite3, json
 from datetime import datetime
+from config import DB_PATH, PRICE_MARKUP
 
 class DB:
     def __init__(self):
-        with sqlite3.connect('stolovka.db') as conn:
+        self.db_path = DB_PATH
+        self._init_database()
+
+    def _get_connection(self):
+        return sqlite3.connect(self.db_path)
+
+    def _init_database(self):
+        with self._get_connection() as conn:
             cursor = conn.cursor()
             cursor.execute('''CREATE TABLE IF NOT EXISTS users (
                             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -35,69 +43,53 @@ class DB:
             cursor.execute('''CREATE TABLE IF NOT EXISTS "settings" (
                             parameter TEXT PRIMARY KEY,
                             Value TEXT);''')  #   таблица меню
-            
-            ###################################################################################
-            #     создаёт в таблице "settings" параметр "RegularMenu", если его нет
-            ###################################################################################
-            cursor.execute("""SELECT * FROM "settings" WHERE parameter = 'RegularMenu' """)
-            if not cursor.fetchone():
-                cursor.execute("""INSERT INTO "settings" (parameter, Value) VALUES (?, ?)""",
-                              ('RegularMenu', json.dumps({'1': '', '2': '', '3': '', '4': '', '5': '', '6': '', '7': '', '8': ''})))
-            ###################################################################################
-            #     создаёт в таблице "settings" параметр "OrderConfirmationType", если его нет
-            ###################################################################################
-            cursor.execute("""SELECT * FROM "settings" WHERE parameter = 'OrderConfirmationType' """)
-            self.OrderConfirmationType = None
-            if not cursor.fetchone():
-                cursor.execute("""INSERT INTO "settings" (parameter, Value) VALUES (?, ?)""",
-                              ('OrderConfirmationType', json.dumps(["off", 10])))  #   auto/on/off
-            ###################################################################################
-            #     создаёт в таблице "settings" параметр "HideToPrint", если его нет
-            ###################################################################################
-            cursor.execute("""SELECT * FROM "settings" WHERE parameter = 'HideToPrint' """)
-            if not cursor.fetchone():
-                cursor.execute("""INSERT INTO "settings" (parameter, Value) VALUES (?, ?)""",
-                              ('HideToPrint', json.dumps({0: True, 1: True, 2: True, 3: True, 4: True, 5: False, 6: False})))
-            ###################################################################################
-            #     создаёт в таблице "settings" параметр "TGReportAutosendParametrs", если его нет
-            ###################################################################################
-            cursor.execute("""SELECT * FROM "settings" WHERE parameter = 'TGReportAutosendParametrs' """)
-            if not cursor.fetchone():
-                cursor.execute("""INSERT INTO "settings" (parameter, Value) VALUES (?, ?)""",
-                              ('TGReportAutosendParametrs', json.dumps({'bot_api_key': '', 'tg_user_id': ''})))
-            ###################################################################################
-            #     создаёт в таблице "settings" параметр "TGReportAutosend", если его нет
-            ###################################################################################
-            cursor.execute("""SELECT * FROM "settings" WHERE parameter = 'TGReportAutosend' """)
-            if not cursor.fetchone():
-                cursor.execute("""INSERT INTO "settings" (parameter, Value) VALUES (?, ?)""",
-                              ('TGReportAutosend', json.dumps(False)))
+
+            # Инициализация настроек по умолчанию
+            default_settings = {
+                'RegularMenu': {'1': '', '2': '', '3': '', '4': '', '5': '', '6': '', '7': '', '8': ''},
+                'OrderConfirmationType': ["off", 10],
+                'HideToPrint': {0: True, 1: True, 2: True, 3: True, 4: True, 5: False, 6: False},
+                'TGReportAutosendParametrs': {'bot_api_key': '', 'tg_user_id': ''},
+                'TGReportAutosend': False
+            }
+
+            for parameter, default_value in default_settings.items():
+                cursor.execute("""SELECT * FROM "settings" WHERE parameter = ?""", (parameter,))
+                if not cursor.fetchone():
+                    cursor.execute("""INSERT INTO "settings" (parameter, Value) VALUES (?, ?)""",
+                                  (parameter, json.dumps(default_value)))
 
 
 
             conn.commit()   #   Создает структуру базы данных, если таковой нет 
         
     def NewTransaction(self, data):
+        try:
+            if not data or 'order' not in data or 'userName' not in data or 'userID' not in data:
+                raise ValueError("Invalid transaction data")
 
-        order_total = sum(float(item[1][0]) * int(item[1][1]) for item in data['order'])
-        current_date = datetime.now().strftime('%Y-%m-%d')
-        current_time = datetime.now().strftime('%H:%M')
-        serialized_order = json.dumps(data['order'])
+            order_total = sum(float(item[1][0]) * int(item[1][1]) for item in data['order'])
+            current_date = datetime.now().strftime('%Y-%m-%d')
+            current_time = datetime.now().strftime('%H:%M')
+            serialized_order = json.dumps(data['order'])
 
-        with sqlite3.connect('stolovka.db') as conn:
-            cursor = conn.cursor()
-            cursor.execute("""INSERT INTO transactions (data, time, person, person_id, "order", price) VALUES (?, ?, ?, ?, ?, ?)""",
-                           (current_date, current_time, data['userName'], data['userID'], serialized_order, order_total))
-            conn.commit()
+            with self._get_connection() as conn:
+                cursor = conn.cursor()
+                cursor.execute("""INSERT INTO transactions (data, time, person, person_id, "order", price) VALUES (?, ?, ?, ?, ?, ?)""",
+                               (current_date, current_time, data['userName'], data['userID'], serialized_order, order_total))
+                conn.commit()
+        except (ValueError, KeyError, TypeError) as e:
+            print(f"Error in NewTransaction: {e}")
+            raise
             
     def GetTodayTtransactions(swlf):
-        with sqlite3.connect('stolovka.db') as conn:
+        with self._get_connection() as conn:
             cursor = conn.cursor()
             cursor.execute("""SELECT * FROM transactions WHERE data = ?""", (datetime.now().strftime('%Y-%m-%d'),))
             return cursor.fetchall()
         
     def GetThisMonthsTransactions(self):
-        with sqlite3.connect('stolovka.db') as conn:
+        with self._get_connection() as conn:
             cursor = conn.cursor()
             cursor.execute("""SELECT * FROM transactions WHERE data LIKE ?""", (datetime.now().strftime('%Y-%m'),))
             return cursor.fetchall()
@@ -105,7 +97,7 @@ class DB:
     ##################\  Для страницы menu /##################
 
     def GetMemu(self, week):
-        with sqlite3.connect('stolovka.db') as conn:
+        with self._get_connection() as conn:
             cursor = conn.cursor()
             cursor.execute(f"""SELECT MenuText FROM "menu" WHERE week_number = ?;""", (week,))
             menu = cursor.fetchone()
@@ -122,13 +114,13 @@ class DB:
         menu = self.GetMemu(week)
         menu[data[0]][str(data[1])] = data[2]
 
-        with sqlite3.connect('stolovka.db') as conn:
+        with self._get_connection() as conn:
             cursor = conn.cursor()
             cursor.execute(f"""UPDATE "menu" SET MenuText = ? WHERE week_number = ?;""", (json.dumps(menu), week))
             conn.commit()   #   Обновляет меню
     
     def GetRegularMenu(self):
-        with sqlite3.connect('stolovka.db') as conn:
+        with self._get_connection() as conn:
             cursor = conn.cursor()
             cursor.execute("""SELECT Value FROM "settings" WHERE parameter = 'RegularMenu' """)
             return json.loads(cursor.fetchone()[0])
@@ -138,13 +130,13 @@ class DB:
         RegMenu = self.GetRegularMenu()
         RegMenu[str(data[0])] = data[1]
 
-        with sqlite3.connect('stolovka.db') as conn:
+        with self._get_connection() as conn:
             cursor = conn.cursor()
             cursor.execute("""UPDATE "settings" SET Value = ? WHERE parameter = 'RegularMenu'""", (json.dumps(RegMenu),) )
             conn.commit()
 
     def GetPrintFlag(self):
-        with sqlite3.connect('stolovka.db') as conn:
+        with self._get_connection() as conn:
             cursor = conn.cursor()
             cursor.execute("""SELECT Value FROM "settings" WHERE parameter = 'HideToPrint' """)
             return json.loads(cursor.fetchone()[0])
@@ -154,7 +146,7 @@ class DB:
         new_print_flag = self.GetPrintFlag()
         new_print_flag[str(data[0])] = data[1]
 
-        with sqlite3.connect('stolovka.db') as conn:
+        with self._get_connection() as conn:
             cursor = conn.cursor()
             cursor.execute("""UPDATE "settings" SET Value = ? WHERE parameter = 'HideToPrint'""", (json.dumps(new_print_flag),) )
             conn.commit()
@@ -171,19 +163,36 @@ class DB:
         return dishes_to_update #   Возвращает список ID блюд, в которых есть ингредиент
     
     def NewIngredient(self, name, volume, price):
-        with sqlite3.connect('stolovka.db') as conn:
-            cursor = conn.cursor()
-            cursor.execute("""SELECT * FROM products WHERE name = ?""", (name,))
-            if cursor.fetchone():
-                return ["Ошибка", "Такой ингредиент уже существует"]
+        try:
+            if not name or not name.strip():
+                return ["Ошибка", "Название ингредиента не может быть пустым"]
 
-            cursor.execute("""INSERT INTO products (name, volume, price) VALUES (?, ?, ?)""", (name, volume, price))
-            conn.commit()
-        
-        return ["успех", "Ингредиент добавлен"]  #   Добавляет ингредиент
+            if volume not in ['кг.', 'л.', 'шт.']:
+                return ["Ошибка", "Неверная единица измерения"]
+
+            try:
+                price = float(price)
+                if price < 0:
+                    return ["Ошибка", "Цена не может быть отрицательной"]
+            except (ValueError, TypeError):
+                return ["Ошибка", "Неверный формат цены"]
+
+            with self._get_connection() as conn:
+                cursor = conn.cursor()
+                cursor.execute("""SELECT * FROM products WHERE name = ?""", (name.strip(),))
+                if cursor.fetchone():
+                    return ["Ошибка", "Такой ингредиент уже существует"]
+
+                cursor.execute("""INSERT INTO products (name, volume, price) VALUES (?, ?, ?)""", (name.strip(), volume, price))
+                conn.commit()
+
+            return ["успех", "Ингредиент добавлен"]
+        except Exception as e:
+            print(f"Error in NewIngredient: {e}")
+            return ["Ошибка", "Ошибка при добавлении ингредиента"]  #   Добавляет ингредиент
 
     def GetIngredientsList(self):
-        with sqlite3.connect('stolovka.db') as conn:
+        with self._get_connection() as conn:
             cursor = conn.cursor()
             cursor.execute("""SELECT * FROM products""")
             return cursor.fetchall()    #   Возвращает список всех ингредиентов
@@ -192,7 +201,7 @@ class DB:
         return {ingredient[0]: {"name": ingredient[1], "volume": ingredient[2], "price": ingredient[3]} for ingredient in self.GetIngredientsList()}    # Возвращает словарь всех ингредиентов
 
     def EditIngredientName(self, id, name):
-        with sqlite3.connect('stolovka.db') as conn:
+        with self._get_connection() as conn:
             cursor = conn.cursor()
         
             cursor.execute("""SELECT * FROM products WHERE name = ?""", (name,))
@@ -204,7 +213,7 @@ class DB:
         return ["Успех", "Название ингредиента изменено"]   #   Меняет название ингредиента
     
     def NewPrice(self, IngredientID, NewPrice):
-        with sqlite3.connect('stolovka.db') as conn:
+        with self._get_connection() as conn:
             cursor = conn.cursor()
             cursor.execute("""UPDATE products SET price = ? WHERE id = ?""", (NewPrice, IngredientID))
             conn.commit()
@@ -215,7 +224,7 @@ class DB:
         return  #   Меняет цену последней закупки ингредиента
 
     def DeleteIngredient(self, IngredientID):
-        with sqlite3.connect('stolovka.db') as conn:
+        with self._get_connection() as conn:
             cursor = conn.cursor()
             cursor.execute("""DELETE FROM products WHERE id = ?""", (IngredientID, ))
             conn.commit()
@@ -228,26 +237,33 @@ class DB:
     ################\ Для страницы dish_list /################
     
     def NewDish(self, dishname):
-        with sqlite3.connect('stolovka.db') as conn:
-            cursor = conn.cursor()
-            cursor.execute("""SELECT * FROM dishes WHERE name = ?""", (dishname,))
+        try:
+            if not dishname or not dishname.strip():
+                return ["Ошибка", "Название блюда не может быть пустым"]
 
-            if cursor.fetchone():
-                return ["Ошибка", "Такое блюдо уже существует"] #   Проверка на уникальность
+            with self._get_connection() as conn:
+                cursor = conn.cursor()
+                cursor.execute("""SELECT * FROM dishes WHERE name = ?""", (dishname.strip(),))
 
-            cursor.execute("""INSERT INTO dishes (name, isactive, recipe, price) VALUES (?, ?, ?, ?)""", (dishname, True, "{}", 0))
-            conn.commit()
-        
-        return ["успех", "Блюдо добавлено"]  #   Добавляет блюдо
+                if cursor.fetchone():
+                    return ["Ошибка", "Такое блюдо уже существует"]
+
+                cursor.execute("""INSERT INTO dishes (name, isactive, recipe, price) VALUES (?, ?, ?, ?)""", (dishname.strip(), True, "{}", 0))
+                conn.commit()
+
+            return ["успех", "Блюдо добавлено"]
+        except Exception as e:
+            print(f"Error in NewDish: {e}")
+            return ["Ошибка", "Ошибка при добавлении блюда"]
     
     def ChangeDishStatus(self, id):
-        with sqlite3.connect('stolovka.db') as conn:
+        with self._get_connection() as conn:
             cursor = conn.cursor()
             cursor.execute("""UPDATE dishes SET isactive = NOT isactive WHERE id = ?""", (id,)) #   Изменяет статус блюда на протевоположный
             conn.commit()   #   Меняет статус блюда на протевоположный
     
     def GetDishList(self):
-        with sqlite3.connect('stolovka.db') as conn:
+        with self._get_connection() as conn:
             cursor = conn.cursor()
             cursor.execute("""SELECT * FROM dishes""")
             return cursor.fetchall()    #   Возвращает список всех блюд
@@ -256,7 +272,7 @@ class DB:
         return {dish[0]: {"name": dish[1], "isactive": dish[2], "recipe": json.loads(dish[3]), "price": dish[4]} for dish in self.GetDishList()}    #   Возвращает словарь всех блюд
         
     def EditDishName(self, id, dishname):
-        with sqlite3.connect('stolovka.db') as conn:
+        with self._get_connection() as conn:
             cursor = conn.cursor()
             cursor.execute("""SELECT * FROM dishes WHERE name = ?""", (dishname,))
 
@@ -268,25 +284,25 @@ class DB:
         return ["Успех", "Название блюда изменено"]   #   Меняет название блюда
 
     def DeleteDish(self, id):
-        with sqlite3.connect('stolovka.db') as conn:
+        with self._get_connection() as conn:
             cursor = conn.cursor()
             cursor.execute("""DELETE FROM dishes WHERE id = ?""", (id,))
             conn.commit()   #   Удаляет блюдо
     
     def GetIngredientName(self, id):
-        with sqlite3.connect('stolovka.db') as conn:
+        with self._get_connection() as conn:
             cursor = conn.cursor()
             cursor.execute("""SELECT name FROM products WHERE id = ?""", (id,))
             return cursor.fetchone()    #   Возвращает название ингредиента
 
     def GetRecipe(self, id):
-        with sqlite3.connect('stolovka.db') as conn:
+        with self._get_connection() as conn:
             cursor = conn.cursor()
             cursor.execute("""SELECT recipe FROM dishes WHERE id = ?""", (id,))
             return json.loads(cursor.fetchone()[0])    #   Возвращает рецепт блюда
     
     def AddIngredientToRecipe(self, DishID, IngredientID, IngredientName, Volume):
-        with sqlite3.connect('stolovka.db') as conn:
+        with self._get_connection() as conn:
             cursor = conn.cursor()
             cursor.execute("""SELECT recipe FROM dishes WHERE id = ?""", (DishID,))
             recipe = json.loads(cursor.fetchone()[0])
@@ -301,7 +317,7 @@ class DB:
         self.DishPriceRecalculate(DishID)   #   Добавляет ингридиент в рецепт
         
     def DeleteIngredientFromRecipe(self, DishID, IngredientID):
-        with sqlite3.connect('stolovka.db') as conn:
+        with self._get_connection() as conn:
             cursor = conn.cursor()
             recipe = self.GetRecipe(DishID)
             recipe.pop(str(IngredientID))
@@ -311,7 +327,7 @@ class DB:
         self.DishPriceRecalculate(DishID)   #   Удаляет ингредиент из рецепта
         
     def IngredientVolumeEdit(self, DishID, IngredientID, Volume):
-        with sqlite3.connect('stolovka.db') as conn:
+        with self._get_connection() as conn:
             cursor = conn.cursor()
             recipe = self.GetRecipe(DishID)
             recipe[str(IngredientID)] = float(Volume)
@@ -326,13 +342,13 @@ class DB:
 
         total_price = sum(recipe[ingr] * ingredients[int(ingr)]['price'] for ingr in recipe)
 
-        with sqlite3.connect('stolovka.db') as conn:
+        with self._get_connection() as conn:
             cursor = conn.cursor()
-            cursor.execute("""UPDATE dishes SET price = ? WHERE id = ?""", (round((total_price * 1.11), 2), DishID))
+            cursor.execute("""UPDATE dishes SET price = ? WHERE id = ?""", (round((total_price * PRICE_MARKUP), 2), DishID))
             conn.commit()   #   Пересчитывает и обновляет цену блюда
 
     def GetDishName(self, id):
-        with sqlite3.connect('stolovka.db') as conn:
+        with self._get_connection() as conn:
             cursor = conn.cursor()
             cursor.execute("""SELECT name FROM dishes WHERE id = ?""", (id,))
             return cursor.fetchone()
@@ -343,33 +359,40 @@ class DB:
     ##################\ Для страницы users /##################
     
     def GetUserList(self):
-        with sqlite3.connect('stolovka.db') as conn:
+        with self._get_connection() as conn:
             cursor = conn.cursor()
             cursor.execute("""SELECT * FROM users""")
             return cursor.fetchall()    #   Получает список всех пользователей из базы данных
     
     def NewUser(self, username):
-        with sqlite3.connect('stolovka.db') as conn:
-            cursor = conn.cursor()
+        try:
+            if not username or not username.strip():
+                return ["Ошибка", "Имя пользователя не может быть пустым"]
 
-            cursor.execute("""SELECT * FROM users WHERE username = ?""", (username,))
-            user = cursor.fetchone()
-            if user:
-                return ["Ошибка", "Такой пользователь уже существует"]
+            with self._get_connection() as conn:
+                cursor = conn.cursor()
 
-            cursor.execute("""INSERT INTO users (username, isactive) VALUES (?, ?)""", (username, True))
-            conn.commit()
-        
-        return ["успех", "Пользователь успешно добавлен"]  #   Добавляет пользователя
+                cursor.execute("""SELECT * FROM users WHERE username = ?""", (username.strip(),))
+                user = cursor.fetchone()
+                if user:
+                    return ["Ошибка", "Такой пользователь уже существует"]
+
+                cursor.execute("""INSERT INTO users (username, isactive) VALUES (?, ?)""", (username.strip(), True))
+                conn.commit()
+
+            return ["успех", "Пользователь успешно добавлен"]
+        except Exception as e:
+            print(f"Error in NewUser: {e}")
+            return ["Ошибка", "Ошибка при добавлении пользователя"]  #   Добавляет пользователя
     
     def ChangeUserStatus(self, id):
-        with sqlite3.connect('stolovka.db') as conn:
+        with self._get_connection() as conn:
             cursor = conn.cursor()
             cursor.execute("""UPDATE users SET isactive = NOT isactive WHERE id = ?""", (id,))
             conn.commit()   # Меняет статус пользователя
         
     def EditUserName(self, id, username):
-        with sqlite3.connect('stolovka.db') as conn:
+        with self._get_connection() as conn:
             cursor = conn.cursor()
             cursor.execute("""SELECT * FROM users WHERE username = ?""", (username,))
 
@@ -381,13 +404,13 @@ class DB:
         return ["Успех", "Имя пользователя изменено"]   #   Меняет имя пользователя
     
     def DeleteUser(self, id):
-        with sqlite3.connect('stolovka.db') as conn:
+        with self._get_connection() as conn:
             cursor = conn.cursor()
             cursor.execute("""DELETE FROM users WHERE id = ?""", (id,))
             conn.commit()   #   Удаляет пользователя
 
     def GetUser(self, id):
-        with sqlite3.connect('stolovka.db') as conn:
+        with self._get_connection() as conn:
             cursor = conn.cursor()
             cursor.execute("""SELECT * FROM users WHERE id = ?""", (id,))
             return cursor.fetchone()    #   Возвращает информацию о пользователе
@@ -395,18 +418,18 @@ class DB:
     ##################\ Для страницы reports /##################
     
     def GetReports(self, month, user=0):
-        with sqlite3.connect('stolovka.db') as conn:
+        with self._get_connection() as conn:
             cursor = conn.cursor()
             cursor.execute(f"""SELECT * FROM transactions WHERE data LIKE ?{'' if int(user) == 0 else f' AND person_id = {user}'}""", (str(month) + "%",))
             return cursor.fetchall()
         
     def DeleteOrder(self, OrderID):
-        with sqlite3.connect('stolovka.db') as conn:
+        with self._get_connection() as conn:
             cursor = conn.cursor()
             cursor.execute("""DELETE FROM transactions WHERE order_id = ?""", (OrderID,))
             
     def DeleteDayReport(self, data):
-        with sqlite3.connect('stolovka.db') as conn:
+        with self._get_connection() as conn:
             cursor = conn.cursor()
             if data[1] == '0':
                 cursor.execute("""DELETE FROM transactions WHERE data = ?""", (data[0],))
@@ -416,7 +439,7 @@ class DB:
     ##################\ Для страницы settings /##################
     def UpdateSettings(self, parametr, value):
         
-        with sqlite3.connect('stolovka.db') as conn:
+        with self._get_connection() as conn:
             cursor = conn.cursor()
         
             if parametr == "OrderConfirmationType":
@@ -435,19 +458,19 @@ class DB:
 
         
     def GetOrderConfirmationType(self):
-        with sqlite3.connect('stolovka.db') as conn:
+        with self._get_connection() as conn:
             cursor = conn.cursor()
             cursor.execute("""SELECT Value FROM 'settings' WHERE parameter = 'OrderConfirmationType'""")
             return json.loads(cursor.fetchall()[0][0])
 
     def GetTGReportAutosendParametrs(self):
-        with sqlite3.connect('stolovka.db') as conn:
+        with self._get_connection() as conn:
             cursor = conn.cursor()
             cursor.execute("""SELECT Value FROM 'settings' WHERE parameter = 'TGReportAutosendParametrs'""")
             return json.loads(cursor.fetchone()[0])
 
     def GetTGReportAutosend(self):
-        with sqlite3.connect('stolovka.db') as conn:
+        with self._get_connection() as conn:
             cursor = conn.cursor()
             cursor.execute("""SELECT Value FROM 'settings' WHERE parameter = 'TGReportAutosend'""")
             return json.loads(cursor.fetchone()[0])

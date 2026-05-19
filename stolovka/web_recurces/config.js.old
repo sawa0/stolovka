@@ -517,13 +517,13 @@ socket.on('Recipe', function (data) {
     document.getElementById("recipeName").innerText = data['Name'];
 
     const recipeKeys = Object.keys(data['Recipe']);
-    const ingridientKeys = Object.keys(data['ingridients']);
+    const ingredientKeys = Object.keys(data['ingredients']);
 
     let ingredientToAdd = '';
 
-    ingridientKeys.forEach((key) => {
+    ingredientKeys.forEach((key) => {
         if (!recipeKeys.includes(key)) {
-            ingredientToAdd += `<option value="${key}">${data['ingridients'][key]['name']}</option>`;
+            ingredientToAdd += `<option value="${key}">${data['ingredients'][key]['name']}</option>`;
         }
     });
 
@@ -553,34 +553,34 @@ socket.on('Recipe', function (data) {
 
     recipeKeys.forEach((key) => {
         var ingredient = data['Recipe'][key];
-        if (data['ingridients'][key]['volume'] == "кг.") { ItogWeight += ingredient; }
+        if (data['ingredients'][key]['volume'] == "кг.") { ItogWeight += ingredient; }
 
         var recipeRow = `
             <tr class="">
-                <td class="padding_4">${data['ingridients'][key]['name']}</td>
+                <td class="padding_4">${data['ingredients'][key]['name']}</td>
                 <td style="width: 140px;">
-                    <div class="input_ingridient_per_volume_unit_price">
-                        <input class="input" type="number" value="${data['ingridients'][key]['price']}" onblur="IngredientPriceEditFromRecipe(${key}, this.value, ${data['id']})">
+                    <div class="input_ingredient_per_volume_unit_price">
+                        <input class="input" type="number" value="${data['ingredients'][key]['price']}" onblur="IngredientPriceEditFromRecipe(${key}, this.value, ${data['id']})">
                         <div>
-                            грн/${data['ingridients'][key]['volume']}
+                            грн/${data['ingredients'][key]['volume']}
                         </div>
                     </div>
                 </td>
                 <td class="input_volume">
-                    <input style="${ingredient === 0 ? 'background-color: #ffa4a4; border-color: #c83838;' : ''}" id="set_ingridient_volume${key}" class="input" type="number" value="${ingredient}" onblur="EditVolume(${data['id']}, ${key}, this.value)"> ${data['ingridients'][key]['volume']}
+                    <input style="${ingredient === 0 ? 'background-color: #ffa4a4; border-color: #c83838;' : ''}" id="set_ingredient_volume${key}" class="input" type="number" value="${ingredient}" onblur="EditVolume(${data['id']}, ${key}, this.value)"> ${data['ingredients'][key]['volume']}
                 </td>
-                <td style="width: 100px;">${(data['ingridients'][key]['price'] * ingredient).toFixed(2)} грн</td>
+                <td style="width: 100px;">${(data['ingredients'][key]['price'] * ingredient).toFixed(2)} грн</td>
                 <td class="delete_btn_column"><button class="delete_btn" onclick="DeleteIngredientFromRecipe(${data['id']}, ${key})">Удалить</button></td>
             </tr>
         `;
 
         recipeTableСontent += recipeRow;
-        ItogPrice += data['ingridients'][key]['price'] * ingredient;
+        ItogPrice += data['ingredients'][key]['price'] * ingredient;
     });
 
     recipeTable.innerHTML = recipeTableСontent;
 
-    document.getElementById("recipe_result_text").innerText = 'Цена всех ингридиентов: ' + ItogPrice.toFixed(2) + ' грн | Итоговая цена: ' + (ItogPrice * 1.11).toFixed(2) + ' грн';
+    document.getElementById("recipe_result_text").innerText = 'Цена всех ингредиентов: ' + ItogPrice.toFixed(2) + ' грн | Итоговая цена: ' + (ItogPrice * 1.11).toFixed(2) + ' грн';
 
     document.getElementById("recipeWindow").style.display = 'block';
 });
@@ -597,7 +597,7 @@ function СloseRecipeWindow() { socket.emit('getDishList'); document.getElementB
 function addIngredient(id) {
 
     var IngredientID = document.getElementById('newIngredient').value;
-    if (IngredientID === '') { alert("Необходимо выбрать ингридиент для добавления в рецепт."); return; }
+    if (IngredientID === '') { alert("Необходимо выбрать ингредиент для добавления в рецепт."); return; }
 
     var newIngredientVolume = document.getElementById('newRecipeIngredientVolume').value;
     if (newIngredientVolume == '') { newIngredientVolume = 0 }

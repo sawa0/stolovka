@@ -13,6 +13,7 @@ from flask import *
 from flask_socketio import SocketIO, send, emit
 
 from BD import db
+from config import HOST, PORT, DEBUG, REPORTS_DIR, REPORT_SCHEDULE_DAY, REPORT_SCHEDULE_HOUR, REPORT_SCHEDULE_MINUTE, WEB_RESOURCES_DIR, WEB_LIBS_DIR
 
 def previous_month_report_autosend():
     if db.GetTGReportAutosend():
@@ -48,8 +49,8 @@ def previous_month_report_autosend():
 
         TGSettings = db.GetTGReportAutosendParametrs()
 
-        from exel import create_excel_report as exel
-        repeat_path = get_report_path(exel(db.GetReports(get_prev_month(), 0)))
+        from excel import create_excel_report
+        repeat_path = get_report_path(create_excel_report(db.GetReports(get_prev_month(), 0)))
 
         result = send_report(TGSettings['bot_api_key'], TGSettings['tg_user_id'], repeat_path)
         #print(result)
@@ -58,9 +59,9 @@ scheduler = BackgroundScheduler()
 scheduler.add_job(
     previous_month_report_autosend,
     trigger='cron',
-    day=1,
-    hour=12,
-    minute=0
+    day=REPORT_SCHEDULE_DAY,
+    hour=REPORT_SCHEDULE_HOUR,
+    minute=REPORT_SCHEDULE_MINUTE
 )
 scheduler.start()
 
@@ -94,7 +95,7 @@ def main_page():
 #                files loading               #
 ##############################################
 
-web_recurces_directory = app.root_path + "\\web_recurces"
+web_recurces_directory = WEB_RESOURCES_DIR
 
 @app.route('/<filename>.css')
 def css_files(filename):
@@ -114,7 +115,7 @@ def JS_files(filename):
 #       Обработка отправки JS библиотек      #
 ##############################################
 
-web_libs_directory = app.root_path + "\\web_recurces\\JS_Libs"
+web_libs_directory = WEB_LIBS_DIR
 
 @app.route('/libs/<filename>')
 def serve_libs(filename):
@@ -281,7 +282,7 @@ def DeleteDish(data):
 @flask_web_interface.on('GetRecipe')
 def GetRecipe(data):
     dish_info = db.GetDishInfo(data)
-    dish_info['ingridients'] = db.GetIngredientsDict()
+    dish_info['ingredients'] = db.GetIngredientsDict()
 
     emit("Recipe", dish_info)
     
@@ -303,10 +304,10 @@ def EditVolume(data):
 @flask_web_interface.on('DownloadRecipe')
 def DownloadRecipe(data):
     dish_info = db.GetDishInfo(data['DishID'])
-    dish_info['ingridients'] = db.GetIngredientsDict()
+    dish_info['ingredients'] = db.GetIngredientsDict()
 
-    from exel import create_excel_recipe as exel
-    emit("DownloadReport", exel(dish_info))
+    from excel import create_excel_recipe
+    emit("DownloadReport", create_excel_recipe(dish_info))
 
 @flask_web_interface.on('getReports')
 def GetReports(data):
@@ -316,17 +317,16 @@ def GetReports(data):
 def DownloadMonthlyReport(data):
     data = db.GetReports(data[0], data[1])
 
-    from exel import create_excel_report as exel
-    emit("DownloadReport", exel(data))
+    from excel import create_excel_report
+    emit("DownloadReport", create_excel_report(data))
 
 @app.route('/reports/<filename>')
 def download_file(filename):
-    reports_dir = os.path.join(app.root_path, "reports")
-    file_path = os.path.join(reports_dir, filename)
-    
+    file_path = os.path.join(REPORTS_DIR, filename)
+
     if not os.path.isfile(file_path):
         return 'File not found', 404
-    
+
     return send_file(file_path, mimetype=filename)
 
 @flask_web_interface.on('DayReportDetails')
@@ -430,10 +430,10 @@ def app_update():
 
 
 ##################################################
-#                 запуск сервера                 #        
-##################################################        
+#                 запуск сервера                 #
+##################################################
 if __name__ == '__main__':
-    flask_web_interface.run(app, debug=False, port="8080", host="0.0.0.0")
+    flask_web_interface.run(app, debug=DEBUG, port=PORT, host=HOST)
 ##################################################
 
 

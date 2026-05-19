@@ -1,135 +1,217 @@
-var socket = io.connect(document.domain + ':' + location.port);
+// ============================================
+// Constants
+// ============================================
+const ORDER_CONFIRMATION_TYPES = {
+    OFF: 'off',
+    ON: 'on',
+    AUTO: 'auto'
+};
 
+const ORDER_STATUS = {
+    WAITING: 'waiting',
+    ACCEPTED: 'accepted',
+    CANCELLED: 'cancelled'
+};
+
+const DECISION_TYPES = {
+    ACCEPT: 'accept',
+    CANCEL: 'cancel'
+};
+
+// ============================================
+// State
+// ============================================
+let socket = io.connect(document.domain + ':' + location.port);
+let activeOrder = null;
+let orderStatus = null;
+let countdownTimer = null;
+let countdownInterval = null;
+
+// ============================================
+// Socket Connection
+// ============================================
 socket.on('connect', function () {
     console.log('WebSocket connection established');
 });
 
-socket.on('reboot', function (data) { setTimeout(function () { location.reload(); }, 5000); });
+socket.on('reboot', function () {
+    setTimeout(() => location.reload(), 5000);
+});
 
-var active_order;
-var order_data;
+// ============================================
+// Order Management
+// ============================================
 socket.on('new_order', function (data) {
+    const [confirmationSettings, order] = data;
 
-    order = data[1];
-    
-    document.querySelector('.username').innerHTML = '';
-    document.querySelector('.username').innerText = order["userName"];
+    activeOrder = order;
+    orderStatus = ORDER_STATUS.WAITING;
 
-    active_order = order;
+    displayOrder(order);
+    handleConfirmationType(confirmationSettings);
+});
 
-    order_data = order["order"];
+function displayOrder(order) {
+    document.querySelector('.username').textContent = order.userName;
 
-    const table = document.querySelector('.current_order_body');
-    table.innerHTML = '';
-    for (var i = 0; i < order_data.length; i++) {
+    const tableBody = document.querySelector('.current_order_body');
+    tableBody.innerHTML = '';
 
-        var dish_quantity = order_data[i][1][1];
-        if (dish_quantity == 0) {
-            continue
-        }
+    order.order.forEach(item => {
+        const [dishName, [price, quantity]] = item;
 
-        var dish_name = order_data[i][0];
+        if (quantity == 0) return;
 
-        var newRowHTML = `
+        const row = `
             <tr>
-                <td>${dish_name}</td>
-                <td>${dish_quantity}</td>
+                <td>${dishName}</td>
+                <td>${quantity}</td>
             </tr>
         `;
-        table.insertAdjacentHTML('beforeend', newRowHTML);
+        tableBody.insertAdjacentHTML('beforeend', row);
+    });
+}
+
+function handleConfirmationType(settings) {
+    const [type, autoConfirmTime] = settings;
+
+    hideDecisionButtons();
+
+    if (type === ORDER_CONFIRMATION_TYPES.OFF) {
+        return;
     }
 
-    order_status = "waiting";
+    showDecisionButtons();
 
-    if (data[0][0] == "off") {
-        return
-    } else if (data[0][0] == "on") {
-        document.querySelectorAll('.btn').forEach(btn => {
-            btn.style.display = 'block';
-            btn.style.animation = 'none';
-        });
-    } else if (data[0][0] == "auto") {
-        document.querySelectorAll('.btn').forEach(btn => {
-            btn.style.display = 'block';
-            btn.style.animation = 'none';
-        });
-        startConfirmationTimer(data[0][1])
-    };
-})
+    if (type === ORDER_CONFIRMATION_TYPES.AUTO) {
+        startAutoConfirmationTimer(autoConfirmTime);
+    }
+}
 
-let countdown;
-function startConfirmationTimer(timer) {
+function showDecisionButtons() {
+    document.querySelectorAll('.btn').forEach(btn => {
+        btn.style.display = 'block';
+        btn.style.animation = 'none';
+    });
+}
 
-    document.getElementById('countdown').style.display = "block";
+function hideDecisionButtons() {
+    document.querySelectorAll('.btn').forEach(btn => {
+        btn.style.display = 'none';
+    });
+}
 
+// ============================================
+// Auto-Confirmation Timer
+// ============================================
+function startAutoConfirmationTimer(seconds) {
     const countdownElement = document.getElementById('countdown');
-    countdown = timer;
-    countdownElement.textContent = "(" + countdown + "c)";
+    countdownElement.style.display = 'block';
 
-    const interval = setInterval(() => {
-        if (order_status == "waiting") {
-            countdown--;
-            countdownElement.textContent = "(" + countdown + "c)";
-            if (countdown <= 0) {
-                clearInterval(interval);
-                orderDecision("accept");
-            }
+    countdownTimer = seconds;
+    updateCountdownDisplay();
+
+    countdownInterval = setInterval(() => {
+        if (orderStatus !== ORDER_STATUS.WAITING) {
+            stopCountdownTimer();
+            return;
         }
-        else {
-            clearInterval(interval);
+
+        countdownTimer--;
+        updateCountdownDisplay();
+
+        if (countdownTimer <= 0) {
+            stopCountdownTimer();
+            processOrderDecision(DECISION_TYPES.ACCEPT);
         }
     }, 1000);
 }
 
-function orderDecision(decision) {
+function updateCountdownDisplay() {
+    const countdownElement = document.getElementById('countdown');
+    countdownElement.textContent = `(${countdownTimer}c)`;
+}
 
-    document.getElementById('countdown').style.display = "none";
-
-    document.querySelectorAll('.btn').forEach(btn => {
-        btn.style.display = 'none';
-    });
-
-    var decision_btn;
-    if (decision == "accept") {
-        decision_btn = document.querySelector('.confirm');
-    } else {
-        decision_btn = document.querySelector('.cancel');
+function stopCountdownTimer() {
+    if (countdownInterval) {
+        clearInterval(countdownInterval);
+        countdownInterval = null;
     }
 
-    decision_btn.style.animation = 'shrink-text 0.5s ease-in-out';
-    decision_btn.addEventListener('animationend', () => {
+    document.getElementById('countdown').style.display = 'none';
+}
+
+// ============================================
+// Order Decision
+// ============================================
+function orderDecision(decision) {
+    processOrderDecision(decision);
+}
+
+function processOrderDecision(decision) {
+    stopCountdownTimer();
+    hideDecisionButtons();
+
+    animateDecisionButton(decision);
+
+    socket.emit('decision', {
+        decision: decision,
+        order: activeOrder
+    });
+
+    resetOrderState();
+}
+
+function animateDecisionButton(decision) {
+    const buttonClass = decision === DECISION_TYPES.ACCEPT ? '.confirm' : '.cancel';
+    const button = document.querySelector(buttonClass);
+
+    button.style.animation = 'shrink-text 0.5s ease-in-out';
+
+    button.addEventListener('animationend', () => {
         document.querySelectorAll('.btn').forEach(btn => {
             btn.style.animation = 'hide-buttons 0.5s forwards';
         });
-    });
-
-    socket.emit('decision', { 'decision': decision, 'order': active_order });
-
-    active_order = null;
-    order_status = null;
-    order_data = null;
+    }, { once: true });
 }
 
+function resetOrderState() {
+    activeOrder = null;
+    orderStatus = null;
+    countdownTimer = null;
+}
 
-document.addEventListener('DOMContentLoaded', function () {
-    socket.emit('get', "transactions");
+// ============================================
+// Order History
+// ============================================
+socket.on('today_transactions', function (transactions) {
+    displayOrderHistory(transactions);
 });
 
-socket.on('today_transactions', function (data) {
-    data.reverse();
+function displayOrderHistory(transactions) {
+    const historyTable = document.getElementById('order_history');
+    historyTable.innerHTML = '';
 
-    const countdownElement = document.getElementById('order_history');
-    countdownElement.innerHTML = '';
+    // Show most recent first
+    const reversedTransactions = [...transactions].reverse();
 
-    data.forEach((transaction) => {
-        var transaction_rows = `
+    reversedTransactions.forEach(transaction => {
+        const [orderId, date, time, userName] = transaction;
+
+        const row = `
             <tr>
-                <td class="history_table_id">${transaction[0]}</td>
-                <td>${transaction[3]}</td>
-                <td class="history_table_time">${transaction[2]}</td>
+                <td class="history_table_id">${orderId}</td>
+                <td>${userName}</td>
+                <td class="history_table_time">${time}</td>
             </tr>
         `;
-        countdownElement.insertAdjacentHTML('beforeend', transaction_rows);
+        historyTable.insertAdjacentHTML('beforeend', row);
     });
-});
+}
 
+// ============================================
+// Initialization
+// ============================================
+document.addEventListener('DOMContentLoaded', function () {
+    socket.emit('get', 'transactions');
+});

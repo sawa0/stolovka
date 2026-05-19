@@ -2,9 +2,17 @@
 <html>
 <head>
     <title>Конфигурация</title>
-    <script src="/libs/socket.io.js"></script>
 
-    <script src="/config.js"></script>
+    <script src="/libs/socket.io.js"></script>
+    <script src="/utils.js"></script>
+    <script src="/socket.js"></script>
+    <script src="/menu.js"></script>
+    <script src="/users.js"></script>
+    <script src="/purchase.js"></script>
+    <script src="/dishes.js"></script>
+    <script src="/reports.js"></script>
+    <script src="/settings.js"></script>
+
     <link rel="stylesheet" href="/config.css">
 </head>
 <body style="margin: 0px; overflow: hidden;">
@@ -12,12 +20,12 @@
         <div>
             <h2>Конфигурация Столовой</h2>
             <div class="sidebar_body">
-                <button id="sidebar_btn_menu" class="key" onclick="openpage('menu')">Меню</button>
-                <button id="sidebar_btn_purchase" class="key" onclick="openpage('purchase')">Продукты</button>
-                <button id="sidebar_btn_dish_list" class="key" onclick="openpage('dish_list')">Рецепты</button>
-                <button id="sidebar_btn_reports" class="key" onclick="openpage('reports')">Отчёты</button>
-                <button id="sidebar_btn_users" class="key" onclick="openpage('users')">Пользователи</button>
-                <button id="sidebar_btn_settings" class="key" onclick="openpage('settings')">Настройки</button>
+                <button id="sidebar_btn_menu" class="key" onclick="openPage('menu')">Меню</button>
+                <button id="sidebar_btn_purchase" class="key" onclick="openPage('purchase')">Продукты</button>
+                <button id="sidebar_btn_dish_list" class="key" onclick="openPage('dish_list')">Рецепты</button>
+                <button id="sidebar_btn_reports" class="key" onclick="openPage('reports')">Отчёты</button>
+                <button id="sidebar_btn_users" class="key" onclick="openPage('users')">Пользователи</button>
+                <button id="sidebar_btn_settings" class="key" onclick="openPage('settings')">Настройки</button>
             </div>
         </div>
         <div class="sidebar_futter">
@@ -27,35 +35,35 @@
     <div class="content">
         <div class="header">
             <div id="users_header_container" class="users_header_container">
-                <input class="input_user_name" type="text" id="newUserName" placeholder="Имя пользователя" oninput="FilterUserList()">
-                <button class="add_user" onclick="NewUser()">Добавить</button>
+                <input class="input_user_name" type="text" id="newUserName" placeholder="Имя пользователя" oninput="filterUserList()">
+                <button class="add_user" onclick="newUser()">Добавить</button>
             </div>
             <div id="purchase_header_container" class="purchase_header_container">
-                <input class="input_ingredient_name" type="text" id="newIngredientName" placeholder="Название ингридеента" oninput="FilterIngredientList()">
+                <input class="input_ingredient_name" type="text" id="newIngredientName" placeholder="Название ингридеента" oninput="filterIngredientList()">
                 <input id="newIngredientPrice" class="newIngredientPrice" type="number" placeholder="Цена   /" />
                 <select id="newIngredientVolume" class="volume_input">
                     <option>кг.</option>
                     <option>л.</option>
                     <option>шт.</option>
                 </select>
-                <button class="add_ingredient" onclick="NewIngredient()">Добавить</button>
+                <button class="add_ingredient" onclick="newIngredient()">Добавить</button>
             </div>
             <div id="menu_header_container" class="menu_header_container">
-                <input class="week" type="week" id="week" name="week" onchange="WeekChange()">
-                <button class="print_menu" onclick="print_memu()">Печать</button>
+                <input class="week" type="week" id="week" name="week" onchange="weekChange()">
+                <button class="print_menu" onclick="printMenu()">Печать</button>
             </div>
             <div id="dish_list_header_container" class="dish_list_header_container">
-                <input class="input_dish_name" type="text" id="newDishName" placeholder="Название блюда" oninput="FilterDishList()">
-                <button class="add_dish" onclick="NewDish()">Добавить</button>
+                <input class="input_dish_name" type="text" id="newDishName" placeholder="Название блюда" oninput="filterDishList()">
+                <button class="add_dish" onclick="newDish()">Добавить</button>
             </div>
             <div id="settings_header_container" class="settings_header_container">
 
             </div>
             <div id="reports_header_container" class="reports_header_container">
                 <div class="UserNameToReport">
-                    <select id="UserNameToReport" class="select_report_user" onchange="ReportsFilterUpdate()"></select>
+                    <select id="UserNameToReport" class="select_report_user" onchange="reportsFilterUpdate()"></select>
                 </div>
-                <input class="ReportMonth" type="month" id="ReportMonth" name="month" onchange="ReportsMonthUpdate()">
+                <input class="ReportMonth" type="month" id="ReportMonth" name="month" onchange="reportsMonthUpdate()">
             </div>
             
         </div>
@@ -78,7 +86,7 @@
                     <p>Также, удалённый ингредиент будет удалён из всех рецептов</p>
                     <div class="delete_action_buttons">
                         <button class="cancel_delete_button" onclick="cancelIngredientDelete()">Отмена</button>
-                        <button class="accept_delete_button" onclick="DeleteIngredient()">Удалить</button>
+                        <button class="accept_delete_button" onclick="deleteIngredient()">Удалить</button>
                     </div>
                 </div>
             </div>
@@ -95,7 +103,7 @@
                     <p>Также блюдо будет удалено из уже заполненных меню.</p>
                     <div class="delete_action_buttons">
                         <button class="cancel_delete_button" onclick="cancelDishDelete()">Отмена</button>
-                        <button class="accept_delete_button" onclick="DeleteDish()">Удалить</button>
+                        <button class="accept_delete_button" onclick="deleteDish()">Удалить</button>
                     </div>
                 </div>
 
@@ -104,7 +112,7 @@
                         <div id="add_ingredients_conteiner" class="add_ingredients_conteiner">
                         </div>
                         <div style="width: -webkit-fill-available;"><h1 id="recipeName" class="recipe_dish_name"></h1></div>
-                        <button class="close_recipe" onclick="СloseRecipeWindow()">Закрыть</button>
+                        <button class="close_recipe" onclick="closeRecipeWindow()">Закрыть</button>
                     </div>
                     <div class="recipe_conteiner_body">
                         <table id="recipe_table">
@@ -128,13 +136,13 @@
                 </div>
                 <div class="report_footer">
                     <div class="display_flex" style="height: 29px;">
-                        <button class="DownloadMonthlyReport" onclick="DownloadReport()">Скачать отчёт за месяц</button>
+                        <button class="DownloadMonthlyReport" onclick="downloadReport()">Скачать отчёт за месяц</button>
                         <div id="month_cost" class="report_day_price" style="width: auto; padding-left: 8px; padding-right: 8px;"></div>
                     </div>
                 </div>
                 <div id="ReportDitailsConteiner" class="report_ditails_conteiner" style="display: none;">
                     <div id="ReportDitailsConteinerHeader" class="report_ditails_conteiner_header">
-                        <button style="margin-left: 3px;" class="close_ReportDitails" onclick="СloseReportDitailsWindow()">Закрыть</button>
+                        <button style="margin-left: 3px;" class="close_ReportDitails" onclick="closeReportDetailsWindow()">Закрыть</button>
                     </div>
                     <div id="ReportDitailsConteinerBody" class="report_ditails_conteiner_body">
                         <table>
@@ -156,7 +164,7 @@
                 <div class="settings_div"> <!--style="display: none"-->
                     <h2 style="margin-top: 0px;text-align: center;">Настройка автоотправки отчётов</h2>
                     <div class="settings_parametr_div" style="display: flex">
-                        <input id="TGReportAutosend" type="checkbox" onchange="tg_autosend_update()" />
+                        <input id="TGReportAutosend" type="checkbox" onchange="tgAutosendUpdate()" />
                         <div>Включить автоотправку ежемесячных отчётов</div>
                     </div>
                     <div class="settings_parametr_div">
@@ -165,20 +173,20 @@
 
                         <div style="display: flex; margin-bottom: 10px;">
                             <input style="width: 400px;padding: 3px;margin-right: 20px;border: solid, 2px, #4caf50;border-radius: 10px;"
-                                   id="TG_Bot_API_Key" oninput="tg_test_reset()" />
+                                   id="TG_Bot_API_Key" oninput="tgTestReset()" />
                             <div style="display: flex; align-items: center;">Bot API token</div>
                         </div>
 
                         <div style="display: flex; margin-bottom: 10px;">
                             <input style="width: 170px;padding: 3px;margin-right: 20px;border: solid, 2px, #4caf50;border-radius: 10px;"
-                                   id="TG_User_ID" type="number" oninput="tg_test_reset()" placeholder="" />
+                                   id="TG_User_ID" type="number" oninput="tgTestReset()" placeholder="" />
                             <div style="display: flex; align-items: center;">ID пользователя, который будет получать отчёт</div>
                         </div>
 
                         <div style="display: flex; justify-content: space-between;">
-                            <button id="telegram_test_button" class="settings_button" onclick="telegram_test()">Проверка</button>
+                            <button id="telegram_test_button" class="settings_button" onclick="telegramTest()">Проверка</button>
                             <div id="telegram_check_result" style="display: flex; align-items: center; font-size: 16px; "></div>
-                            <button style="display: none; margin-right: 0px;" id="telegram_save_button" class="settings_button" onclick="save_telegram_settings()">Сохранить</button>
+                            <button style="display: none; margin-right: 0px;" id="telegram_save_button" class="settings_button" onclick="saveTelegramSettings()">Сохранить</button>
                         </div>
 
                     </div>
@@ -187,15 +195,15 @@
                     <h2 style="margin-top: 0px;text-align: center;">Настройки подтверждения заказа</h2>
                     <div style="display: flex;margin-bottom: 10px;">
                         <button style="border-top-left-radius: 10px;border-bottom-left-radius: 10px;width: 126px;"
-                                id="OrderConfirmationType_off" onclick="OrderConfirmationTypeUpdate('off')">Не требуется</button>
-                        <button id="OrderConfirmationType_auto" onclick="OrderConfirmationTypeUpdate('auto')">Авто подтверждение</button>
+                                id="OrderConfirmationType_off" onclick="orderConfirmationTypeUpdate('off')">Не требуется</button>
+                        <button id="OrderConfirmationType_auto" onclick="orderConfirmationTypeUpdate('auto')">Авто подтверждение</button>
                         <button style="border-top-right-radius: 10px;border-bottom-right-radius: 10px;width: 101px;"
-                                id="OrderConfirmationType_on" onclick="OrderConfirmationTypeUpdate('on')">Требуется</button>
+                                id="OrderConfirmationType_on" onclick="orderConfirmationTypeUpdate('on')">Требуется</button>
                     </div>
                     <div style="display: flex; align-items: center;">
                         <div style="font-size: 19px;">Время автоматического подтверждения</div>
                         <input style="width: 50px;padding: 3px;margin-left: 10px;margin-right: 3px;border: solid, 2px, #4caf50;border-radius: 10px;"
-                               id="OrderAutoConfirmationTime" onblur="OrderAutoConfirmationTimeUpdate()" type="number" onchange="" onfocus="" />
+                               id="OrderAutoConfirmationTime" onblur="orderAutoConfirmationTimeUpdate()" type="number" onchange="" onfocus="" />
                         <div>сек</div>
                     </div>
                 </div>
@@ -208,7 +216,7 @@
                     <h2 style="margin-top: 0px;text-align: center;">Обновление приложения</h2>
                     <div style="display: flex; align-items: center;">
                         <div style="font-size: 19px;">Текущяя версия:   0.0.1</div>
-                        <!--<button style="padding: 5px 10px; margin-right: 5px; border: none; border-radius: 5px; background-color: #4CAF50; color: white; cursor: pointer; margin-left: 10px;" onclick="app_update()">Обновить</button>-->
+                        <!--<button style="padding: 5px 10px; margin-right: 5px; border: none; border-radius: 5px; background-color: #4CAF50; color: white; cursor: pointer; margin-left: 10px;" onclick="appUpdate()">Обновить</button>-->
                     </div>
                 </div>
 
