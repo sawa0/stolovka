@@ -368,3 +368,6 @@ FodyWeavers.xsd
 
 *.xlsx
 /stolovka/web app
+/stolovka/build/stolovka
+/stolovka/dist
+/stolovka/stolovka.spec
