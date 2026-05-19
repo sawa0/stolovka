@@ -64,8 +64,14 @@ scheduler.add_job(
 )
 scheduler.start()
 
-app = Flask(__name__)
-flask_web_interface = SocketIO(app) #   Flask app
+def GetRootPath():
+    if getattr(sys, 'frozen', False):
+        return os.path.dirname(sys.executable)
+    else:
+        return os.path.dirname(os.path.abspath(__file__))
+
+app = Flask(__name__, root_path=GetRootPath())
+flask_web_interface = SocketIO(app, async_mode='threading') #   Flask app
 
 @app.route('/favicon.ico')  #   Иконка на вкладке браузера
 def favicon():
