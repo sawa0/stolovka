@@ -13,7 +13,8 @@ from flask import *
 from flask_socketio import SocketIO, send, emit
 
 from BD import db
-from config import HOST, PORT, DEBUG, REPORTS_DIR, REPORT_SCHEDULE_DAY, REPORT_SCHEDULE_HOUR, REPORT_SCHEDULE_MINUTE, WEB_RESOURCES_DIR, WEB_LIBS_DIR
+from config import HOST, PORT, DEBUG, REPORTS_DIR, REPORT_SCHEDULE_DAY, REPORT_SCHEDULE_HOUR, REPORT_SCHEDULE_MINUTE, WEB_RESOURCES_DIR, WEB_LIBS_DIR, GIT_CONFIG
+from git_updater import GitUpdater
 
 def previous_month_report_autosend():
     if db.GetTGReportAutosend():
@@ -427,6 +428,129 @@ def app_update():
 #         print("Обновление завершено!")
 #     else:
 #         print("Ошибка загрузки архива!")
+
+
+##################################################
+#            Git Update API endpoints            #
+##################################################
+
+git_updater = GitUpdater()
+
+@app.route('/api/update/status', methods=['GET'])
+def update_status():
+    """Получить текущую ветку и версию"""
+    current = git_updater.get_current_version()
+    if not current:
+        return jsonify({'success': False, 'error': 'Не удалось получить информацию о версии'}), 500
+
+    return jsonify({
+        'success': True,
+        'current': current,
+        'config': {
+            'stable_branch': GIT_CONFIG['stable_branch'],
+            'experimental_branch': GIT_CONFIG['experimental_branch']
+        }
+    })
+
+@app.route('/api/update/check', methods=['GET'])
+def check_updates():
+    """Проверить наличие обновлений для текущей ветки"""
+    result = git_updater.check_updates()
+    return jsonify(result)
+
+@app.route('/api/update/execute', methods=['POST'])
+def execute_update():
+    """Выполнить обновление текущей ветки"""
+    result = git_updater.pull_updates()
+
+    if result['success']:
+        # Отправляем уведомление через WebSocket
+        flask_web_interface.emit('update_status', {
+            'status': 'completed',
+            'message': 'Обновление успешно завершено. Перезапуск приложения...'
+        })
+
+        # Перезапуск приложения через 2 секунды
+        import threading
+        def delayed_restart():
+            import time
+            time.sleep(2)
+            git_updater.restart_application()
+
+        threading.Thread(target=delayed_restart, daemon=True).start()
+
+    return jsonify(result)
+
+@app.route('/api/update/switch', methods=['POST'])
+def switch_branch():
+    """Переключиться на другую ветку"""
+    data = request.get_json()
+    branch = data.get('branch')
+
+    if not branch:
+        return jsonify({'success': False, 'error': 'Не указана ветка'}), 400
+
+    if branch not in [GIT_CONFIG['stable_branch'], GIT_CONFIG['experimental_branch']]:
+        return jsonify({'success': False, 'error': 'Недопустимая ветка'}), 400
+
+    result = git_updater.switch_branch(branch)
+
+    if result['success']:
+        # Отправляем уведомление через WebSocket
+        flask_web_interface.emit('update_status', {
+            'status': 'completed',
+            'message': f'Переключено на ветку {branch}. Перезапуск приложения...'
+        })
+
+        # Перезапуск приложения через 2 секунды
+        import threading
+        def delayed_restart():
+            import time
+            time.sleep(2)
+            git_updater.restart_application()
+
+        threading.Thread(target=delayed_restart, daemon=True).start()
+
+    return jsonify(result)
+
+@app.route('/api/update/changelog/<from_commit>/<to_commit>', methods=['GET'])
+def get_changelog(from_commit, to_commit):
+    """Получить список изменений между коммитами"""
+    commits = git_updater.get_commit_log(from_commit, to_commit)
+    return jsonify({
+        'success': True,
+        'commits': commits
+    })
+
+##################################################
+#         WebSocket события для обновлений       #
+##################################################
+
+@flask_web_interface.on('update_check')
+def handle_update_check():
+    """Обработка запроса проверки обновлений через WebSocket"""
+    emit('update_status', {'status': 'checking', 'message': 'Проверка обновлений...'})
+    result = git_updater.check_updates()
+    emit('update_check_result', result)
+
+@flask_web_interface.on('update_execute')
+def handle_update_execute():
+    """Обработка запроса выполнения обновления через WebSocket"""
+    emit('update_status', {'status': 'downloading', 'message': 'Скачивание обновлений...'})
+    result = git_updater.pull_updates()
+
+    if result['success']:
+        emit('update_status', {'status': 'restarting', 'message': 'Перезапуск приложения...'})
+
+        import threading
+        def delayed_restart():
+            import time
+            time.sleep(2)
+            git_updater.restart_application()
+
+        threading.Thread(target=delayed_restart, daemon=True).start()
+    else:
+        emit('update_status', {'status': 'error', 'message': result.get('error', 'Неизвестная ошибка')})
 
 
 ##################################################

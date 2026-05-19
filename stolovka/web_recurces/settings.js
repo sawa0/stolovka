@@ -127,3 +127,28 @@ function saveTelegramSettings() {
 function tgAutosendUpdate() {
     socket.emit("updateSettings", ["TGReportAutosend", document.getElementById('TGReportAutosend').checked]);
 }
+
+/**
+ * Инициализация модуля обновлений приложения
+ */
+let updateManager = null;
+let updateUI = null;
+
+function initUpdateModule() {
+    updateManager = new UpdateManager();
+    updateUI = new UpdateUI(updateManager, socket);
+
+    // Рендерим UI обновлений в контейнер
+    const updateContainer = document.getElementById('update-section');
+    if (updateContainer) {
+        updateUI.render('update-section');
+    }
+}
+
+// Инициализация при загрузке страницы настроек
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initUpdateModule);
+} else {
+    initUpdateModule();
+}
+

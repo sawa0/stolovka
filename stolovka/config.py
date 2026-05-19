@@ -19,3 +19,12 @@ REPORT_SCHEDULE_MINUTE = 0
 
 # Настройки цен
 PRICE_MARKUP = 1.11  # Наценка 11%
+
+# Настройки Git обновлений
+GIT_CONFIG = {
+    'repo_url': 'https://github.com/sawa0/stolovka',
+    'stable_branch': 'master',
+    'experimental_branch': 'AI_Master',
+    'auto_check_updates': True,
+    'check_interval_hours': 24
+}
