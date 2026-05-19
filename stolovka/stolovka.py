@@ -14,7 +14,7 @@ from flask_socketio import SocketIO, send, emit
 
 from BD import db
 from config import HOST, PORT, DEBUG, REPORTS_DIR, REPORT_SCHEDULE_DAY, REPORT_SCHEDULE_HOUR, REPORT_SCHEDULE_MINUTE, WEB_RESOURCES_DIR, WEB_LIBS_DIR, GIT_CONFIG
-from git_updater import GitUpdater
+from github_updater import GitHubUpdater
 
 def previous_month_report_autosend():
     if db.GetTGReportAutosend():
@@ -433,12 +433,17 @@ def app_update():
 #            Git Update API endpoints            #
 ##################################################
 
-git_updater = GitUpdater()
+# Инициализация GitHub updater
+github_updater = GitHubUpdater(
+    repo_owner='sawa0',
+    repo_name='stolovka',
+    current_branch=GIT_CONFIG['experimental_branch']  # По умолчанию AI_Master
+)
 
 @app.route('/api/update/status', methods=['GET'])
 def update_status():
     """Получить текущую ветку и версию"""
-    current = git_updater.get_current_version()
+    current = github_updater.get_current_version()
     if not current:
         return jsonify({'success': False, 'error': 'Не удалось получить информацию о версии'}), 500
 
@@ -454,13 +459,15 @@ def update_status():
 @app.route('/api/update/check', methods=['GET'])
 def check_updates():
     """Проверить наличие обновлений для текущей ветки"""
-    result = git_updater.check_updates()
+    current_branch = github_updater.get_current_version()['branch']
+    result = github_updater.check_updates(current_branch)
     return jsonify(result)
 
 @app.route('/api/update/execute', methods=['POST'])
 def execute_update():
     """Выполнить обновление текущей ветки"""
-    result = git_updater.pull_updates()
+    current_branch = github_updater.get_current_version()['branch']
+    result = github_updater.update(current_branch)
 
     if result['success']:
         # Отправляем уведомление через WebSocket
@@ -474,7 +481,7 @@ def execute_update():
         def delayed_restart():
             import time
             time.sleep(2)
-            git_updater.restart_application()
+            github_updater.restart_application()
 
         threading.Thread(target=delayed_restart, daemon=True).start()
 
@@ -492,7 +499,7 @@ def switch_branch():
     if branch not in [GIT_CONFIG['stable_branch'], GIT_CONFIG['experimental_branch']]:
         return jsonify({'success': False, 'error': 'Недопустимая ветка'}), 400
 
-    result = git_updater.switch_branch(branch)
+    result = github_updater.switch_branch(branch)
 
     if result['success']:
         # Отправляем уведомление через WebSocket
@@ -506,7 +513,7 @@ def switch_branch():
         def delayed_restart():
             import time
             time.sleep(2)
-            git_updater.restart_application()
+            github_updater.restart_application()
 
         threading.Thread(target=delayed_restart, daemon=True).start()
 
@@ -515,7 +522,7 @@ def switch_branch():
 @app.route('/api/update/changelog/<from_commit>/<to_commit>', methods=['GET'])
 def get_changelog(from_commit, to_commit):
     """Получить список изменений между коммитами"""
-    commits = git_updater.get_commit_log(from_commit, to_commit)
+    commits = github_updater.get_commit_log(from_commit, to_commit)
     return jsonify({
         'success': True,
         'commits': commits
@@ -529,14 +536,16 @@ def get_changelog(from_commit, to_commit):
 def handle_update_check():
     """Обработка запроса проверки обновлений через WebSocket"""
     emit('update_status', {'status': 'checking', 'message': 'Проверка обновлений...'})
-    result = git_updater.check_updates()
+    current_branch = github_updater.get_current_version()['branch']
+    result = github_updater.check_updates(current_branch)
     emit('update_check_result', result)
 
 @flask_web_interface.on('update_execute')
 def handle_update_execute():
     """Обработка запроса выполнения обновления через WebSocket"""
     emit('update_status', {'status': 'downloading', 'message': 'Скачивание обновлений...'})
-    result = git_updater.pull_updates()
+    current_branch = github_updater.get_current_version()['branch']
+    result = github_updater.update(current_branch)
 
     if result['success']:
         emit('update_status', {'status': 'restarting', 'message': 'Перезапуск приложения...'})
@@ -545,7 +554,7 @@ def handle_update_execute():
         def delayed_restart():
             import time
             time.sleep(2)
-            git_updater.restart_application()
+            github_updater.restart_application()
 
         threading.Thread(target=delayed_restart, daemon=True).start()
     else:

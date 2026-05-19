@@ -9,6 +9,35 @@ from typing import Dict, List, Optional, Tuple
 class GitUpdater:
     def __init__(self, repo_path: str = None):
         self.repo_path = repo_path or os.path.dirname(os.path.abspath(__file__))
+        self.git_available = self._check_git_available()
+        self.is_git_repo = self._check_is_git_repo()
+
+    def _check_git_available(self) -> bool:
+        """Проверить, установлен ли Git"""
+        try:
+            result = subprocess.run(
+                ['git', '--version'],
+                capture_output=True,
+                timeout=5
+            )
+            return result.returncode == 0
+        except Exception:
+            return False
+
+    def _check_is_git_repo(self) -> bool:
+        """Проверить, является ли папка Git-репозиторием"""
+        if not self.git_available:
+            return False
+        try:
+            result = subprocess.run(
+                ['git', 'rev-parse', '--git-dir'],
+                cwd=self.repo_path,
+                capture_output=True,
+                timeout=5
+            )
+            return result.returncode == 0
+        except Exception:
+            return False
 
     def _run_git_command(self, command: List[str]) -> Tuple[bool, str, str]:
         """Выполнить git команду и вернуть результат"""
