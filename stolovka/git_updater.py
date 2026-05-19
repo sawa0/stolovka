@@ -18,6 +18,8 @@ class GitUpdater:
                 cwd=self.repo_path,
                 capture_output=True,
                 text=True,
+                encoding='utf-8',
+                errors='replace',
                 timeout=30
             )
             return result.returncode == 0, result.stdout.strip(), result.stderr.strip()
