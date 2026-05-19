@@ -399,7 +399,6 @@ def app_update():
 #     response = requests.get(url)
 #     release_data = response.json()
 
-
 #     # Скачивание архива
 #     response = requests.get(release_data["zipball_url"])
 #     if response.status_code == 200:
